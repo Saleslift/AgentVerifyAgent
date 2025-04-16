@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       isManualAuthAction.current = true;
       console.log('[AuthContext] Starting signup process with email:', email);
-      
+
       // Always set role to agent
       const enhancedMetadata = {
         ...metadata,
@@ -135,6 +135,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.warn('[AuthContext] Profile not found. Skipping creation during sign-in to avoid policy issues.');
       }
 
+      setUser(data?.user)
       await new Promise(resolve => setTimeout(resolve, 500));
 
       return { error: null };

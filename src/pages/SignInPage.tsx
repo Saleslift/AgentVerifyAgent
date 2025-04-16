@@ -19,7 +19,7 @@ export default function SignInPage() {
     // Only redirect when both auth and role data are fully loaded
     if (user && !authLoading && !roleLoading) {
       console.log('SignInPage: Ready to redirect with role:', role);
-      
+
       const redirectPath = sessionStorage.getItem('redirectAfterLogin');
       if (redirectPath) {
         sessionStorage.removeItem('redirectAfterLogin');
@@ -42,7 +42,7 @@ export default function SignInPage() {
     try {
       const { error } = await signIn(email.trim(), password.trim());
       if (error) throw error;
-      
+
       if (rememberMe) {
         localStorage.setItem('rememberedEmail', email.trim());
       } else {
@@ -68,7 +68,7 @@ export default function SignInPage() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <div className="flex justify-center">
-          <img 
+          <img
             src="https://edcsftvorssaojmyfqgs.supabase.co/storage/v1/object/public/homepage-assets//png%20100%20x%20100%20(1).png"
             alt="AgentVerify Logo"
             className="h-12 w-12"

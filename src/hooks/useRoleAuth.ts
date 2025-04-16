@@ -17,20 +17,20 @@ export function useRoleAuth() {
   // Debug function to help diagnose role issues
   const debugRoleInfo = async () => {
     if (!user) return { error: 'No user logged in' };
-    
+
     try {
       // Get user metadata
       const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
-      
+
       if (userError) throw userError;
-      
+
       // Get profile data
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', user.id)
         .single();
-      
+
       return {
         userId: user.id,
         email: user.email,
@@ -73,7 +73,7 @@ export function useRoleAuth() {
       if (abortController.current) {
         abortController.current.abort();
       }
-      
+
       // Create a new abort controller for this fetch
       abortController.current = new AbortController();
 
@@ -84,19 +84,19 @@ export function useRoleAuth() {
         setRole('agent');
         localStorage.setItem('user_role', 'agent');
         setLoading(false);
-        
+
         return;
       } catch (err) {
         console.error('Error fetching user role:', err);
         if (mounted) {
           setError(err instanceof Error ? err.message : 'Failed to load user role');
-          
+
           // Try to get role from localStorage as fallback
           const savedRole = localStorage.getItem('user_role') as 'agent' | null;
           if (savedRole) {
             setRole(savedRole);
           }
-          
+
           setLoading(false);
         }
       }
