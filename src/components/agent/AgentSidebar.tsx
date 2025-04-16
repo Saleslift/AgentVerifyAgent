@@ -6,7 +6,6 @@ import {
   ExternalLink, HelpCircle, Plus, Building, Bell, Users, Folder,
   ChevronDown, ChevronUp, Home, Store, FileText
 } from 'lucide-react';
-import { useAuth } from '../../contexts/AuthContext';
 import { useRoleAuth } from '../../hooks/useRoleAuth';
 import { supabase } from '../../utils/supabase';
 
@@ -15,7 +14,6 @@ const IconSize = 20;
 export default function AgentSidebar({ isOpen, onToggle, agentId, activeTab, onTabChange, agentSlug }) {
   const navigate = useNavigate();
   const { role } = useRoleAuth();
-  const { user } = useAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [expandedMenus, setExpandedMenus] = useState([]);
   const [isHovered, setIsHovered] = useState(false);
@@ -30,15 +28,15 @@ export default function AgentSidebar({ isOpen, onToggle, agentId, activeTab, onT
     if (!agentId) return;
     const fetchUnread = async () => {
       const { count } = await supabase.from('notifications')
-        .select('*', { count: 'exact', head: true })
-        .eq('recipient_id', agentId).eq('is_read', false);
+          .select('*', { count: 'exact', head: true })
+          .eq('recipient_id', agentId).eq('is_read', false);
       setUnreadCount(count || 0);
     };
     fetchUnread();
     const channel = supabase.channel('notification_changes')
-      .on('postgres_changes', {
-        event: '*', schema: 'public', table: 'notifications', filter: `recipient_id=eq.${agentId}`
-      }, fetchUnread).subscribe();
+        .on('postgres_changes', {
+          event: '*', schema: 'public', table: 'notifications', filter: `recipient_id=eq.${agentId}`
+        }, fetchUnread).subscribe();
     return () => supabase.removeChannel(channel);
   }, [agentId]);
 
@@ -97,7 +95,7 @@ export default function AgentSidebar({ isOpen, onToggle, agentId, activeTab, onT
       onClick: () => toggleSubMenu('crm'),
       submenu: [
         { id: 'contacts', label: 'Leads', icon: Users, onClick: () => onTabChange('contacts') },
-        { id: 'crm-deals', label: 'Deals', icon: FileText, onClick: () => navigate('/crm/deals') },
+        { id: 'deals', label: 'Deals', icon: FileText, onClick: () => onTabChange('crm-deals') },
       ]
     },
     { id: 'jobs', label: 'Jobs', icon: Briefcase, onClick: () => onTabChange('jobs') },
@@ -107,93 +105,93 @@ export default function AgentSidebar({ isOpen, onToggle, agentId, activeTab, onT
   const menuItems = createMenuItems();
 
   return (
-    <aside
-      className={`fixed left-0 top-0 z-40 h-screen bg-black transition-all duration-300 ease-in-out ${isHovered ? 'w-[250px]' : 'w-[70px]'} flex flex-col`}
-      onMouseEnter={() => {
-        clearTimeout(hoverTimeout.current);
-        hoverTimeout.current = setTimeout(() => setIsHovered(true), 100);
-      }}
-      onMouseLeave={() => {
-        clearTimeout(hoverTimeout.current);
-        hoverTimeout.current = setTimeout(() => setIsHovered(false), 150);
-      }}
-    >
-      <div className="h-20 flex items-center px-4 border-b border-[#333]">
-        <img
-          src="https://edcsftvorssaojmyfqgs.supabase.co/storage/v1/object/public/homepage-assets//png%20100%20x%20100%20(1).png"
-          alt="AgentVerify"
-          className="h-8 w-8"
-        />
-        {isHovered && <span className="ml-3 text-white text-lg font-semibold">AgentVerify</span>}
-      </div>
+      <aside
+          className={`fixed left-0 top-0 z-40 h-screen bg-black transition-all duration-300 ease-in-out ${isHovered ? 'w-[250px]' : 'w-[70px]'} flex flex-col`}
+          onMouseEnter={() => {
+            clearTimeout(hoverTimeout.current);
+            hoverTimeout.current = setTimeout(() => setIsHovered(true), 100);
+          }}
+          onMouseLeave={() => {
+            clearTimeout(hoverTimeout.current);
+            hoverTimeout.current = setTimeout(() => setIsHovered(false), 150);
+          }}
+      >
+        <div className="h-20 flex items-center px-4 border-b border-[#333]">
+          <img
+              src="https://edcsftvorssaojmyfqgs.supabase.co/storage/v1/object/public/homepage-assets//png%20100%20x%20100%20(1).png"
+              alt="AgentVerify"
+              className="h-8 w-8"
+          />
+          {isHovered && <span className="ml-3 text-white text-lg font-semibold">AgentVerify</span>}
+        </div>
 
-      <nav className="flex-1 overflow-y-auto px-2 mt-2">
-        {menuItems.map(item => {
-          const isSubItemActive = item.submenu?.some(sub => sub.id === activeTab);
-          const isItemActive = activeTab === item.id || isSubItemActive;
+        <nav className="flex-1 overflow-y-auto px-2 mt-2">
+          {menuItems.map(item => {
+            const isSubItemActive = item.submenu?.some(sub => sub.id === activeTab);
+            const isItemActive = activeTab === item.id || isSubItemActive;
 
-          return (
-            <div key={item.id}>
-              <button
-                onClick={handleClick(item.id, item.onClick)}
-                className={`group flex items-center w-full px-3 py-2 rounded-lg mb-1 transition-all duration-200
+            return (
+                <div key={item.id}>
+                  <button
+                      onClick={handleClick(item.id, item.onClick)}
+                      className={`group flex items-center w-full px-3 py-2 rounded-lg mb-1 transition-all duration-200
                   ${isItemActive ? 'bg-[#cefa05] text-black' : 'text-white hover:bg-white/10'} ${isHovered ? 'justify-start' : 'justify-center'} gap-x-3`}
-                aria-expanded={item.hasSubmenu ? expandedMenus.includes(item.id) : undefined}
-                aria-label={item.label}
-              >
-                <div className="min-w-[20px] flex justify-center items-center"><item.icon size={IconSize} /></div>
-                {isHovered && <span className="truncate font-medium text-left">{item.label}</span>}
-                {isHovered && item.hasSubmenu && (
-                  expandedMenus.includes(item.id) ? <ChevronUp size={16} className="ml-auto" /> : <ChevronDown size={16} className="ml-auto" />
-                )}
-                {item.badge !== undefined && isHovered && (
-                  <span className="ml-auto bg-white text-black text-xs px-2 rounded-full font-medium">
+                      aria-expanded={item.hasSubmenu ? expandedMenus.includes(item.id) : undefined}
+                      aria-label={item.label}
+                  >
+                    <div className="min-w-[20px] flex justify-center items-center"><item.icon size={IconSize} /></div>
+                    {isHovered && <span className="truncate font-medium text-left">{item.label}</span>}
+                    {isHovered && item.hasSubmenu && (
+                        expandedMenus.includes(item.id) ? <ChevronUp size={16} className="ml-auto" /> : <ChevronDown size={16} className="ml-auto" />
+                    )}
+                    {item.badge !== undefined && isHovered && (
+                        <span className="ml-auto bg-white text-black text-xs px-2 rounded-full font-medium">
                     {item.badge > 9 ? '9+' : item.badge}
                   </span>
-                )}
-              </button>
-              {item.hasSubmenu && expandedMenus.includes(item.id) && (
-                <div className="ml-6 mt-1 space-y-1 transition-all ease-in-out overflow-hidden">
-                  {item.submenu.map(sub => (
-                    <button
-                      key={sub.id}
-                      onClick={handleClick(sub.id, sub.onClick, item.id)}
-                      className={`flex items-center w-full px-3 py-2 rounded-lg text-sm transition-all duration-200 gap-x-3
+                    )}
+                  </button>
+                  {item.hasSubmenu && expandedMenus.includes(item.id) && (
+                      <div className="ml-6 mt-1 space-y-1 transition-all ease-in-out overflow-hidden">
+                        {item.submenu.map(sub => (
+                            <button
+                                key={sub.id}
+                                onClick={handleClick(sub.id, sub.onClick, item.id)}
+                                className={`flex items-center w-full px-3 py-2 rounded-lg text-sm transition-all duration-200 gap-x-3
                         ${activeTab === sub.id ? 'bg-[#cefa05] text-black' : 'text-white/80 hover:bg-white/10'}`}
-                      aria-label={sub.label}
-                    >
-                      <div className="min-w-[20px] flex justify-center items-center"><sub.icon size={IconSize - 4} /></div>
-                      <span className="text-left">{sub.label}</span>
-                    </button>
-                  ))}
+                                aria-label={sub.label}
+                            >
+                              <div className="min-w-[20px] flex justify-center items-center"><sub.icon size={IconSize - 4} /></div>
+                              <span className="text-left">{sub.label}</span>
+                            </button>
+                        ))}
+                      </div>
+                  )}
                 </div>
-              )}
-            </div>
-          );
-        })}
-      </nav>
+            );
+          })}
+        </nav>
 
-      <div className="border-t border-[#333333] w-full"></div>
-      <div className="px-3 py-4">
-        <a
-          href="https://wa.me/971543106444"
-          target="_blank"
-          rel="noopener noreferrer"
-          className={`flex items-center w-full px-3 py-2 text-white hover:bg-white/10 rounded-lg mb-2 ${isHovered ? 'justify-start' : 'justify-center'} gap-x-3`}
-          aria-label="Support"
-        >
-          <div className="min-w-[20px] flex justify-center items-center"><HelpCircle size={IconSize} /></div>
-          {isHovered && <span className="font-medium text-left">Support</span>}
-        </a>
-        <button
-          onClick={handleClick('logout', handleLogout)}
-          className={`flex items-center w-full px-3 py-2 text-white hover:bg-white/10 rounded-lg ${isHovered ? 'justify-start' : 'justify-center'} gap-x-3`}
-          aria-label="Logout"
-        >
-          <div className="min-w-[20px] flex justify-center items-center"><LogOut size={IconSize} /></div>
-          {isHovered && <span className="font-medium text-left">Log Out</span>}
-        </button>
-      </div>
-    </aside>
+        <div className="border-t border-[#333333] w-full"></div>
+        <div className="px-3 py-4">
+          <a
+              href="https://wa.me/971543106444"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`flex items-center w-full px-3 py-2 text-white hover:bg-white/10 rounded-lg mb-2 ${isHovered ? 'justify-start' : 'justify-center'} gap-x-3`}
+              aria-label="Support"
+          >
+            <div className="min-w-[20px] flex justify-center items-center"><HelpCircle size={IconSize} /></div>
+            {isHovered && <span className="font-medium text-left">Support</span>}
+          </a>
+          <button
+              onClick={handleClick('logout', handleLogout)}
+              className={`flex items-center w-full px-3 py-2 text-white hover:bg-white/10 rounded-lg ${isHovered ? 'justify-start' : 'justify-center'} gap-x-3`}
+              aria-label="Logout"
+          >
+            <div className="min-w-[20px] flex justify-center items-center"><LogOut size={IconSize} /></div>
+            {isHovered && <span className="font-medium text-left">Log Out</span>}
+          </button>
+        </div>
+      </aside>
   );
 }
