@@ -12,12 +12,13 @@ import EditProfilePage from './EditProfilePage';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserData } from '../hooks/useUserData';
 import { initPageVisibilityHandling, cleanupPageVisibilityHandling } from '../utils/pageVisibility';
+import DealsPage from "./crm/DealsPage.tsx";
 
 export default function AgentDashboardPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { profile, properties, loading, error } = useUserData();
-  
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'properties' | 'marketplace' | 'statistics' | 'jobs' | 'projects' | 'notifications' | 'edit-profile' | 'contacts'>('properties');
 
@@ -26,7 +27,7 @@ export default function AgentDashboardPage() {
     initPageVisibilityHandling();
     return () => cleanupPageVisibilityHandling();
   }, []);
-  
+
   // Check for invitation token in session storage
   useEffect(() => {
     const invitationToken = sessionStorage.getItem('invitationToken');
@@ -72,7 +73,7 @@ export default function AgentDashboardPage() {
         agentSlug={profile?.slug}
       />
 
-      <main 
+      <main
         className={`
           transition-all duration-300 
           md:ml-[70px]
@@ -106,6 +107,8 @@ export default function AgentDashboardPage() {
             <EditProfilePage />
           ) : activeTab === 'contacts' ? (
             <ContactsPage />
+          ) : activeTab === 'crm-deals' ? (
+              <DealsPage/>
           ) : (
             <PropertyManagement
               agentId={user.id}
