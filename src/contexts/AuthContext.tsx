@@ -7,9 +7,9 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   signUp: (
-    email: string,
-    password: string,
-    options?: { data: any }
+      email: string,
+      password: string,
+      options?: { data: any }
   ) => Promise<{ error: AuthError | null; user?: User | null }>;
   signIn: (email: string, password: string) => Promise<{ error: AuthError | null }>;
   signOut: () => Promise<void>;
@@ -53,20 +53,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signUp = async (
-    email: string,
-    password: string,
-    metadata: any
+      email: string,
+      password: string,
+      metadata: any
   ): Promise<{ error: AuthError | null; user?: User | null }> => {
     try {
       isManualAuthAction.current = true;
       console.log('[AuthContext] Starting signup process with email:', email);
 
-      // Always set role to agent
+      // Dynamically assign role based on metadata (added to handle both roles)
+      const role = metadata?.data?.role;
+      if (!role || (role !== 'agency' && role !== 'agent')) {
+        console.warn(`[AuthContext] Invalid or missing role: ${role}, using default 'agent'`);
+      } else {
+        console.log(`[AuthContext] Using role from metadata: ${role}`);
+      }
+
       const enhancedMetadata = {
         ...metadata,
         data: {
           ...metadata?.data,
-          role: 'agent',
+          role: role || 'agent', // Default to 'agent' if role is missing
         },
       };
 
@@ -92,6 +99,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const user = data.user;
       console.log('[AuthContext] Signup successful, user created:', user?.id);
       console.log('[AuthContext] User role assigned:', enhancedMetadata.data.role);
+
+      // Insert profile manually (added to handle agency-specific fields)
+      if (user) {
+        const profileData: any = {
+          id: user.id,
+          email: email.trim(),
+          full_name: '',
+          role: enhancedMetadata.data.role,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        };
+
+        if (enhancedMetadata.data.role === 'agency') {
+          profileData.full_name = metadata.data?.companyName || '';
+          profileData.whatsapp = metadata.data?.agencyPhone || '';
+          profileData.agency_website = metadata.data?.agencyWebsite || '';
+        }
+
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .insert([profileData]);
+
+        if (profileError) {
+          console.error('[AuthContext] Error inserting profile:', profileError);
+        } else {
+          console.log('[AuthContext] Profile inserted successfully for user:', user.id);
+        }
+      }
 
       return {
         error: null,
@@ -122,10 +157,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const userId = data.user.id;
 
       const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle();
 
       if (profileError) {
         console.error('Error fetching profile:', profileError);
@@ -135,7 +170,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         console.warn('[AuthContext] Profile not found. Skipping creation during sign-in to avoid policy issues.');
       }
 
-      setUser(data?.user)
+      setUser(data?.user);
       await new Promise(resolve => setTimeout(resolve, 500));
 
       return { error: null };
@@ -156,9 +191,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut }}>
-      {children}
-    </AuthContext.Provider>
+      <AuthContext.Provider value={{ user, loading, signUp, signIn, signOut }}>
+        {children}
+      </AuthContext.Provider>
   );
 }
 

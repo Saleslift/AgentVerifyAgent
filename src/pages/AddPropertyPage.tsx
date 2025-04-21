@@ -4,11 +4,13 @@ import Header from '../components/Header';
 import { useAuth } from '../contexts/AuthContext';
 import { useRoleAuth } from '../hooks/useRoleAuth';
 import AgentPropertyForm from '../components/agent/AgentPropertyForm';
+import AgencyPropertyForm from "../components/agency/AgencyPropertyForm.tsx";
+import DeveloperPropertyForm from "../components/developer/DeveloperPropertyForm.tsx";
 
 export default function AddPropertyPage() {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { loading } = useRoleAuth();
+  const { role, loading } = useRoleAuth();
 
   if (!user) {
     navigate('/signin');
@@ -26,14 +28,27 @@ export default function AddPropertyPage() {
   return (
     <div className="min-h-screen bg-gray-50">
       <Header />
-      
+
       <div className="container mx-auto px-4 py-8">
         <div className="bg-white rounded-lg shadow-sm">
           <div className="p-6">
-            <AgentPropertyForm 
-              agentId={user.id}
-              onSuccess={() => navigate('/dashboard')}
-            />
+            {role === 'agency' && (
+                <AgencyPropertyForm
+                    agencyId={user.id}
+                    onSuccess={() => navigate('/dashboard')}
+                />
+            )}
+            {role === 'agent' && (
+                <AgentPropertyForm
+                  agentId={user.id}
+                  onSuccess={() => navigate('/dashboard')}
+            />)}
+            {role === 'developer' && (
+                <DeveloperPropertyForm
+                    developerId={user.id}
+                    onSuccess={() => navigate('/dashboard')}
+                />
+            )}
           </div>
         </div>
       </div>

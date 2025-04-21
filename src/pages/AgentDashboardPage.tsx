@@ -8,11 +8,14 @@ import AgentProjectsTab from '../components/agent/AgentProjectsTab';
 import MarketplaceTab from '../components/MarketplaceTab';
 import NotificationsTab from '../components/agent/NotificationsTab';
 import ContactsPage from './agent/ContactsPage';
-import EditProfilePage from './EditProfilePage';
+import EditProfilePage from './EditAgentProfilePage';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserData } from '../hooks/useUserData';
 import { initPageVisibilityHandling, cleanupPageVisibilityHandling } from '../utils/pageVisibility';
 import DealsPage from "./crm/DealsPage.tsx";
+import AddPropertyPage from "./AddPropertyPage.tsx";
+
+type ActiveTabs = 'properties' | 'marketplace' | 'statistics' | 'jobs' | 'projects' | 'notifications' | 'edit-profile' | 'contacts' | 'my-properties' | 'crm-deals' | 'add-property';
 
 export default function AgentDashboardPage() {
   const navigate = useNavigate();
@@ -20,7 +23,7 @@ export default function AgentDashboardPage() {
   const { profile, properties, loading, error } = useUserData();
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'properties' | 'marketplace' | 'statistics' | 'jobs' | 'projects' | 'notifications' | 'edit-profile' | 'contacts'>('properties');
+  const [activeTab, setActiveTab] = useState<ActiveTabs>('properties');
 
   // Initialize page visibility handling to prevent reloads
   useEffect(() => {
@@ -109,7 +112,20 @@ export default function AgentDashboardPage() {
             <ContactsPage />
           ) : activeTab === 'crm-deals' ? (
               <DealsPage/>
-          ) : (
+          ) : activeTab === 'add-property' ? (
+              <AddPropertyPage />
+          ) : activeTab === 'my-properties' ? (
+              <PropertyManagement
+                  agentId={user.id}
+                  properties={properties}
+                  onDelete={(id) => {
+                    // Handle delete
+                    console.log('Delete property:', id);
+                  }}
+                  showAddButton={false}
+                  showOriginTag={true} // Show origin tags in My Properties tab
+              />
+              ) : (
             <PropertyManagement
               agentId={user.id}
               properties={properties}

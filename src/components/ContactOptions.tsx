@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MessageSquare, Phone, Mail, X } from 'lucide-react';
+import { MessageSquare, Phone, Mail } from 'lucide-react';
 import Modal from './Modal';
 
 interface ContactOptionsProps {
@@ -90,7 +90,7 @@ export default function ContactOptions({ whatsapp, email, phone }: ContactOption
               <MessageSquare className="h-5 w-5 mr-3" />
               WhatsApp
             </button>
-            
+
             <button
               onClick={handleCallClick}
               disabled={!phone && !whatsapp}
@@ -100,7 +100,7 @@ export default function ContactOptions({ whatsapp, email, phone }: ContactOption
               <Phone className="h-5 w-5 mr-3" />
               Call
             </button>
-            
+
             <button
               onClick={handleEmailClick}
               disabled={!email}

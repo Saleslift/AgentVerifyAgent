@@ -6,11 +6,11 @@ import { useRoleAuth } from '../hooks/useRoleAuth';
 export default function DashboardRedirect() {
   const { role, loading, debugRoleInfo } = useRoleAuth();
   const { user } = useAuth();
-  
+
   // For debugging purposes
   React.useEffect(() => {
     if (user && role === null && !loading) {
-      console.log('DashboardRedirect: Role is null but user exists, debugging...');
+
       debugRoleInfo().then(info => {
         console.log('Role debug info:', info);
       });
@@ -35,11 +35,16 @@ export default function DashboardRedirect() {
     // Set flag to allow navigation
     sessionStorage.setItem('intentional_navigation', 'true');
 
-    // Log the role for debugging
-    console.log('DashboardRedirect: Redirecting based on role:', role);
-
-    // Always redirect to agent dashboard
-    return <Navigate to="/agent-dashboard" replace />;
+    switch (role) {
+      case 'agency':
+        return  <Navigate to="/agency-dashboard" replace />;
+      case 'developer':
+        return  <Navigate to="/developer-dashboard" replace />;
+      case 'agent':
+        return  <Navigate to="/agent-dashboard" replace />;
+      default:
+        return  <Navigate to="/agent-dashboard" replace />;
+    }
   }
 
   // If we get here, we have a user but no role yet - show loading state
@@ -47,6 +52,12 @@ export default function DashboardRedirect() {
     <div className="min-h-screen flex flex-col items-center justify-center">
       <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary-300 mb-4"></div>
       <p className="text-gray-600">Loading your profile...</p>
+      <button
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-black text-white rounded-md"
+      >
+        Reload Page
+      </button>
     </div>
   );
 }

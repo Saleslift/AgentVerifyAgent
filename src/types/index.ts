@@ -1,8 +1,38 @@
-export interface ServiceArea {
+// Unified Property Interface
+export interface Property {
   id: string;
+  title: string;
+  description?: string;
+  type: 'Apartment' | 'Penthouse' | 'Townhouse' | 'House' | 'Villa' | 'Land' | 'Town house';
+  contractType: 'Sale' | 'Rent';
+  price: number;
   location: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  sqft?: number;
+  highlight?: string;
+  images: string[];
+  videos?: string[];
+  agentId: string;
+  shared?: boolean;
+  amenities?: string[];
+  customAmenities?: string[]; // Added from AgentVerifyAgent
+  furnishingStatus?: 'Furnished' | 'Unfurnished' | 'Semi-Furnished';
+  completionStatus?: 'Ready' | 'Off-plan resale' | 'Off-Plan';
+  lat?: number;
+  lng?: number;
+  floorPlanImage?: string;
+  parkingAvailable?: boolean;
+  slug?: string;
+  handoverDate?: string;
+  payment_plan?: string; // Added from AgentVerifyAgency
+  brochureUrl?: string; // Added from AgentVerifyAgency
+  source?: 'direct' | 'marketplace'; // Added from AgentVerifyAgent
+  creator_type?: 'agent' | 'agency' | 'developer'; // Added from AgentVerifyAgent
+  creator_id?: string; // Added from AgentVerifyAgent
 }
 
+// Unified Certification Interface
 export interface Certification {
   id: string;
   name: string;
@@ -11,7 +41,55 @@ export interface Certification {
   rera_number?: string;
 }
 
-interface Review {
+// Unified ServiceArea Interface
+export interface ServiceArea {
+  id: string;
+  location: string;
+}
+
+// Unified Agent Interface
+export interface Agent {
+  id: string;
+  name?: string; // From AgentVerifyAgent
+  full_name?: string; // From AgentVerifyAgency
+  introduction?: string; // From AgentVerifyAgent
+  photo?: string; // From AgentVerifyAgent
+  avatar_url?: string | null; // From AgentVerifyAgency
+  whatsapp?: string | null; // From AgentVerifyAgency
+  phone?: string | null; // From AgentVerifyAgency
+  email: string;
+  agencyLogo?: string; // From AgentVerifyAgent
+  agencyName?: string; // From AgentVerifyAgent
+  agencyWebsite?: string; // From AgentVerifyAgent
+  agencyEmail?: string; // From AgentVerifyAgent
+  agencyFormationDate?: string; // From AgentVerifyAgent
+  agencyTeamSize?: number; // From AgentVerifyAgent
+  verified?: boolean; // From AgentVerifyAgent
+  bio?: string; // From AgentVerifyAgent
+  languages?: string[]; // From AgentVerifyAgent
+  specialties?: string[]; // From AgentVerifyAgent
+  registrationNumber?: string; // From AgentVerifyAgent
+  location?: string; // From AgentVerifyAgent
+  experience?: string; // From AgentVerifyAgent
+  activeListings?: number; // From AgentVerifyAgent
+  reviews?: Review[]; // From AgentVerifyAgent
+  youtube?: string; // From AgentVerifyAgent
+  facebook?: string; // From AgentVerifyAgent
+  instagram?: string; // From AgentVerifyAgent
+  linkedin?: string; // From AgentVerifyAgent
+  tiktok?: string; // From AgentVerifyAgent
+  x?: string; // From AgentVerifyAgent
+  serviceAreas?: ServiceArea[]; // From AgentVerifyAgent
+  certifications?: Certification[]; // From AgentVerifyAgent
+  slug?: string; // From AgentVerifyAgent
+  currentUserId?: string; // From AgentVerifyAgent
+  status?: string; // From AgentVerifyAgency
+  created_at?: string; // From AgentVerifyAgency
+  agency_id?: string; // From AgentVerifyAgency
+}
+
+// Unified Review Interface
+export interface Review {
   id: string;
   rating: number;
   comment: string;
@@ -23,71 +101,70 @@ interface Review {
   };
 }
 
-export interface Property {
-  id: string;
-  title: string;
-  description: string;
-  type: 'Apartment' | 'Penthouse' | 'Townhouse' | 'House' | 'Villa' | 'Land';
-  contractType: 'Sale' | 'Rent';
-  price: number;
-  location: string;
-  bedrooms: number;
-  bathrooms: number;
-  sqft: number;
-  highlight: string;
-  images: string[];
-  videos?: string[];
-  agentId: string;
-  shared: boolean;
-  amenities?: string[];
-  customAmenities?: string[];
-  furnishingStatus?: 'Furnished' | 'Unfurnished' | 'Semi-Furnished';
-  completionStatus?: 'Ready' | 'Off-plan resale' | 'Off-Plan';
-  lat?: number;
-  lng?: number;
-  source?: 'direct' | 'marketplace';
-  creator_type?: 'agent' | 'agency' | 'developer';
-  creator_id?: string;
-  floorPlanImage?: string;
-  parkingAvailable?: boolean;
-  slug?: string;
-  handoverDate?: string;
-  created_at?: string;
-}
-
-export interface Agent {
+// Unified AgencyProfile Interface
+export interface AgencyProfile {
   id: string;
   name: string;
-  introduction: string;
-  photo: string;
-  agencyLogo: string;
-  agencyName: string;
-  agencyWebsite?: string;
-  agencyEmail?: string;
-  agencyFormationDate?: string;
-  agencyTeamSize?: number;
-  verified: boolean;
-  bio: string;
-  languages: string[];
-  specialties: string[];
-  registrationNumber: string;
-  whatsapp: string;
-  location: string;
-  experience: string;
-  activeListings: number;
-  reviews: Review[];
-  youtube?: string;
-  facebook?: string;
-  instagram?: string;
-  linkedin?: string;
-  tiktok?: string;
-  x?: string;
-  serviceAreas: ServiceArea[];
-  certifications: Certification[];
-  slug: string;
-  currentUserId?: string;
+  email: string;
+  logo?: string;
+  location?: string;
+  phone?: string;
+  website?: string;
+  formationDate?: string;
+  teamSize?: number;
+  agentCount?: number;
+  propertyCount?: number;
 }
 
+// Unified JobPosting Interface
+export interface JobPosting {
+  id: string;
+  title: string;
+  experienceRequired: string;
+  languages: string[];
+  location: string;
+  salaryMin?: number;
+  salaryMax?: number;
+  description: string;
+  qualifications: string[];
+  deadline: string;
+  status: 'active' | 'inactive';
+  createdAt: string;
+  updatedAt: string;
+  applicationCount?: number;
+}
+
+// Unified JobApplication Interface
+export interface JobApplication {
+  id: string;
+  jobId: string;
+  agentId: string;
+  status: 'pending' | 'reviewing' | 'accepted' | 'rejected';
+  coverLetter?: string;
+  createdAt: string;
+  agent?: {
+    id: string;
+    name: string;
+    avatar?: string;
+    email: string;
+    phone?: string;
+  };
+}
+
+// Unified AgentInvitation Interface
+export interface AgentInvitation {
+  id: string;
+  email: string;
+  token: string;
+  status: 'pending' | 'accepted' | 'expired';
+  expiresAt: string;
+  createdAt: string;
+}
+
+// Unified DealType
+export type DealType = 'own_property' | 'marketplace' | 'collaboration' | 'off_plan_project';
+
+// Unified UnitType Interface
 export interface UnitType {
   id?: string;
   name: string;
@@ -98,6 +175,7 @@ export interface UnitType {
   units_available?: number;
 }
 
+// Unified Project Interface
 export interface Project {
   id: string;
   title: string;
@@ -126,6 +204,7 @@ export interface Project {
   updated_at?: string;
 }
 
+// Unified PropertyFilters Interface
 export interface PropertyFilters {
   type?: string;
   locations?: string[];

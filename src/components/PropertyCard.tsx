@@ -44,9 +44,9 @@ const PropertyCard = memo(function PropertyCard({
           'get_all_property_amenities',
           { p_property_id: property.id }
         );
-        
+
         if (error) throw error;
-        
+
         if (data) {
           const amenityNames = data.map(item => item.name);
           setAllAmenities(amenityNames);
@@ -57,7 +57,7 @@ const PropertyCard = memo(function PropertyCard({
         setAllAmenities(property.amenities || []);
       }
     };
-    
+
     fetchAllAmenities();
   }, [property.id, property.amenities]);
 
@@ -75,12 +75,12 @@ const PropertyCard = memo(function PropertyCard({
 
   const handleCardClick = useCallback((e: React.MouseEvent) => {
     // Prevent navigation if clicking action buttons
-    if (e.target instanceof HTMLElement && 
+    if (e.target instanceof HTMLElement &&
         (e.target.closest('button') || e.target.closest('a'))
     ) {
       return;
     }
-    
+
     // Set flag to allow navigation
     sessionStorage.setItem('intentional_navigation', 'true');
     navigate(`/property/${property.slug || property.id}`);
@@ -117,7 +117,7 @@ const PropertyCard = memo(function PropertyCard({
 
   return (
     <>
-      <div 
+      <div
         ref={cardRef}
         className="relative bg-white rounded-lg border border-gray-200 overflow-hidden cursor-pointer transform transition-all duration-300"
         onClick={handleCardClick}
@@ -141,10 +141,10 @@ const PropertyCard = memo(function PropertyCard({
             priority={false}
           />
         </div>
-        
+
         <div className="p-4">
           <h3 className="text-base font-semibold text-gray-900 mb-2 line-clamp-2 h-12">{property.title}</h3>
-          
+
           <div className="flex flex-wrap gap-2 mb-3 text-sm">
             <div className="flex items-center px-2 py-1 bg-gray-100 rounded-md">
               <span>{property.type}</span>
@@ -165,16 +165,16 @@ const PropertyCard = memo(function PropertyCard({
               </div>
             )}
           </div>
-          
+
           <div className="flex items-center mb-3">
             <span className="text-gray-600 text-sm truncate">{property.location}</span>
           </div>
-          
+
           <div className="flex items-center justify-between">
             <span className="text-lg font-bold text-primary-300">
               {formatPrice(property.price)}
             </span>
-            
+
             <div className="flex items-center space-x-2">
               {/* Share Button */}
               <button
@@ -232,7 +232,7 @@ const PropertyCard = memo(function PropertyCard({
                   )}
                 </div>
               )}
-              
+
               {source === 'marketplace' && onDelete && (
                 <button
                   onClick={handleDelete}
@@ -254,7 +254,7 @@ const PropertyCard = memo(function PropertyCard({
 
       {/* Share Modal */}
       <ShareModal
-        isOpen={showShareModal} 
+        isOpen={showShareModal}
         onClose={() => setShowShareModal(false)}
         property={property}
         onCopySuccess={handleCopySuccess}
