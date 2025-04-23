@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useRoleAuth } from '../../hooks/useRoleAuth';
 import { supabase } from '../../utils/supabase';
+import {useAuth} from "../../contexts/AuthContext.tsx";
 
 const IconSize = 20;
 
@@ -19,6 +20,7 @@ export default function AgentSidebar({ isOpen, onToggle, agentId, activeTab, onT
   const [isHovered, setIsHovered] = useState(false);
   const hoverTimeout = useRef(null);
   const previousActiveTab = useRef(activeTab);
+  const {signOut} = useAuth();
 
   useEffect(() => {
     if (role && role !== 'agent') navigate('/dashboard');
@@ -63,8 +65,12 @@ export default function AgentSidebar({ isOpen, onToggle, agentId, activeTab, onT
   };
 
   const handleLogout = async () => {
-    sessionStorage.setItem('intentional_navigation', 'true');
-    await supabase.auth.signOut();
+    // await sessionStorage.setItem('intentional_navigation', 'true');
+    // await sessionStorage.removeItem('redirectAfterLogin');
+    // await supabase.auth.signOut();
+    // navigate('/signin');
+
+    await signOut()
   };
 
   const createMenuItems = () => [

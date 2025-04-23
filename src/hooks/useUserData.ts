@@ -71,6 +71,8 @@ export function useUserData() {
           .select('*')
           .eq('id', user.id)
           .maybeSingle();
+      console.log('profileData', profileData)
+      console.log('profileError', profileError)
 
       if (profileError) {
         if (profileError.code === 'PGRST116') {
@@ -79,7 +81,7 @@ export function useUserData() {
               .insert([{
                 id: user.id,
                 email: user.email || '',
-                role: 'agent', // Default role
+                 role: 'agent', // Default role
                 created_at: new Date().toISOString(),
                 updated_at: new Date().toISOString()
               }])

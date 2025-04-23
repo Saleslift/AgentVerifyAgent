@@ -1,23 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Search, Filter, Edit, Trash2, Eye, Building, Share2, Users } from 'lucide-react';
+import { Plus, Search, Filter,  Building } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 import { Property } from '../../types';
 import { useUserDataContext } from '../../contexts/UserDataContext';
-import { useCurrency } from '../../contexts/CurrencyContext';
 import AgencyPropertyCard from '../AgencyPropertyCard';
 import SharePropertyModal from '../property/SharePropertyModal';
 
 export default function AgencyProperties() {
   const navigate = useNavigate();
   const { profile } = useUserDataContext();
-  const { formatPrice } = useCurrency();
   const [properties, setProperties] = useState<Property[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState('all');
   const [filterContractType, setFilterContractType] = useState('all');
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [propertySharing, setPropertySharing] = useState<{ [key: string]: { count: number, withAll: boolean } }>({});

@@ -63,28 +63,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Dynamically assign role based on metadata (added to handle both roles)
       const role = metadata?.data?.role;
-      if (!role || (role !== 'agency' && role !== 'agent')) {
-        console.warn(`[AuthContext] Invalid or missing role: ${role}, using default 'agent'`);
-      } else {
-        console.log(`[AuthContext] Using role from metadata: ${role}`);
-      }
-
-      const enhancedMetadata = {
-        ...metadata,
-        data: {
-          ...metadata?.data,
-          role: role || 'agent', // Default to 'agent' if role is missing
-        },
-      };
-
-      console.log('[AuthContext] Enhanced metadata:', enhancedMetadata);
-
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
           data: {
-            ...enhancedMetadata.data,
+            ...metadata.data,
             email_confirmed: true,
             created_at: new Date().toISOString(),
           },
@@ -98,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const user = data.user;
       console.log('[AuthContext] Signup successful, user created:', user?.id);
-      console.log('[AuthContext] User role assigned:', enhancedMetadata.data.role);
+      console.log('[AuthContext] User role assigned:', metadata.data.role);
 
       // Insert profile manually (added to handle agency-specific fields)
       if (user) {
@@ -106,16 +90,39 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           id: user.id,
           email: email.trim(),
           full_name: '',
-          role: enhancedMetadata.data.role,
+          role,
           created_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
 
-        if (enhancedMetadata.data.role === 'agency') {
+        if (role === 'agency') {
+          profileData.agency_name = metadata.data?.companyName || '';
           profileData.full_name = metadata.data?.companyName || '';
-          profileData.whatsapp = metadata.data?.agencyPhone || '';
-          profileData.agency_website = metadata.data?.agencyWebsite || '';
+          profileData.whatsapp = metadata.data?.agencyWhatsapp || metadata.data?.agencyPhone;
+          profileData.agency_email = email;
+          profileData.registration_number = metadata.data?.companyRegNumber || '';
+          profileData.location = metadata.data?.companyAddress || '';
+          profileData.company_details = {
+            name: metadata.data?.companyName || '',
+            registration_number: metadata.data?.companyRegNumber || ''
+          }
         }
+        else if (role === 'agent') {
+          profileData.full_name = `${metadata.data?.firstName} ${metadata.data?.lastName}` || '';
+          profileData.registration_number = metadata.data?.registrationNumber || '';
+          profileData.whatsapp = metadata.data?.whatsapp || metadata.data?.phone ;
+        }
+        else if (role === 'developer') {
+          profileData.full_name = metadata.data?.companyName || '';
+          profileData.registration_number = metadata.data?.registrationNumber || '';
+
+          profileData.developer_details = {
+            company_name: metadata.data?.developerCompanyName || '',
+            phone: metadata.data?.phone || '',
+            whatsapp:  metadata.data?.phone || '',
+          };
+        }
+        console.log('profileData --->', profileData)
 
         const { error: profileError } = await supabase
             .from('profiles')
@@ -126,11 +133,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } else {
           console.log('[AuthContext] Profile inserted successfully for user:', user.id);
         }
+        setUser(user);
       }
 
       return {
         error: null,
-        user: data.user,
+        user,
       };
     } catch (error) {
       console.error('[AuthContext] Error during sign up:', error);
@@ -183,6 +191,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signOut = async () => {
     try {
       await supabase.auth.signOut();
+      sessionStorage.removeItem('user_role')
       setUser(null);
       navigate('/');
     } catch (error) {

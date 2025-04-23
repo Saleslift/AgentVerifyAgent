@@ -13,6 +13,7 @@ import SignInPage from './pages/SignInPage';
 
 // Lazy-loaded components
 const SignUpPage = lazy(() => import('./pages/SignUpPage'));
+
 const DashboardRedirect = lazy(() => import('./pages/DashboardRedirect'));
 const PasswordResetPage = lazy(() => import('./pages/PasswordResetPage'));
 const UpdatePasswordPage = lazy(() => import('./pages/UpdatePasswordPage'));
