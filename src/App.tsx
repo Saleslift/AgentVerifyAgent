@@ -59,9 +59,10 @@ function PrivateRoute({ children, requiredRole = 'any' }: PrivateRouteProps) {
         return <Navigate to="/signin" />;
     }
 
-    if (requiredRole !== 'any' && role !== requiredRole) {
-        return <Navigate to="/dashboard" />;
-    }
+    // if (requiredRole !== 'any' && role !== requiredRole) {
+    //     console.log('NAVIGATE !!!!')
+    //     return <Navigate to="/dashboard" />;
+    // }
 
     return <UserDataProvider>{children}</UserDataProvider>;
 }
@@ -198,7 +199,8 @@ const App = memo(function App() {
                             }
                         />
                         <Route
-                            path="/add-property"
+                            path="/add-property/:slug?"
+
                             element={
                                 <PrivateRoute>
                                     <Suspense fallback={<PageLoader />}>

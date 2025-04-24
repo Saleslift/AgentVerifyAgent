@@ -8,23 +8,23 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 export const isWebContainerEnvironment = () => {
   // Enhanced check for WebContainer URL patterns
   const webContainerHosts = [
-    'webcontainer', 
-    'stackblitz', 
+    'webcontainer',
+    'stackblitz',
     'local-credentialless',
     'codesandbox',
     'csb.app',
     'github.dev',
     'githubpreview'
   ];
-  
-  const isWebContainer = webContainerHosts.some(host => 
+
+  const isWebContainer = webContainerHosts.some(host =>
     window.location.hostname.includes(host)
   );
-  
+
   if (isWebContainer && import.meta.env.DEV) {
     console.info('Running in WebContainer environment - localhost Supabase connections will not work');
   }
-  
+
   return isWebContainer;
 };
 
@@ -51,7 +51,7 @@ if (isInWebContainer && isLocalhost(supabaseUrl)) {
   console.error('1. Use a remote Supabase instance (create one at https://supabase.com)');
   console.error('2. Update your .env file with the remote Supabase URL and anon key');
   console.error('----------------------------------------');
-  
+
   // Add an error notification to the DOM for better visibility
   setTimeout(() => {
     try {
@@ -79,7 +79,7 @@ if (isInWebContainer && isLocalhost(supabaseUrl)) {
 // Validate environment variables
 if (!supabaseUrl) {
   console.error('Missing VITE_SUPABASE_URL environment variable');
-  
+
   // WebContainer-specific message
   if (isInWebContainer) {
     console.info('You need to provide a remote Supabase URL in your .env file when running in WebContainer');
@@ -122,7 +122,7 @@ export const supabase = createClient(
       }
 
       // Implement retry logic for fetch with exponential backoff
-      const MAX_RETRIES = 3;
+      const MAX_RETRIES = 1;
       const INITIAL_RETRY_DELAY = 1000;
       // Increase timeout for WebContainer environments
       const TIMEOUT_MS = isInWebContainer ? 60000 : 45000; // 60 seconds in WebContainer, 45 seconds elsewhere
@@ -138,11 +138,11 @@ export const supabase = createClient(
             if (import.meta.env.DEV) {
               console.info(`Supabase connection attempt ${attempt + 1} to ${args[0]}`);
             }
-            
+
             // Add proper signal handling and abort error catch
             const signal = controller.signal;
             const options = { ...args[1] };
-            
+
             // Ensure we don't override an existing signal
             if (!options.signal) {
               options.signal = signal;
@@ -150,7 +150,7 @@ export const supabase = createClient(
               // Handle case where a signal is already provided
               const existingSignal = options.signal;
               options.signal = signal;
-              
+
               // If original signal aborts, abort our controller too
               if (existingSignal.aborted) {
                 controller.abort(existingSignal.reason);
@@ -160,7 +160,7 @@ export const supabase = createClient(
                 });
               }
             }
-            
+
             const response = await fetch(args[0], options);
 
             clearTimeout(timeout);
@@ -181,7 +181,7 @@ export const supabase = createClient(
                 if (!jsonText.trim()) {
                   throw new Error('Empty response received when JSON expected');
                 }
-                
+
                 try {
                   // Explicitly check if the text is valid JSON
                   JSON.parse(jsonText);
@@ -206,7 +206,7 @@ export const supabase = createClient(
             return response;
           } catch (err) {
             clearTimeout(timeout);
-            
+
             // Handle AbortError with more details
             if (err.name === 'AbortError') {
               if (attempt === MAX_RETRIES - 1) {
@@ -221,7 +221,7 @@ export const supabase = createClient(
           }
         } catch (err) {
           lastError = err;
-          
+
           // Enhanced error logging
           console.warn('Supabase fetch attempt failed:', {
             attempt: attempt + 1,
@@ -231,7 +231,7 @@ export const supabase = createClient(
             status: err.status,
             timestamp: new Date().toISOString()
           });
-          
+
           // Development mode specific error handling
           if (import.meta.env.DEV) {
             // Check for common issues in development
@@ -239,7 +239,7 @@ export const supabase = createClient(
             if (url.includes('localhost') || url.includes('127.0.0.1')) {
               console.error('⚠️ Attempting to connect to localhost Supabase instance from WebContainer environment.');
               console.info('WebContainer cannot connect to services running on localhost. Use a remote Supabase instance.');
-              
+
               // Break out of retry loop for localhost URLs in development
               if (attempt === 0) {
                 const devError = new Error(
@@ -321,13 +321,13 @@ export const checkConnection = async () => {
     // Dev mode specific check
     if (import.meta.env.DEV) {
       console.info('Checking Supabase connection to:', supabaseUrl);
-      
+
       // Early detection for localhost URLs which won't work in WebContainer
       if (isLocalhost(supabaseUrl)) {
         console.error('⚠️ Detected localhost Supabase URL:', supabaseUrl);
         if (isInWebContainer) {
           console.info('WebContainer cannot connect to services running on localhost. Use a remote Supabase instance.');
-          
+
           return {
             connected: false,
             error: 'Cannot connect to localhost Supabase from WebContainer',
@@ -341,7 +341,7 @@ export const checkConnection = async () => {
         }
       }
     }
-    
+
     // Increase timeout for connection check to 45 seconds
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), isInWebContainer ? 60000 : 30000);
@@ -359,9 +359,9 @@ export const checkConnection = async () => {
         .select('count')
         .limit(1)
         .abortSignal(controller.signal);
-      
+
       clearTimeout(timeoutId);
-      
+
       if (error) {
         // Enhanced error logging
         console.error('Supabase connection check failed:', {
@@ -383,7 +383,7 @@ export const checkConnection = async () => {
           }
         };
       }
-      
+
       return {
         connected: true,
         error: null,

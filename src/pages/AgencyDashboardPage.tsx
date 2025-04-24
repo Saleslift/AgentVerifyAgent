@@ -22,7 +22,48 @@ export default function AgencyDashboardPage() {
   const { user, signOut } = useAuth();
   const { profile, loading, error } = useUserDataContext();
   const [isHovered, setIsHovered] = useState(false);
-  const hoverTimeout = useRef(null);
+  const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Error signing out:', error);
+    }
+  };
+
+
+  const handleMouseEnter = () => {
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current);
+    }
+    hoverTimeout.current = setTimeout(() => setIsHovered(true), 100);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current);
+    }
+    hoverTimeout.current = setTimeout(() => setIsHovered(false), 150);
+  };
+
+  // Fix this function to properly handle dashboard and subpaths
+  const getActiveClass = (path: string) => {
+    const currentPath = location.pathname;
+
+    // Special case for main dashboard
+    if (path === '/agency-dashboard') {
+      return currentPath === '/agency-dashboard' || currentPath === '/agency-dashboard/'
+          ? 'bg-[#CEFA05] text-black'
+          : 'text-white hover:bg-white/10';
+    }
+
+    // For all other paths
+    return currentPath.startsWith(path)
+        ? 'bg-[#CEFA05] text-black'
+        : 'text-white hover:bg-white/10';
+  };
+
 
   if (error) {
     return (
@@ -42,21 +83,24 @@ export default function AgencyDashboardPage() {
     );
   }
 
-  if (!user) return <Navigate to="/signin" />;
+  if (!user){
+    return <Navigate to="/signin" />;
+  }
+
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
     </div>
   );
 
-  if (profile && profile.role !== 'agency') {
+  if (profile && profile?.role !== 'agency') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
         <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
           <Building className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
           <p className="text-gray-600 mb-6">
-            This dashboard is only available for agency accounts. Your current role is: {profile.role}
+            This dashboard is only available for agency accounts. Your current role is: {profile?.role}
           </p>
           <Link to="/dashboard" className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-900 inline-block">
             Go to Your Dashboard
@@ -66,31 +110,14 @@ export default function AgencyDashboardPage() {
     );
   }
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
-  };
 
-  const getActiveClass = (path) => {
-    const currentPath = location.pathname;
-    return currentPath === path ? 'bg-[#CEFA05] text-black' : 'text-white hover:bg-white/10';
-  };
 
   return (
     <div className="flex h-screen bg-gray-50">
       <aside
         className={`fixed h-full bg-black text-white z-40 flex flex-col transition-all duration-300 ease-in-out ${isHovered ? 'w-[250px]' : 'w-[70px]'}`}
-        onMouseEnter={() => {
-          clearTimeout(hoverTimeout.current);
-          hoverTimeout.current = setTimeout(() => setIsHovered(true), 100);
-        }}
-        onMouseLeave={() => {
-          clearTimeout(hoverTimeout.current);
-          hoverTimeout.current = setTimeout(() => setIsHovered(false), 150);
-        }}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
       >
         <div className="h-20 flex items-center px-4 border-b border-white/10">
           <img
@@ -155,13 +182,16 @@ export default function AgencyDashboardPage() {
       <main className={`flex-1 transition-all duration-300 ease-in-out ${isHovered ? 'ml-[250px]' : 'ml-[70px]'}`}>
         <div className="p-8">
           <Routes>
-            <Route path="/" element={<AgencyDashboardHome />} />
-            <Route path="/properties/*" element={<AgencyProperties />} />
-            <Route path="/agents/*" element={<AgencyAgents />} />
-            <Route path="/jobs/*" element={<AgencyJobs />} />
-            <Route path="/developers/*" element={<AgencyDevelopers />} />
-            <Route path="/settings" element={<AgencySettings />} />
-            <Route path="*" element={<Navigate to="/agency-dashboard" replace />} />
+            <Route index element={<AgencyDashboardHome />} />
+            <Route path="dashboard" element={<AgencyDashboardHome />} />
+            <Route path="properties" element={<AgencyProperties />} />
+            <Route path="agents" element={<AgencyAgents />} />
+            <Route path="jobs" element={<AgencyJobs />} />
+            <Route path="developers" element={<AgencyDevelopers />} />
+            <Route path="settings" element={<AgencySettings />} />
+            {/* Only navigate to root if not matched */}
+            {/*<Route path="*" element={<Navigate to="" replace />} />*/}
+            {/*<Route path="*" element={<Navigate to="/agency-dashboard" replace />} />*/}
           </Routes>
         </div>
       </main>

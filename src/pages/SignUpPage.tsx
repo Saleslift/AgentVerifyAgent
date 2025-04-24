@@ -64,7 +64,6 @@ const SignUpPage = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
-    const navigate = useNavigate();
 
     const { control, handleSubmit, watch, formState: { errors }, reset } = useForm<SignupFormData>({
         defaultValues: {
@@ -90,7 +89,7 @@ const SignUpPage = () => {
             { name: 'companyName', label: 'Company Name *', type: 'text', required: true },
             { name: 'companyAddress', label: 'Company Address *', type: 'text', required: true },
             { name: 'companyRegNumber', label: 'Company Registration Number *', type: 'text', required: true },
-            { name: 'agencyPhone', label: 'Phone Number *', type: 'tel', required: true, placeholder: '+971' },
+            { name: 'phone', label: 'Phone Number *', type: 'tel', required: true, placeholder: '+971' },
             { name: 'agencyWhatsapp', label: 'WhatsApp Number (if different from phone)', type: 'tel', required: false, placeholder: '+971' },
         ],
         developer: [
@@ -141,7 +140,7 @@ const SignUpPage = () => {
             }
 
             setSuccess(true);
-            navigate('/dashboard');
+            // navigate('/dashboard');
         } catch (err: any) {
             console.error('Error during sign up:', err);
 
@@ -288,7 +287,7 @@ const SignUpPage = () => {
                             <button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-900 bg-primary-300 hover:bg-primary-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-300 disabled:opacity-50"
+                                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-gray-900 bg-primary-300 hover:bg-primary-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-300 disabled:opacity-50 gradient-button"
                             >
                                 {loading ? 'Creating account...' : 'Create account'}
                             </button>

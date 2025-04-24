@@ -125,7 +125,7 @@ export default function AgencyProperties() {
   }, [profile?.id]);
 
   const handleEditProperty = (property: Property) => {
-    navigate(`/agency-dashboard/properties/edit/${property.id}`);
+    navigate(`/add-property/${property.id}`);
   };
 
   const handleShareProperty = (propertyId: string) => {

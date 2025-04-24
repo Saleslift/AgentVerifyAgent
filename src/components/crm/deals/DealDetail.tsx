@@ -1,22 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  ArrowLeft, 
-  Home, 
+import {
+  ArrowLeft,
+  Home,
   User,
   Calendar,
   Clock,
   FileText,
-  MessageSquare,
   CheckCircle2,
   Trash2,
-  ChevronDown,
   Edit,
   X,
   Users,
   DollarSign,
   Save,
-  CornerUpRight
 } from 'lucide-react';
 import { useAuth } from '../../../contexts/AuthContext';
 import { supabase } from '../../../utils/supabase';
@@ -26,7 +23,6 @@ import DealChat from './DealChat';
 import DealFiles from './DealFiles';
 import DeleteConfirmationModal from '../../DeleteConfirmationModal';
 import { useCurrency } from '../../../contexts/CurrencyContext';
-import AgentSidebar from '../../agent/AgentSidebar';
 
 const DealDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -44,20 +40,20 @@ const DealDetail: React.FC = () => {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [sidebarActiveTab, setSidebarActiveTab] = useState('crm');
-  
+
   useEffect(() => {
     if (!id || !user) return;
     fetchDeal();
   }, [id, user]);
-  
+
   // Fetch the deal details
   const fetchDeal = async () => {
     if (!id || !user) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      
+
       const { data, error: fetchError } = await supabase
         .from('crm_deals')
         .select(`
@@ -103,13 +99,13 @@ const DealDetail: React.FC = () => {
         `)
         .eq('id', id)
         .single();
-      
+
       if (fetchError) throw fetchError;
-      
+
       if (!data) {
         throw new Error('Deal not found');
       }
-      
+
       setDeal(data);
       setEditedDeal({
         status: data.status,
@@ -117,10 +113,10 @@ const DealDetail: React.FC = () => {
         notes: data.notes,
         dealValue: data.deal_value
       });
-      
+
       // Check if the current user is the deal owner
       setIsOwner(data.agent_id === user.id);
-      
+
     } catch (err) {
       console.error('Error fetching deal:', err);
       setError(err instanceof Error ? err.message : 'Failed to load deal details');
@@ -128,15 +124,15 @@ const DealDetail: React.FC = () => {
       setLoading(false);
     }
   };
-  
+
   // Save edited deal
   const handleSave = async () => {
     if (!id || !user || !deal) return;
-    
+
     try {
       setSaving(true);
       setError(null);
-      
+
       const { error: updateError } = await supabase
         .from('crm_deals')
         .update({
@@ -147,9 +143,9 @@ const DealDetail: React.FC = () => {
           updated_at: new Date().toISOString()
         })
         .eq('id', id);
-        
+
       if (updateError) throw updateError;
-      
+
       // Log activity
       await supabase
         .from('crm_activities')
@@ -161,10 +157,10 @@ const DealDetail: React.FC = () => {
             description: `Updated deal information`
           }
         ]);
-      
+
       setEditMode(false);
       fetchDeal();
-      
+
     } catch (err) {
       console.error('Error updating deal:', err);
       setError(err instanceof Error ? err.message : 'Failed to update deal');
@@ -172,24 +168,24 @@ const DealDetail: React.FC = () => {
       setSaving(false);
     }
   };
-  
+
   // Delete deal
   const handleDelete = async () => {
     if (!id || !user) return;
-    
+
     try {
       setDeleting(true);
-      
+
       // Delete the deal
       const { error: deleteError } = await supabase
         .from('crm_deals')
         .delete()
         .eq('id', id);
-        
+
       if (deleteError) throw deleteError;
-      
+
       navigate('/crm/deals');
-      
+
     } catch (err) {
       console.error('Error deleting deal:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete deal');
@@ -197,18 +193,10 @@ const DealDetail: React.FC = () => {
       setShowDeleteModal(false);
     }
   };
-  
+
   if (loading) {
     return (
       <div className="min-h-screen bg-white">
-        <AgentSidebar
-          isOpen={false}
-          onToggle={() => {}}
-          agentId={user?.id}
-          activeTab={sidebarActiveTab}
-          onTabChange={setSidebarActiveTab}
-          agentSlug=""
-        />
         <main className="transition-all duration-300 md:ml-[70px] pt-20 md:pt-8 px-4 md:px-8 lg:px-12">
           <div className="max-w-[1600px] mx-auto flex justify-center items-center min-h-[60vh]">
             <LoadingSpinner />
@@ -217,18 +205,10 @@ const DealDetail: React.FC = () => {
       </div>
     );
   }
-  
+
   if (error || !deal) {
     return (
       <div className="min-h-screen bg-white">
-        <AgentSidebar
-          isOpen={false}
-          onToggle={() => {}}
-          agentId={user?.id}
-          activeTab={sidebarActiveTab}
-          onTabChange={setSidebarActiveTab}
-          agentSlug=""
-        />
         <main className="transition-all duration-300 md:ml-[70px] pt-20 md:pt-8 px-4 md:px-8 lg:px-12">
           <div className="max-w-[1600px] mx-auto">
             <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md">
@@ -255,10 +235,10 @@ const DealDetail: React.FC = () => {
       </div>
     );
   }
-  
+
   // Get property title, either from property or project
   const propertyTitle = deal.property?.title || deal.project?.title || 'Unnamed Property';
-  
+
   // Get stage based on status
   const getStage = (status: string) => {
     switch(status) {
@@ -270,7 +250,7 @@ const DealDetail: React.FC = () => {
       default: return 'Initial';
     }
   };
-  
+
   // Get status color
   const getStatusColor = (status: string) => {
     switch(status) {
@@ -290,7 +270,7 @@ const DealDetail: React.FC = () => {
         return 'bg-gray-100 text-gray-800';
     }
   };
-  
+
   // Get deal type badge color
   const getDealTypeColor = (dealType: string) => {
     return dealType === 'Own Property' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800';
@@ -298,25 +278,17 @@ const DealDetail: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      <AgentSidebar
-        isOpen={false}
-        onToggle={() => {}}
-        agentId={user?.id}
-        activeTab={sidebarActiveTab}
-        onTabChange={setSidebarActiveTab}
-        agentSlug=""
-      />
       <main className="transition-all duration-300 md:ml-[70px] pt-20 md:pt-8 px-4 md:px-8 lg:px-12">
         <div className="max-w-[1600px] mx-auto">
           {/* Back button */}
           <button
-            onClick={() => navigate('/crm/deals')}
+            onClick={() => navigate(-1)}
             className="inline-flex items-center px-3 py-2 border border-gray-300 rounded-md text-sm text-gray-700 bg-white hover:bg-gray-50 mb-6"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Deals
           </button>
-          
+
           {/* Header */}
           <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6 shadow-sm">
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
@@ -325,7 +297,7 @@ const DealDetail: React.FC = () => {
                   <span className={`px-2 py-1 rounded-full text-xs font-medium ${getDealTypeColor(deal.deal_type)}`}>
                     {deal.deal_type === 'Marketplace Property' ? 'Collaboration' : deal.deal_type}
                   </span>
-                  
+
                   {editMode ? (
                     <select
                       value={editedDeal.status}
@@ -345,19 +317,19 @@ const DealDetail: React.FC = () => {
                     </span>
                   )}
                 </div>
-                
+
                 <h1 className="text-2xl font-bold text-gray-900 mb-1">{propertyTitle}</h1>
-                
+
                 <div className="text-gray-600 mb-2">
                   {deal.lead ? deal.lead.full_name : 'No contact'} • {getStage(deal.status)}
                 </div>
-                
+
                 <div className="flex items-center text-sm text-gray-500">
                   <Clock className="h-4 w-4 mr-1" />
                   Created on {new Date(deal.created_at).toLocaleDateString()}
                 </div>
               </div>
-              
+
               <div className="flex items-center space-x-3">
                 {editMode ? (
                   <>
@@ -406,7 +378,7 @@ const DealDetail: React.FC = () => {
               </div>
             </div>
           </div>
-          
+
           {/* Tabs */}
           <div className="mb-6 border-b border-gray-200">
             <nav className="-mb-px flex space-x-6 overflow-x-auto" aria-label="Tabs">
@@ -454,7 +426,7 @@ const DealDetail: React.FC = () => {
               )}
             </nav>
           </div>
-          
+
           {/* Tab Content */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm">
             {activeTab === 'overview' && (
@@ -468,7 +440,7 @@ const DealDetail: React.FC = () => {
                         <User className="h-5 w-5 mr-2 text-blue-500" />
                         Contact Information
                       </h2>
-                      
+
                       {deal.lead ? (
                         <div className="bg-gray-50 rounded-lg p-4">
                           <h3 className="font-medium text-gray-900 mb-2">{deal.lead.full_name}</h3>
@@ -505,21 +477,21 @@ const DealDetail: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Property Information */}
                     <div className="mb-8">
                       <h2 className="text-lg font-semibold mb-4 flex items-center">
                         <Home className="h-5 w-5 mr-2 text-green-500" />
                         Property Information
                       </h2>
-                      
+
                       {deal.property ? (
                         <div className="bg-gray-50 rounded-lg overflow-hidden">
                           {deal.property.images?.[0] && (
                             <div className="h-48 overflow-hidden">
-                              <img 
-                                src={deal.property.images[0]} 
-                                alt={deal.property.title} 
+                              <img
+                                src={deal.property.images[0]}
+                                alt={deal.property.title}
                                 className="w-full h-full object-cover"
                               />
                             </div>
@@ -566,14 +538,14 @@ const DealDetail: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Deal Value & Commission */}
                     <div>
                       <h2 className="text-lg font-semibold mb-4 flex items-center">
                         <DollarSign className="h-5 w-5 mr-2 text-yellow-500" />
                         Deal Value & Commission
                       </h2>
-                      
+
                       <div className="bg-gray-50 rounded-lg p-4">
                         {editMode ? (
                           <div className="space-y-4">
@@ -589,7 +561,7 @@ const DealDetail: React.FC = () => {
                                 placeholder="Enter deal value"
                               />
                             </div>
-                            
+
                             <div>
                               <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Commission Split
@@ -609,7 +581,7 @@ const DealDetail: React.FC = () => {
                               <span className="w-24 text-gray-500">Deal Value:</span>
                               {deal.deal_value ? formatPrice(deal.deal_value) : 'Not specified'}
                             </p>
-                            
+
                             {(deal.deal_type === 'Collaboration' || deal.deal_type === 'Marketplace Property') && (
                               <p className="text-gray-600 flex items-baseline">
                                 <span className="w-24 text-gray-500">Split:</span>
@@ -623,7 +595,7 @@ const DealDetail: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  
+
                   {/* Right Column */}
                   <div>
                     {/* Deal Details */}
@@ -632,7 +604,7 @@ const DealDetail: React.FC = () => {
                         <FileText className="h-5 w-5 mr-2 text-purple-500" />
                         Deal Details
                       </h2>
-                      
+
                       <div className="bg-gray-50 rounded-lg p-4">
                         <div className="space-y-4">
                           <div className="flex flex-col">
@@ -643,12 +615,12 @@ const DealDetail: React.FC = () => {
                               </span>
                             </div>
                           </div>
-                          
+
                           <div className="flex flex-col">
                             <span className="text-gray-500 text-sm">Stage</span>
                             <span className="font-medium">{getStage(deal.status)}</span>
                           </div>
-                          
+
                           <div className="flex flex-col">
                             <span className="text-gray-500 text-sm">Deal Type</span>
                             <div className="mt-1 flex items-center">
@@ -664,14 +636,14 @@ const DealDetail: React.FC = () => {
                               </span>
                             </div>
                           </div>
-                          
+
                           {/* Partner Agent (for collaborations) */}
                           {(deal.deal_type === 'Collaboration' || deal.deal_type === 'Marketplace Property') && deal.co_agent && (
                             <div className="flex flex-col">
                               <span className="text-gray-500 text-sm">Partner Agent</span>
                               <div className="mt-1 flex items-center">
                                 {deal.co_agent.avatar_url ? (
-                                  <img 
+                                  <img
                                     src={deal.co_agent.avatar_url}
                                     alt={deal.co_agent.full_name}
                                     className="w-8 h-8 rounded-full object-cover mr-2"
@@ -688,14 +660,14 @@ const DealDetail: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    
+
                     {/* Notes */}
                     <div>
                       <h2 className="text-lg font-semibold mb-4 flex items-center">
                         <FileText className="h-5 w-5 mr-2 text-gray-500" />
                         Notes
                       </h2>
-                      
+
                       {editMode ? (
                         <textarea
                           value={editedDeal.notes || ''}
@@ -714,17 +686,17 @@ const DealDetail: React.FC = () => {
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Timeline */}
                     <div className="mt-8">
                       <h2 className="text-lg font-semibold mb-4 flex items-center">
                         <Calendar className="h-5 w-5 mr-2 text-orange-500" />
                         Timeline
                       </h2>
-                      
+
                       <div className="relative">
                         <div className="absolute left-4 top-0 h-full w-0.5 bg-gray-200"></div>
-                        
+
                         {/* Timeline items */}
                         <div className="space-y-4 relative">
                           <div className="flex items-center mb-2">
@@ -738,7 +710,7 @@ const DealDetail: React.FC = () => {
                               </time>
                             </div>
                           </div>
-                          
+
                           {deal.status !== 'Draft' && (
                             <div className="flex items-center mb-2">
                               <div className="z-10 flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
@@ -752,7 +724,7 @@ const DealDetail: React.FC = () => {
                               </div>
                             </div>
                           )}
-                          
+
                           {(deal.status === 'Docs Sent' || deal.status === 'Signed' || deal.status === 'Closed') && (
                             <div className="flex items-center mb-2">
                               <div className="z-10 flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
@@ -766,7 +738,7 @@ const DealDetail: React.FC = () => {
                               </div>
                             </div>
                           )}
-                          
+
                           {(deal.status === 'Signed' || deal.status === 'Closed') && (
                             <div className="flex items-center mb-2">
                               <div className="z-10 flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
@@ -780,7 +752,7 @@ const DealDetail: React.FC = () => {
                               </div>
                             </div>
                           )}
-                          
+
                           {deal.status === 'Closed' && (
                             <div className="flex items-center mb-2">
                               <div className="z-10 flex items-center justify-center w-8 h-8 bg-green-100 rounded-full">
@@ -794,7 +766,7 @@ const DealDetail: React.FC = () => {
                               </div>
                             </div>
                           )}
-                          
+
                           {deal.status === 'Lost' && (
                             <div className="flex items-center mb-2">
                               <div className="z-10 flex items-center justify-center w-8 h-8 bg-red-100 rounded-full">
@@ -815,20 +787,20 @@ const DealDetail: React.FC = () => {
                 </div>
               </div>
             )}
-            
+
             {activeTab === 'activity' && (
               <DealActivityLog dealId={id} />
             )}
-            
+
             {activeTab === 'files' && (
               <DealFiles dealId={id} />
             )}
-            
+
             {activeTab === 'chat' && deal && (
               <DealChat dealId={id} deal={deal} />
             )}
           </div>
-          
+
           {/* Delete Confirmation Modal */}
           <DeleteConfirmationModal
             isOpen={showDeleteModal}

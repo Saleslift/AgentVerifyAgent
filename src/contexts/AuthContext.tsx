@@ -52,6 +52,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
+  // useEffect(() => {
+  //   if (user && user?.confirmed_at) {
+  //     navigate('/dashboard');
+  //   }
+  // }, [user]);
+
   const signUp = async (
       email: string,
       password: string,
@@ -63,9 +69,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Dynamically assign role based on metadata (added to handle both roles)
       const role = metadata?.data?.role;
+      console.log('Phone--->', metadata.data.phone)
       const { data, error } = await supabase.auth.signUp({
-        email,
+        // email,
         password,
+        phone: metadata.data?.phone,
         options: {
           data: {
             ...metadata.data,
@@ -74,13 +82,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           },
         },
       });
+      console.log('User created:', data);
 
       if (error) {
         console.error('[AuthContext] Signup error:', error);
         return { error };
       }
 
-      const user = data.user;
+      const user = data?.user;
       console.log('[AuthContext] Signup successful, user created:', user?.id);
       console.log('[AuthContext] User role assigned:', metadata.data.role);
 
@@ -98,7 +107,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         if (role === 'agency') {
           profileData.agency_name = metadata.data?.companyName || '';
           profileData.full_name = metadata.data?.companyName || '';
-          profileData.whatsapp = metadata.data?.agencyWhatsapp || metadata.data?.agencyPhone;
+          profileData.whatsapp = metadata.data?.agencyWhatsapp || metadata.data?.phone;
           profileData.agency_email = email;
           profileData.registration_number = metadata.data?.companyRegNumber || '';
           profileData.location = metadata.data?.companyAddress || '';
@@ -109,7 +118,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         else if (role === 'agent') {
           profileData.full_name = `${metadata.data?.firstName} ${metadata.data?.lastName}` || '';
-          profileData.registration_number = metadata.data?.registrationNumber || '';
+          profileData.registration_number = metadata.data?.brokerNumber || '';
           profileData.whatsapp = metadata.data?.whatsapp || metadata.data?.phone ;
         }
         else if (role === 'developer') {

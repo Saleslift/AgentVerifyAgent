@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import AgentSidebar from '../components/agent/AgentSidebar';
 import PropertyManagement from '../components/PropertyManagement';
 import JobsTab from '../components/agent/JobsTab';
@@ -19,6 +19,7 @@ type ActiveTabs = 'properties' | 'marketplace' | 'statistics' | 'jobs' | 'projec
 
 export default function AgentDashboardPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { profile, properties, loading, error } = useUserData();
 
@@ -30,6 +31,44 @@ export default function AgentDashboardPage() {
     initPageVisibilityHandling();
     return () => cleanupPageVisibilityHandling();
   }, []);
+
+  useEffect(() => {
+    // Map path to tab
+    const pathToTab: Record<string, ActiveTabs> = {
+      '/agent-dashboard/properties': 'properties',
+      '/agent-dashboard/marketplace': 'marketplace',
+      '/agent-dashboard/statistics': 'statistics',
+      '/agent-dashboard/jobs': 'jobs',
+      '/agent-dashboard/projects': 'projects',
+      '/agent-dashboard/notifications': 'notifications',
+      '/agent-dashboard/edit-profile': 'edit-profile',
+      '/agent-dashboard/contacts': 'contacts',
+      '/agent-dashboard/crm-deals': 'crm-deals',
+      '/agent-dashboard/add-property': 'add-property',
+      '/agent-dashboard/my-properties': 'my-properties',
+    };
+    const tab = pathToTab[location.pathname];
+    if (tab && tab !== activeTab) setActiveTab(tab);
+  }, [location.pathname]);
+
+  const handleTabChange = (tab: ActiveTabs) => {
+    setActiveTab(tab);
+    // Map tab to path
+    const tabToPath: Record<ActiveTabs, string> = {
+      'properties': '/agent-dashboard/properties',
+      'marketplace': '/agent-dashboard/marketplace',
+      'statistics': '/agent-dashboard/statistics',
+      'jobs': '/agent-dashboard/jobs',
+      'projects': '/agent-dashboard/projects',
+      'notifications': '/agent-dashboard/notifications',
+      'edit-profile': '/agent-dashboard/edit-profile',
+      'contacts': '/agent-dashboard/contacts',
+      'crm-deals': '/agent-dashboard/crm-deals',
+      'add-property': '/agent-dashboard/add-property',
+      'my-properties': '/agent-dashboard/my-properties',
+    };
+    navigate(tabToPath[tab]);
+  };
 
   // Check for invitation token in session storage
   useEffect(() => {
@@ -72,7 +111,7 @@ export default function AgentDashboardPage() {
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         agentId={user.id}
         activeTab={activeTab}
-        onTabChange={setActiveTab}
+        onTabChange={handleTabChange}
         agentSlug={profile?.slug}
       />
 

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, Filter, Shield, Award, MapPin, Building, CheckCircle, AlertCircle, 
+import {
+  Search, Filter, Shield, Award, MapPin, Building, CheckCircle, AlertCircle,
   FileText, Download, Upload, Clock, X, LayoutGrid, List, MessageSquare,
   ExternalLink, ChevronDown, Calendar, RefreshCw
 } from 'lucide-react';
@@ -96,7 +96,7 @@ export default function AgencyDevelopers() {
   const fetchDevelopers = async () => {
     try {
       setLoading(true);
-      
+
       const { data, error } = await supabase
         .from('profiles')
         .select(`
@@ -113,9 +113,9 @@ export default function AgencyDevelopers() {
           created_at
         `)
         .eq('role', 'developer');
-      
+
       if (error) throw error;
-      
+
       setDevelopers(data || []);
     } catch (error) {
       console.error('Error fetching developers:', error);
@@ -126,21 +126,21 @@ export default function AgencyDevelopers() {
 
   const fetchCollaborations = async () => {
     if (!profile?.id) return;
-    
+
     try {
       const { data, error } = await supabase
         .from('developer_agency_contracts')
         .select('*')
         .eq('agency_id', profile.id);
-      
+
       if (error) throw error;
-      
+
       // Convert to map for easier lookup
       const collaborationMap = (data || []).reduce((acc, item) => {
         acc[item.developer_id] = item;
         return acc;
       }, {} as {[key: string]: CollaborationStatus});
-      
+
       setCollaborations(collaborationMap);
     } catch (error) {
       console.error('Error fetching collaborations:', error);
@@ -154,11 +154,11 @@ export default function AgencyDevelopers() {
 
   const isLicenseExpired = (collaboration: CollaborationStatus): boolean => {
     if (!collaboration || !collaboration.agency_license_url) return false;
-    
+
     const createDate = new Date(collaboration.created_at);
     const now = new Date();
     const diffMonths = (now.getFullYear() - createDate.getFullYear()) * 12 + now.getMonth() - createDate.getMonth();
-    
+
     return diffMonths >= 11;
   };
 
@@ -176,7 +176,7 @@ export default function AgencyDevelopers() {
         ),
       };
     }
-    
+
     // Check for license expiry
     const licenseExpired = isLicenseExpired(collaboration);
     if (licenseExpired) {
@@ -196,7 +196,7 @@ export default function AgencyDevelopers() {
         ),
       };
     }
-    
+
     switch (collaboration.status) {
       case 'pending':
         return {
@@ -267,17 +267,17 @@ export default function AgencyDevelopers() {
   // Filter developers based on search and status
   const filteredDevelopers = developers.filter(developer => {
     // Search filter
-    const matchesSearch = 
-      developer.full_name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-      developer.location?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    const matchesSearch =
+      developer.full_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      developer.location?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       developer?.developer_details?.company_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       false;
-    
+
     // Status filter
     if (filterStatus === 'all') return matchesSearch;
-    
+
     const collaboration = collaborations[developer.id];
-    
+
     switch (filterStatus) {
       case 'request_sent':
         return matchesSearch && !!collaboration;
@@ -302,7 +302,7 @@ export default function AgencyDevelopers() {
           <h1 className="text-2xl font-bold">Developers</h1>
           <p className="text-gray-500">Partner with real estate developers and market their projects</p>
         </div>
-        
+
         {/* View Toggle and Filter */}
         <div className="flex space-x-3">
           <div className="relative">
@@ -320,34 +320,34 @@ export default function AgencyDevelopers() {
               </span>
               <ChevronDown className="h-4 w-4" />
             </button>
-            
+
             <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10 hidden group-focus-within:block">
               <div className="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                <button 
+                <button
                   onClick={() => setFilterStatus('all')}
                   className={`block px-4 py-2 text-sm text-left w-full ${filterStatus === 'all' ? 'bg-gray-100 text-gray-900' : 'text-gray-700'} hover:bg-gray-100`}
                 >
                   All Statuses
                 </button>
-                <button 
+                <button
                   onClick={() => setFilterStatus('request_sent')}
                   className={`block px-4 py-2 text-sm text-left w-full ${filterStatus === 'request_sent' ? 'bg-gray-100 text-gray-900' : 'text-gray-700'} hover:bg-gray-100`}
                 >
                   Request Sent
                 </button>
-                <button 
+                <button
                   onClick={() => setFilterStatus('pending')}
                   className={`block px-4 py-2 text-sm text-left w-full ${filterStatus === 'pending' ? 'bg-gray-100 text-gray-900' : 'text-gray-700'} hover:bg-gray-100`}
                 >
                   Pending
                 </button>
-                <button 
+                <button
                   onClick={() => setFilterStatus('approved')}
                   className={`block px-4 py-2 text-sm text-left w-full ${filterStatus === 'approved' ? 'bg-gray-100 text-gray-900' : 'text-gray-700'} hover:bg-gray-100`}
                 >
                   Approved
                 </button>
-                <button 
+                <button
                   onClick={() => setFilterStatus('needs_action')}
                   className={`block px-4 py-2 text-sm text-left w-full ${filterStatus === 'needs_action' ? 'bg-gray-100 text-gray-900' : 'text-gray-700'} hover:bg-gray-100`}
                 >
@@ -356,7 +356,7 @@ export default function AgencyDevelopers() {
               </div>
             </div>
           </div>
-          
+
           <div className="flex border border-gray-300 rounded-lg overflow-hidden">
             <button
               onClick={() => setViewMode('list')}
@@ -375,7 +375,7 @@ export default function AgencyDevelopers() {
           </div>
         </div>
       </div>
-      
+
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm p-4 mb-8">
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -391,7 +391,7 @@ export default function AgencyDevelopers() {
               />
             </div>
           </div>
-          
+
           <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setFilterStatus('all')}
@@ -446,7 +446,7 @@ export default function AgencyDevelopers() {
           </div>
         </div>
       </div>
-      
+
       {/* Success Message */}
       {uploadSuccess && (
         <div className="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
@@ -455,8 +455,8 @@ export default function AgencyDevelopers() {
             <div className="ml-3">
               <p className="text-sm text-green-700">{uploadSuccess}</p>
             </div>
-            <button 
-              className="ml-auto text-green-400 hover:text-green-500" 
+            <button
+              className="ml-auto text-green-400 hover:text-green-500"
               onClick={() => setUploadSuccess(null)}
             >
               <X className="h-5 w-5" />
@@ -464,7 +464,7 @@ export default function AgencyDevelopers() {
           </div>
         </div>
       )}
-      
+
       {/* Developers Display */}
       {loading ? (
         <div className="min-h-[50vh] flex items-center justify-center">
@@ -497,7 +497,7 @@ export default function AgencyDevelopers() {
           {filteredDevelopers.map(developer => {
             const collaboration = collaborations[developer.id];
             const { element: statusElement } = getCollaborationStatus(developer.id);
-            
+
             return (
               <div
                 key={developer.id}
@@ -525,13 +525,13 @@ export default function AgencyDevelopers() {
                         <Building className="w-8 h-8 text-gray-400" />
                       )}
                     </div>
-                    
+
                     {/* Developer Info */}
                     <div className="flex-grow min-w-0">
                       <h3 className="text-lg font-semibold line-clamp-1">
                         {developer?.developer_details?.company_name || developer.full_name}
                       </h3>
-                      
+
                       {developer.location && (
                         <div className="flex items-center text-sm text-gray-600 mt-1">
                           <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0 mr-1" />
@@ -540,7 +540,7 @@ export default function AgencyDevelopers() {
                       )}
                     </div>
                   </div>
-                  
+
                   {collaboration && isLicenseExpired(collaboration) && (
                     <div className="bg-yellow-50 text-yellow-800 border border-yellow-200 rounded-md p-2 mb-4 flex items-center text-sm">
                       <RefreshCw className="h-4 w-4 mr-1.5 flex-shrink-0" />
@@ -557,7 +557,7 @@ export default function AgencyDevelopers() {
                           Request sent: {new Date(collaboration.created_at).toLocaleDateString()}
                         </span>
                       </div>
-                      
+
                       <div className="flex items-center text-sm font-medium">
                         <span>Status: </span>
                         {collaboration.status === 'active' && (
@@ -582,7 +582,7 @@ export default function AgencyDevelopers() {
                     </div>
                   )}
                 </div>
-                
+
                 {/* Action buttons */}
                 <div className="p-4 bg-gray-50 grid grid-cols-1 gap-2">
                   {developer.whatsapp && (
@@ -597,7 +597,7 @@ export default function AgencyDevelopers() {
                       WhatsApp
                     </a>
                   )}
-                  
+
                   <div className="grid grid-cols-2 gap-2">
                     {developer.slug && (
                       <a
@@ -611,7 +611,7 @@ export default function AgencyDevelopers() {
                         View Profile
                       </a>
                     )}
-                    
+
                     {/* Show collaboration button */}
                     <div className="w-full" onClick={(e) => e.stopPropagation()}>
                       {statusElement}
@@ -651,10 +651,10 @@ export default function AgencyDevelopers() {
                   const collaboration = collaborations[developer.id];
                   const { text: statusText } = getCollaborationStatus(developer.id);
                   const licenseExpired = collaboration && isLicenseExpired(collaboration);
-                  
+
                   return (
-                    <tr 
-                      key={developer.id} 
+                    <tr
+                      key={developer.id}
                       onClick={() => {
                         setSelectedDeveloper(developer);
                         if (collaboration) {
@@ -760,10 +760,10 @@ export default function AgencyDevelopers() {
           </div>
         </div>
       )}
-      
+
       {/* Contract Details Modal */}
-      <Modal 
-        isOpen={showContractDetailsModal} 
+      <Modal
+        isOpen={showContractDetailsModal}
         onClose={() => setShowContractDetailsModal(false)}
         title="Collaboration Details"
       >
@@ -773,18 +773,18 @@ export default function AgencyDevelopers() {
               <h3 className="text-lg font-medium text-gray-900 mb-3">
                 {selectedDeveloper?.developer_details?.company_name || selectedDeveloper.full_name}
               </h3>
-              
+
               {selectedDeveloper.location && (
                 <div className="flex items-center text-sm text-gray-600 mb-3">
                   <MapPin className="h-4 w-4 mr-1 text-gray-400" />
                   <span>{selectedDeveloper.location}</span>
                 </div>
               )}
-              
+
               {selectedDeveloper.whatsapp && (
-                <a 
+                <a
                   href={`https://wa.me/${selectedDeveloper.whatsapp.replace(/\+/g, '')}`}
-                  target="_blank" 
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center px-3 py-1 rounded-md bg-[#CEFA05] text-black text-sm"
                 >
@@ -793,11 +793,11 @@ export default function AgencyDevelopers() {
                 </a>
               )}
             </div>
-            
+
             <div className="space-y-6">
               <div>
                 <h4 className="font-medium text-gray-900 mb-3">Collaboration Status</h4>
-                
+
                 <div className="bg-gray-50 rounded-lg p-4 space-y-4">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
@@ -808,7 +808,7 @@ export default function AgencyDevelopers() {
                       </div>
                       <span className="ml-2 text-gray-700">Business Registration</span>
                     </div>
-                    
+
                     {collaborations[selectedDeveloper.id].agency_registration_url && (
                       <a
                         href={collaborations[selectedDeveloper.id].agency_registration_url!}
@@ -820,7 +820,7 @@ export default function AgencyDevelopers() {
                       </a>
                     )}
                   </div>
-                  
+
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
                       <div className={`w-8 h-8 flex items-center justify-center rounded-full ${
@@ -830,7 +830,7 @@ export default function AgencyDevelopers() {
                       </div>
                       <span className="ml-2 text-gray-700">Business License</span>
                     </div>
-                    
+
                     {collaborations[selectedDeveloper.id].agency_license_url && (
                       <a
                         href={collaborations[selectedDeveloper.id].agency_license_url!}
@@ -842,7 +842,7 @@ export default function AgencyDevelopers() {
                       </a>
                     )}
                   </div>
-                  
+
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
                       <div className={`w-8 h-8 flex items-center justify-center rounded-full ${
@@ -852,7 +852,7 @@ export default function AgencyDevelopers() {
                       </div>
                       <span className="ml-2 text-gray-700">Signed Contract</span>
                     </div>
-                    
+
                     {collaborations[selectedDeveloper.id].agency_signed_contract_url && (
                       <a
                         href={collaborations[selectedDeveloper.id].agency_signed_contract_url!}
@@ -864,7 +864,7 @@ export default function AgencyDevelopers() {
                       </a>
                     )}
                   </div>
-                  
+
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
                       <div className={`w-8 h-8 flex items-center justify-center rounded-full ${
@@ -874,7 +874,7 @@ export default function AgencyDevelopers() {
                       </div>
                       <span className="ml-2 text-gray-700">Developer Signed Contract</span>
                     </div>
-                    
+
                     {collaborations[selectedDeveloper.id].developer_contract_url && (
                       <a
                         href={collaborations[selectedDeveloper.id].developer_contract_url!}
@@ -888,10 +888,10 @@ export default function AgencyDevelopers() {
                   </div>
                 </div>
               </div>
-              
+
               <div className="border-t border-gray-200 pt-6">
                 <h4 className="font-medium text-gray-900 mb-3">Collaboration Timeline</h4>
-                
+
                 <div className="space-y-4">
                   <div className="flex">
                     <div className="flex flex-col items-center mr-4">
@@ -907,7 +907,7 @@ export default function AgencyDevelopers() {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex">
                     <div className="flex flex-col items-center mr-4">
                       <div className={`w-8 h-8 ${
@@ -931,28 +931,28 @@ export default function AgencyDevelopers() {
                       </p>
                     </div>
                   </div>
-                  
+
                   <div className="flex">
                     <div className="flex flex-col items-center mr-4">
                       <div className={`w-8 h-8 ${
                         collaborations[selectedDeveloper.id].developer_contract_url ? 
                         'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-400'
                       } rounded-full flex items-center justify-center`}>
-                        {collaborations[selectedDeveloper.id].developer_contract_url ? 
+                        {collaborations[selectedDeveloper.id].developer_contract_url ?
                           <CheckCircle className="h-4 w-4" /> : <Clock className="h-4 w-4" />}
                       </div>
                     </div>
                     <div>
                       <p className="text-sm font-medium text-gray-900">Developer Signed Contract</p>
                       <p className="text-xs text-gray-500">
-                        {collaborations[selectedDeveloper.id].developer_contract_url ? 'Completed' : 
+                        {collaborations[selectedDeveloper.id].developer_contract_url ? 'Completed' :
                          collaborations[selectedDeveloper.id].status === 'rejected' ? 'Rejected' : 'Pending'}
                       </p>
                     </div>
                   </div>
                 </div>
               </div>
-              
+
               {/* Action buttons based on status */}
               <div className="border-t border-gray-200 pt-6 flex justify-end space-x-3">
                 {collaborations[selectedDeveloper.id].status === 'active' ? (

@@ -8,7 +8,7 @@ import SharedPropertiesAgentSelector from './SharedPropertiesAgentSelector';
 
 interface AgencyPropertyFormProps {
   agencyId: string;
-  property?: Property;
+  property?: Property | null;
   onSuccess: () => void;
 }
 
@@ -44,18 +44,18 @@ export default function AgencyPropertyForm({ agencyId, property, onSuccess }: Ag
       });
       setImages(property.images || []);
       setVideos(property.videos || []);
-      
+
       // Fetch existing shares
       fetchExistingShares();
     }
-    
+
     // Fetch agents
     fetchAgencyAgents();
   }, [property, agencyId]);
 
   const fetchExistingShares = async () => {
     if (!property) return;
-    
+
     try {
       // First check if we're sharing with all agents
       const { data: propertyData, error: propertyError } = await supabase
@@ -65,9 +65,9 @@ export default function AgencyPropertyForm({ agencyId, property, onSuccess }: Ag
         .single();
 
       if (propertyError) throw propertyError;
-      
+
       setShareWithAllAgents(propertyData?.shared_with_all_agents || false);
-      
+
       if (!propertyData?.shared_with_all_agents) {
         // Fetch specific agent shares
         const { data: sharedAgents, error: sharesError } = await supabase
@@ -77,7 +77,7 @@ export default function AgencyPropertyForm({ agencyId, property, onSuccess }: Ag
           .eq('shared_by_agency_id', agencyId);
 
         if (sharesError) throw sharesError;
-        
+
         const agentIds = sharedAgents?.map(share => share.agent_id) || [];
         setSelectedAgentIds(agentIds);
       }
@@ -106,9 +106,9 @@ export default function AgencyPropertyForm({ agencyId, property, onSuccess }: Ag
         .eq('agency_id', agencyId)
         .eq('status', 'active')
         .order('created_at', { ascending: false });
-      
+
       if (agentError) throw agentError;
-      
+
       // Transform data
       const transformedAgents: Agent[] = agentData
         ? agentData.map(item => ({
@@ -122,7 +122,7 @@ export default function AgencyPropertyForm({ agencyId, property, onSuccess }: Ag
             agency_id: agencyId
           }))
         : [];
-      
+
       setAgencyAgents(transformedAgents);
     } catch (error) {
       console.error('Error fetching agents:', error);
@@ -332,7 +332,7 @@ export default function AgencyPropertyForm({ agencyId, property, onSuccess }: Ag
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     try {
       setLoading(true);
       setError(null);
@@ -366,7 +366,7 @@ export default function AgencyPropertyForm({ agencyId, property, onSuccess }: Ag
       };
 
       let propertyId: string;
-      
+
       if (property?.id) {
         // Update existing property
         const { error: updateError } = await supabase
@@ -375,7 +375,7 @@ export default function AgencyPropertyForm({ agencyId, property, onSuccess }: Ag
           .eq('id', property.id);
 
         if (updateError) throw updateError;
-        
+
         propertyId = property.id;
       } else {
         // Create new property
@@ -390,7 +390,7 @@ export default function AgencyPropertyForm({ agencyId, property, onSuccess }: Ag
           .single();
 
         if (saveError) throw saveError;
-        
+
         propertyId = savedProperty.id;
       }
 
@@ -409,17 +409,17 @@ export default function AgencyPropertyForm({ agencyId, property, onSuccess }: Ag
           .select('agent_id')
           .eq('property_id', propertyId)
           .eq('shared_by_agency_id', agencyId);
-          
+
         if (sharesError) throw sharesError;
-        
+
         const existingAgentIds = existingShares?.map(share => share.agent_id) || [];
-        
+
         // Agents to remove (in existing but not in selected)
         const agentsToRemove = existingAgentIds.filter(id => !selectedAgentIds.includes(id));
-        
+
         // Agents to add (in selected but not in existing)
         const agentsToAdd = selectedAgentIds.filter(id => !existingAgentIds.includes(id));
-        
+
         // Remove agents no longer selected
         if (agentsToRemove.length > 0) {
           const { error: deleteError } = await supabase
@@ -428,10 +428,10 @@ export default function AgencyPropertyForm({ agencyId, property, onSuccess }: Ag
             .eq('property_id', propertyId)
             .eq('shared_by_agency_id', agencyId)
             .in('agent_id', agentsToRemove);
-            
+
           if (deleteError) throw deleteError;
         }
-        
+
         // Add newly selected agents
         if (agentsToAdd.length > 0) {
           const newShares = agentsToAdd.map(agentId => ({
@@ -440,18 +440,18 @@ export default function AgencyPropertyForm({ agencyId, property, onSuccess }: Ag
             shared_by_agency_id: agencyId,
             notified: false
           }));
-          
+
           const { error: insertError } = await supabase
             .from('shared_properties')
             .insert(newShares);
-            
+
           if (insertError) throw insertError;
         }
       }
 
       // Navigate to properties
-      navigate('/agency-dashboard/properties');
-      
+      navigate(-1);
+
       // Call success callback
       onSuccess();
     } catch (error) {
@@ -516,7 +516,7 @@ export default function AgencyPropertyForm({ agencyId, property, onSuccess }: Ag
             <Users className="h-5 w-5 text-gray-400 mr-2" />
             <span className="text-gray-700">Choose which agents can see this property</span>
           </div>
-          
+
           <SharedPropertiesAgentSelector
             agencyId={agencyId}
             selectedAgentIds={selectedAgentIds}
@@ -558,7 +558,7 @@ export default function AgencyPropertyForm({ agencyId, property, onSuccess }: Ag
               placeholder="Provide a detailed description of the property..."
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Property Type *

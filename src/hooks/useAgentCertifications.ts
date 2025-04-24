@@ -73,14 +73,17 @@ export function useAgentCertifications(agentId: string | undefined) {
       const fileExt = file.name.split('.').pop()?.toLowerCase();
       const fileName = `${agentId}/${crypto.randomUUID()}.${fileExt}`;
 
-      const { error: uploadError } = await supabase.storage
+      const { data, error: uploadError } = await supabase.storage
         .from('certifications')
         .upload(fileName, file, {
           cacheControl: '3600',
           upsert: false
         });
 
-      if (uploadError) throw uploadError;
+      if (uploadError){
+        console.log('Error uploading file:', uploadError);
+        throw uploadError;
+      }
 
       const { data: { publicUrl } } = supabase.storage
         .from('certifications')

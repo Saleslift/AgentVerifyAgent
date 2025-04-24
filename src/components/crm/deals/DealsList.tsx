@@ -15,7 +15,7 @@ interface DealsListProps {
   onRefresh: () => void;
 }
 
-const DealsList: React.FC<DealsListProps> = ({ deals, onRefresh }) => {
+const DealsList: React.FC<DealsListProps> = ({ deals }) => {
   const navigate = useNavigate();
 
   const handleDealClick = (dealId: string) => {

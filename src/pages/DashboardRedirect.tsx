@@ -2,6 +2,8 @@ import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useRoleAuth } from '../hooks/useRoleAuth';
+import AgencyDashboardPage from "./AgencyDashboardPage.tsx";
+import DeveloperDashboardPage from "./DeveloperDashboardPage.tsx";
 
 export default function DashboardRedirect() {
   const { role, loading, debugRoleInfo } = useRoleAuth();
@@ -34,6 +36,17 @@ export default function DashboardRedirect() {
   if (role) {
     // Set flag to allow navigation
     sessionStorage.setItem('intentional_navigation', 'true');
+
+   //  switch (role) {
+   //   case 'agency':
+   //     return  <AgencyDashboardPage />;
+   //   case 'developer':
+   //     return  <DeveloperDashboardPage />;
+   //   case 'agent':
+   //     return  <AgencyDashboardPage />;
+   //   default:
+   //     return   <AgencyDashboardPage />;
+   // }
 
     switch (role) {
       case 'agency':

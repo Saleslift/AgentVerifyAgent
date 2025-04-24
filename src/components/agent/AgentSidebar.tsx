@@ -12,34 +12,53 @@ import {useAuth} from "../../contexts/AuthContext.tsx";
 
 const IconSize = 20;
 
-export default function AgentSidebar({ isOpen, onToggle, agentId, activeTab, onTabChange, agentSlug }) {
+export default function AgentSidebar({ agentId, activeTab, onTabChange, agentSlug }) {
   const navigate = useNavigate();
   const { role } = useRoleAuth();
   const [unreadCount, setUnreadCount] = useState(0);
   const [expandedMenus, setExpandedMenus] = useState([]);
   const [isHovered, setIsHovered] = useState(false);
-  const hoverTimeout = useRef(null);
+  const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
   const previousActiveTab = useRef(activeTab);
   const {signOut} = useAuth();
+
+  const handleMouseEnter = () => {
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current);
+    }
+    hoverTimeout.current = setTimeout(() => setIsHovered(true), 100);
+  };
+
+  const handleMouseLeave = () => {
+    if (hoverTimeout.current) {
+      clearTimeout(hoverTimeout.current);
+    }
+    hoverTimeout.current = setTimeout(() => setIsHovered(false), 150);
+  };
 
   useEffect(() => {
     if (role && role !== 'agent') navigate('/dashboard');
   }, [role]);
 
   useEffect(() => {
-    if (!agentId) return;
-    const fetchUnread = async () => {
-      const { count } = await supabase.from('notifications')
-          .select('*', { count: 'exact', head: true })
-          .eq('recipient_id', agentId).eq('is_read', false);
-      setUnreadCount(count || 0);
-    };
-    fetchUnread();
-    const channel = supabase.channel('notification_changes')
-        .on('postgres_changes', {
-          event: '*', schema: 'public', table: 'notifications', filter: `recipient_id=eq.${agentId}`
-        }, fetchUnread).subscribe();
-    return () => supabase.removeChannel(channel);
+    if (agentId){
+      const fetchUnread = async () => {
+        const { count } = await supabase.from('notifications')
+            .select('*', { count: 'exact', head: true })
+            .eq('recipient_id', agentId).eq('is_read', false);
+        setUnreadCount(count || 0);
+      };
+      fetchUnread();
+
+      const channel = supabase.channel('notification_changes')
+          .on('postgres_changes', {
+            event: '*', schema: 'public', table: 'notifications', filter: `recipient_id=eq.${agentId}`
+          }, fetchUnread).subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      }
+    }
   }, [agentId]);
 
   useEffect(() => {
@@ -65,11 +84,6 @@ export default function AgentSidebar({ isOpen, onToggle, agentId, activeTab, onT
   };
 
   const handleLogout = async () => {
-    // await sessionStorage.setItem('intentional_navigation', 'true');
-    // await sessionStorage.removeItem('redirectAfterLogin');
-    // await supabase.auth.signOut();
-    // navigate('/signin');
-
     await signOut()
   };
 
@@ -92,16 +106,16 @@ export default function AgentSidebar({ isOpen, onToggle, agentId, activeTab, onT
         { id: 'projects', label: 'Projects', icon: Building, onClick: () => onTabChange('projects') },
       ]
     },
-    {
-      id: 'notifications', label: 'Notifications', icon: Bell,
-      onClick: () => onTabChange('notifications'), badge: unreadCount > 0 ? unreadCount : undefined
-    },
+    // {
+    //   id: 'notifications', label: 'Notifications', icon: Bell,
+    //   onClick: () => onTabChange('notifications'), badge: unreadCount > 0 ? unreadCount : undefined
+    // },
     {
       id: 'crm', label: 'CRM', icon: Folder, hasSubmenu: true,
       onClick: () => toggleSubMenu('crm'),
       submenu: [
         { id: 'contacts', label: 'Leads', icon: Users, onClick: () => onTabChange('contacts') },
-        { id: 'deals', label: 'Deals', icon: FileText, onClick: () => onTabChange('crm-deals') },
+        { id: 'crm-deals', label: 'Deals', icon: FileText, onClick: () => onTabChange('crm-deals') },
       ]
     },
     { id: 'jobs', label: 'Jobs', icon: Briefcase, onClick: () => onTabChange('jobs') },
@@ -113,14 +127,8 @@ export default function AgentSidebar({ isOpen, onToggle, agentId, activeTab, onT
   return (
       <aside
           className={`fixed left-0 top-0 z-40 h-screen bg-black transition-all duration-300 ease-in-out ${isHovered ? 'w-[250px]' : 'w-[70px]'} flex flex-col`}
-          onMouseEnter={() => {
-            clearTimeout(hoverTimeout.current);
-            hoverTimeout.current = setTimeout(() => setIsHovered(true), 100);
-          }}
-          onMouseLeave={() => {
-            clearTimeout(hoverTimeout.current);
-            hoverTimeout.current = setTimeout(() => setIsHovered(false), 150);
-          }}
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
       >
         <div className="h-20 flex items-center px-4 border-b border-[#333]">
           <img
