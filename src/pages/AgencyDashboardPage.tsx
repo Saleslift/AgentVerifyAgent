@@ -75,10 +75,10 @@ export default function AgencyDashboardPage() {
   }
 
   return (
-      <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white">
       <AgencySidebar activeTab={activeTab} onTabChange={handleTabChange} />
       <main
-          className={`
+        className={`
           transition-all duration-300 
           md:ml-[70px]
           pt-20 md:pt-8 
@@ -91,7 +91,7 @@ export default function AgencyDashboardPage() {
             <Route path="dashboard" element={<AgencyDashboardHome />} />
             <Route path="properties" element={<AgencyProperties />} />
             <Route path="agents" element={<AgencyAgents />} />
-            <Route path="jobs" element={<AgencyJobs />} />
+            <Route path="jobs/*" element={<AgencyJobs />} />
             <Route path="developers" element={<AgencyDevelopers />} />
             <Route path="settings" element={<AgencySettings />} />
           </Routes>
