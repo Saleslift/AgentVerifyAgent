@@ -46,6 +46,8 @@ export default function PropertyManagement({
   const [properties, setProperties] = useState<Property[]>(initialProperties);
   const [showEditModal, setShowEditModal] = useState(false);
   const [propertyToEdit, setPropertyToEdit] = useState<Property | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6; // Number of properties per page
 
   // Update local properties when initialProperties changes
   useEffect(() => {
@@ -82,6 +84,26 @@ export default function PropertyManagement({
     }
     return true;
   });
+
+  // Calculate paginated properties
+  const paginatedProperties = filteredProperties.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
 
   const handleAddToListings = async (propertyId: string) => {
     if (!onAddToListings) return;
@@ -173,7 +195,7 @@ export default function PropertyManagement({
 
   return (
     <>
-      <div className="space-y-8">
+      <div className="space-y-8 pb-24 min-h-screen"> {/* Added min-h-screen and increased padding-bottom */}
         <div className="flex flex-col gap-4 mb-8">
           <div className="flex flex-wrap justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-900">
@@ -268,8 +290,8 @@ export default function PropertyManagement({
           <div className={showFilters ? 'lg:col-span-3' : 'lg:col-span-4'}>
             {viewMode === 'list' ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProperties.length > 0 ? (
-                  filteredProperties.map(property => (
+                {paginatedProperties.length > 0 ? (
+                  paginatedProperties.map(property => (
                     <PropertyCard
                       key={property.id}
                       property={property}
@@ -290,13 +312,44 @@ export default function PropertyManagement({
             ) : (
               <div className="h-[500px] sm:h-[600px] md:h-[700px] rounded-lg overflow-hidden">
                 <PropertyMap
-                  properties={filteredProperties}
+                  properties={paginatedProperties}
                   onPropertySelect={handlePropertySelect}
                 />
               </div>
             )}
           </div>
         </div>
+
+        {/* Pagination Controls */}
+        {filteredProperties.length > itemsPerPage && (
+          <div className="flex justify-center items-center space-x-4 mt-6">
+            <button
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+              className={`px-4 py-2 rounded-lg ${
+                currentPage === 1
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-black text-white hover:bg-gray-900'
+              }`}
+            >
+              Previous
+            </button>
+            <span className="text-gray-700">
+              Page {currentPage} of {totalPages}
+            </span>
+            <button
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+              className={`px-4 py-2 rounded-lg ${
+                currentPage === totalPages
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-black text-white hover:bg-gray-900'
+              }`}
+            >
+              Next
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Edit Property Modal */}
@@ -371,3 +424,4 @@ export default function PropertyManagement({
     </>
   );
 }
+

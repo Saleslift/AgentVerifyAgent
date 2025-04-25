@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Filter, Map as MapIcon, List } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useMarketplace } from '../hooks/useMarketplace';
@@ -9,19 +8,16 @@ import PropertyMap from './PropertyMap';
 import MarketplacePropertyCard from './MarketplacePropertyCard';
 import CurrencySelector from './CurrencySelector';
 
-interface MarketplaceTabProps {
-  agentId: string;
-}
-
-export default function MarketplaceTab({ agentId }: MarketplaceTabProps) {
-  const navigate = useNavigate();
+export default function MarketplaceTab() {
   const { user } = useAuth();
   const { loading, error, properties, addToListings, addingProperty } = useMarketplace(user?.id || '');
-  
+
   const [showFilters, setShowFilters] = useState(false);
   const [filters, setFilters] = useState<PropertyFilters>({});
   const [viewMode, setViewMode] = useState<'list' | 'map'>('list');
   const [sortBy, setSortBy] = useState<'default' | 'price_asc' | 'price_desc'>('default');
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6; // Number of properties per page
 
   // Filter and sort properties
   const filteredProperties = properties.filter(property => {
@@ -48,6 +44,26 @@ export default function MarketplaceTab({ agentId }: MarketplaceTabProps) {
     }
   });
 
+  // Paginate filtered properties
+  const paginatedProperties = filteredProperties.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
   const handlePropertySelect = (property: Property) => {
     // Set flag to allow navigation
     sessionStorage.setItem('intentional_navigation', 'true');
@@ -71,12 +87,12 @@ export default function MarketplaceTab({ agentId }: MarketplaceTabProps) {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-32 min-h-screen"> {/* Increased padding-bottom */}
       <div className="flex flex-col gap-4 mb-8">
         <h2 className="text-2xl font-bold text-gray-900">
           Marketplace Properties
         </h2>
-        
+
         {/* Controls - Responsive layout */}
         <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-3">
           {/* Sort dropdown - Full width on mobile, auto on larger screens */}
@@ -89,12 +105,12 @@ export default function MarketplaceTab({ agentId }: MarketplaceTabProps) {
             <option value="price_asc">Price: Low to High</option>
             <option value="price_desc">Price: High to Low</option>
           </select>
-          
+
           {/* Currency selector */}
           <div className="h-11 w-full sm:w-auto">
             <CurrencySelector />
           </div>
-          
+
           {/* View mode toggle */}
           <div className="flex items-center bg-gray-100 rounded-lg p-1 h-11 w-full sm:w-auto">
             <button
@@ -120,7 +136,7 @@ export default function MarketplaceTab({ agentId }: MarketplaceTabProps) {
               Map
             </button>
           </div>
-          
+
           {/* Filter button */}
           <button
             onClick={() => setShowFilters(!showFilters)}
@@ -146,12 +162,12 @@ export default function MarketplaceTab({ agentId }: MarketplaceTabProps) {
             />
           </div>
         )}
-        
+
         <div className={showFilters ? 'lg:col-span-3' : 'lg:col-span-4'}>
           {viewMode === 'list' ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProperties.length > 0 ? (
-                filteredProperties.map(property => (
+              {paginatedProperties.length > 0 ? (
+                paginatedProperties.map(property => (
                   <MarketplacePropertyCard
                     key={property.id}
                     property={property}
@@ -168,13 +184,44 @@ export default function MarketplaceTab({ agentId }: MarketplaceTabProps) {
           ) : (
             <div className="h-[500px] sm:h-[600px] md:h-[700px] rounded-lg overflow-hidden">
               <PropertyMap
-                properties={filteredProperties}
+                properties={paginatedProperties}
                 onPropertySelect={handlePropertySelect}
               />
             </div>
           )}
         </div>
       </div>
+
+      {/* Pagination Controls */}
+      {filteredProperties.length > itemsPerPage && (
+        <div className="flex justify-center items-center space-x-4 mt-6">
+          <button
+            onClick={handlePreviousPage}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 rounded-lg ${
+              currentPage === 1
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-black text-white hover:bg-gray-900'
+            }`}
+          >
+            Previous
+          </button>
+          <span className="text-gray-700">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2 rounded-lg ${
+              currentPage === totalPages
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-black text-white hover:bg-gray-900'
+            }`}
+          >
+            Next
+          </button>
+        </div>
+      )}
     </div>
   );
 }

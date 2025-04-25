@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Plus, Search, Filter,  Building } from 'lucide-react';
+import { Plus, Search, Filter, Building } from 'lucide-react';
 import { supabase } from '../../utils/supabase';
 import { Property } from '../../types';
 import { useUserDataContext } from '../../contexts/UserDataContext';
@@ -18,6 +18,8 @@ export default function AgencyProperties() {
   const [showShareModal, setShowShareModal] = useState(false);
   const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(null);
   const [propertySharing, setPropertySharing] = useState<{ [key: string]: { count: number, withAll: boolean } }>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 6; // Number of properties per page
 
   const fetchProperties = async () => {
     if (!profile?.id) return;
@@ -158,6 +160,18 @@ export default function AgencyProperties() {
     }
   };
 
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
   // Filter properties
   const filteredProperties = properties.filter(property => {
     const matchesSearch = property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -169,6 +183,13 @@ export default function AgencyProperties() {
     return matchesSearch && matchesType && matchesContract;
   });
 
+  const paginatedProperties = filteredProperties.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  const totalPages = Math.ceil(filteredProperties.length / itemsPerPage);
+
   if (loading) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center">
@@ -178,7 +199,7 @@ export default function AgencyProperties() {
   }
 
   return (
-    <div>
+    <div className="space-y-8 pb-24 min-h-screen">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
         <h1 className="text-2xl font-bold">Properties</h1>
 
@@ -263,7 +284,7 @@ export default function AgencyProperties() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProperties.map((property) => (
+          {paginatedProperties.map((property) => (
             <AgencyPropertyCard
               key={property.id}
               property={property}
@@ -275,6 +296,37 @@ export default function AgencyProperties() {
               isSharedWithAllAgents={propertySharing[property.id]?.withAll || false}
             />
           ))}
+        </div>
+      )}
+
+      {/* Pagination Controls */}
+      {filteredProperties.length > itemsPerPage && (
+        <div className="flex justify-center items-center space-x-4 mt-6">
+          <button
+            onClick={handlePreviousPage}
+            disabled={currentPage === 1}
+            className={`px-4 py-2 rounded-lg ${
+              currentPage === 1
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-black text-white hover:bg-gray-900'
+            }`}
+          >
+            Previous
+          </button>
+          <span className="text-gray-700">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages}
+            className={`px-4 py-2 rounded-lg ${
+              currentPage === totalPages
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-black text-white hover:bg-gray-900'
+            }`}
+          >
+            Next
+          </button>
         </div>
       )}
 
