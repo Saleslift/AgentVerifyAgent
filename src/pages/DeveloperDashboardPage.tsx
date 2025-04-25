@@ -45,27 +45,34 @@ export default function DeveloperDashboardPage() {
         onTabChange={setActiveTab}
       />
 
-      <main className="transition-all duration-300 md:ml-[70px]">
+      <main
+          className={`
+          transition-all duration-300 
+          md:ml-[70px]
+          pt-20 md:pt-8 
+          px-4 md:px-8 lg:px-12
+        `}
+      >
         <div className="container mx-auto px-4 py-8">
           <div className="bg-white rounded-lg shadow-sm p-6">
             <Routes>
               <Route path="/create-project" element={
-                <DeveloperProjectForm 
+                <DeveloperProjectForm
                   userId={user.id}
                   onSuccess={() => navigate('/developer-dashboard')}
                   onCancel={() => navigate('/developer-dashboard')}
                 />
               } />
               <Route path="/create-prelaunch" element={
-                <PrelaunchProjectForm 
+                <PrelaunchProjectForm
                   userId={user.id}
                   onSuccess={() => navigate('/developer-dashboard')}
                   onCancel={() => navigate('/developer-dashboard')}
                 />
               } />
               <Route path="/edit-project/:projectId" element={
-                <DeveloperProjectForm 
-                  projectId={window.location.pathname.split('/').pop()} 
+                <DeveloperProjectForm
+                  projectId={window.location.pathname.split('/').pop()}
                   userId={user.id}
                   onSuccess={() => navigate('/developer-dashboard')}
                   onCancel={() => navigate('/developer-dashboard')}

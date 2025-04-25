@@ -1,75 +1,40 @@
-// Fully upgraded Agency Sidebar matching AgentSidebar behavior
-import React, { useState, useRef } from 'react';
-import { Routes, Route, Link, useLocation, Navigate } from 'react-router-dom';
-import {
-  HomeIcon, Building, Plus, Users, Briefcase,
-  Settings, Info, LogOut, Building2
-} from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { useUserDataContext } from '../contexts/UserDataContext';
-
 import AgencyProperties from '../components/agency/AgencyProperties';
 import AgencyAgents from '../components/agency/AgencyAgents';
 import AgencyJobs from '../components/agency/AgencyJobs';
 import AgencySettings from '../components/agency/AgencySettings';
 import AgencyDashboardHome from '../components/agency/AgencyDashboardHome';
 import AgencyDevelopers from '../components/agency/AgencyDevelopers';
-
-const IconSize = 20;
+import AgencySidebar from '../components/agency/AgencySidebar';
 
 export default function AgencyDashboardPage() {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const { profile, loading, error } = useUserDataContext();
-  const [isHovered, setIsHovered] = useState(false);
-  const hoverTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [activeTab, setActiveTab] = useState(location.pathname.split('/')[2] || 'dashboard');
+  const [isMobile, setIsMobile] = useState(false);
 
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error('Error signing out:', error);
-    }
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  const handleTabChange = (tab) => {
+    setActiveTab(tab);
   };
-
-
-  const handleMouseEnter = () => {
-    if (hoverTimeout.current) {
-      clearTimeout(hoverTimeout.current);
-    }
-    hoverTimeout.current = setTimeout(() => setIsHovered(true), 100);
-  };
-
-  const handleMouseLeave = () => {
-    if (hoverTimeout.current) {
-      clearTimeout(hoverTimeout.current);
-    }
-    hoverTimeout.current = setTimeout(() => setIsHovered(false), 150);
-  };
-
-  // Fix this function to properly handle dashboard and subpaths
-  const getActiveClass = (path: string) => {
-    const currentPath = location.pathname;
-
-    // Special case for main dashboard
-    if (path === '/agency-dashboard') {
-      return currentPath === '/agency-dashboard' || currentPath === '/agency-dashboard/'
-          ? 'bg-[#CEFA05] text-black'
-          : 'text-white hover:bg-white/10';
-    }
-
-    // For all other paths
-    return currentPath.startsWith(path)
-        ? 'bg-[#CEFA05] text-black'
-        : 'text-white hover:bg-white/10';
-  };
-
 
   if (error) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
         <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
-          <Building className="h-12 w-12 text-red-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Something went wrong</h1>
           <p className="text-gray-600 mb-6">{error}</p>
           <button
@@ -83,103 +48,43 @@ export default function AgencyDashboardPage() {
     );
   }
 
-  if (!user){
+  if (!user) {
     return <Navigate to="/signin" />;
   }
 
-  if (loading) return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-black"></div>
+      </div>
+    );
+  }
 
   if (profile && profile?.role !== 'agency') {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
         <div className="bg-white p-8 rounded-lg shadow-md max-w-md w-full text-center">
-          <Building className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h1>
           <p className="text-gray-600 mb-6">
             This dashboard is only available for agency accounts. Your current role is: {profile?.role}
           </p>
-          <Link to="/dashboard" className="px-4 py-2 bg-black text-white rounded-md hover:bg-gray-900 inline-block">
-            Go to Your Dashboard
-          </Link>
+          <Navigate to="/dashboard" replace />
         </div>
       </div>
     );
   }
 
-
-
   return (
-    <div className="flex h-screen bg-gray-50">
-      <aside
-        className={`fixed h-full bg-black text-white z-40 flex flex-col transition-all duration-300 ease-in-out ${isHovered ? 'w-[250px]' : 'w-[70px]'}`}
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+      <div className="min-h-screen bg-white">
+      <AgencySidebar activeTab={activeTab} onTabChange={handleTabChange} />
+      <main
+          className={`
+          transition-all duration-300 
+          md:ml-[70px]
+          pt-20 md:pt-8 
+          px-4 md:px-8 lg:px-12
+        `}
       >
-        <div className="h-20 flex items-center px-4 border-b border-white/10">
-          <img
-            src="https://edcsftvorssaojmyfqgs.supabase.co/storage/v1/object/public/homepage-assets//png%20100%20x%20100%20(1).png"
-            alt="AgentVerify Logo"
-            className="h-8 w-8"
-          />
-          {isHovered && <span className="ml-3 text-white text-lg font-medium">AgentVerify</span>}
-        </div>
-
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          <Link to="/agency-dashboard" className={`flex items-center w-full px-3 py-2 rounded-lg transition-all duration-200 ${getActiveClass('/agency-dashboard')} ${isHovered ? 'justify-start' : 'justify-center'} gap-x-3`}>
-            <div className="min-w-[20px] flex justify-center items-center"><HomeIcon size={IconSize} /></div>
-            {isHovered && <span className="text-left font-medium">Dashboard</span>}
-          </Link>
-
-          <Link to="/agency-dashboard/properties" className={`flex items-center w-full px-3 py-2 rounded-lg transition-all duration-200 ${getActiveClass('/agency-dashboard/properties')} ${isHovered ? 'justify-start' : 'justify-center'} gap-x-3`}>
-            <div className="min-w-[20px] flex justify-center items-center"><Building size={IconSize} /></div>
-            {isHovered && <span className="text-left font-medium">Properties</span>}
-          </Link>
-
-          <Link to="/add-property" className={`flex items-center w-full px-3 py-2 rounded-lg bg-white text-black font-medium ${isHovered ? 'justify-start' : 'justify-center'} gap-x-3`}>
-            <div className="min-w-[20px] flex justify-center items-center"><Plus size={IconSize} /></div>
-            {isHovered && <span className="text-left font-medium">Add Property</span>}
-          </Link>
-
-          <Link to="/agency-dashboard/agents" className={`flex items-center w-full px-3 py-2 rounded-lg transition-all duration-200 ${getActiveClass('/agency-dashboard/agents')} ${isHovered ? 'justify-start' : 'justify-center'} gap-x-3`}>
-            <div className="min-w-[20px] flex justify-center items-center"><Users size={IconSize} /></div>
-            {isHovered && <span className="text-left font-medium">Agents</span>}
-          </Link>
-
-          <Link to="/agency-dashboard/jobs" className={`flex items-center w-full px-3 py-2 rounded-lg transition-all duration-200 ${getActiveClass('/agency-dashboard/jobs')} ${isHovered ? 'justify-start' : 'justify-center'} gap-x-3`}>
-            <div className="min-w-[20px] flex justify-center items-center"><Briefcase size={IconSize} /></div>
-            {isHovered && <span className="text-left font-medium">Jobs</span>}
-          </Link>
-
-          <Link to="/agency-dashboard/developers" className={`flex items-center w-full px-3 py-2 rounded-lg transition-all duration-200 ${getActiveClass('/agency-dashboard/developers')} ${isHovered ? 'justify-start' : 'justify-center'} gap-x-3`}>
-            <div className="min-w-[20px] flex justify-center items-center"><Building2 size={IconSize} /></div>
-            {isHovered && <span className="text-left font-medium">Developers</span>}
-          </Link>
-
-          <Link to="/agency-dashboard/settings" className={`flex items-center w-full px-3 py-2 rounded-lg transition-all duration-200 ${getActiveClass('/agency-dashboard/settings')} ${isHovered ? 'justify-start' : 'justify-center'} gap-x-3`}>
-            <div className="min-w-[20px] flex justify-center items-center"><Settings size={IconSize} /></div>
-            {isHovered && <span className="text-left font-medium">Settings</span>}
-          </Link>
-        </nav>
-
-        <div className="border-t border-white/10 w-full"></div>
-
-        <div className="px-3 py-4">
-          <a href="https://wa.me/971543106444" target="_blank" rel="noopener noreferrer" className={`flex items-center w-full px-3 py-2 text-white hover:bg-white/10 rounded-lg mb-2 ${isHovered ? 'justify-start' : 'justify-center'} gap-x-3`}>
-            <div className="min-w-[20px] flex justify-center items-center"><Info size={IconSize} /></div>
-            {isHovered && <span className="text-left font-medium">Support</span>}
-          </a>
-          <button onClick={handleSignOut} className={`flex items-center w-full px-3 py-2 text-white hover:bg-white/10 rounded-lg ${isHovered ? 'justify-start' : 'justify-center'} gap-x-3`}>
-            <div className="min-w-[20px] flex justify-center items-center"><LogOut size={IconSize} /></div>
-            {isHovered && <span className="text-left font-medium">Log Out</span>}
-          </button>
-        </div>
-      </aside>
-
-      <main className={`flex-1 transition-all duration-300 ease-in-out ${isHovered ? 'ml-[250px]' : 'ml-[70px]'}`}>
         <div className="p-8">
           <Routes>
             <Route index element={<AgencyDashboardHome />} />
@@ -189,9 +94,6 @@ export default function AgencyDashboardPage() {
             <Route path="jobs" element={<AgencyJobs />} />
             <Route path="developers" element={<AgencyDevelopers />} />
             <Route path="settings" element={<AgencySettings />} />
-            {/* Only navigate to root if not matched */}
-            {/*<Route path="*" element={<Navigate to="" replace />} />*/}
-            {/*<Route path="*" element={<Navigate to="/agency-dashboard" replace />} />*/}
           </Routes>
         </div>
       </main>
