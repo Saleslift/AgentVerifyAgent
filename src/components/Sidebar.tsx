@@ -41,7 +41,6 @@ export default function Sidebar({
   menuItems,
   actionItems = [],
   activeTab,
-  onTabChange,
   onLogout,
   logoSrc,
   appName
@@ -117,12 +116,16 @@ export default function Sidebar({
                 <div key={item.id}>
                   <button
                     onClick={() => {
-                      item.onClick();
-                      if (!item.hasSubmenu) setIsFullscreen(false);
+                      if (item.hasSubmenu) {
+                        toggleSubMenu(item.id);
+                      } else {
+                        item.onClick();
+                        setIsFullscreen(false);
+                      }
                     }}
                     className={`flex items-center w-full px-4 py-3 rounded-lg ${
                       activeTab === item.id
-                        ? 'bg-white text-black'
+                        ? 'bg-[#cefa05] text-black'
                         : 'text-white hover:bg-[#333333]'
                     }`}
                   >
@@ -252,7 +255,7 @@ export default function Sidebar({
                           ${activeTab === sub.id ? 'bg-[#cefa05] text-black' : 'text-white/80 hover:bg-white/10'}`}
                       >
                         <sub.icon size={IconSize - 4} />
-                        <span>{sub.label}</span>
+                        <span className={'ml-1'}>{sub.label}</span>
                       </button>
                     ))}
                   </div>
