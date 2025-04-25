@@ -52,12 +52,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, []);
 
-  // useEffect(() => {
-  //   if (user && user?.confirmed_at) {
-  //     navigate('/dashboard');
-  //   }
-  // }, [user]);
-
   const signUp = async (
       email: string,
       password: string,
@@ -69,11 +63,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       // Dynamically assign role based on metadata (added to handle both roles)
       const role = metadata?.data?.role;
-      console.log('Phone--->', metadata.data.phone)
+      // console.log('Phone--->', metadata.data.phone)
       const { data, error } = await supabase.auth.signUp({
-        // email,
+        email,
         password,
-        phone: metadata.data?.phone,
+        // phone: metadata.data?.phone,
         options: {
           data: {
             ...metadata.data,
