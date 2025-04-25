@@ -115,7 +115,7 @@ export default function PropertyPage() {
     try {
       const results = await getGeocode({ address: `${location}, UAE` });
       const { lat, lng } = await getLatLng(results[0]);
-      
+
       setAreaCoords({ lat, lng });
 
       const { error: updateError } = await supabase
@@ -174,7 +174,7 @@ export default function PropertyPage() {
 
   const handleCalculateRoutes = async () => {
     if (!destination) return;
-    
+
     await Promise.all([
       calculateRoute(google.maps.TravelMode.DRIVING),
       calculateRoute(google.maps.TravelMode.WALKING),
@@ -184,14 +184,14 @@ export default function PropertyPage() {
 
   const handlePrevImage = () => {
     if (!property) return;
-    setActiveImageIndex((prev) => 
+    setActiveImageIndex((prev) =>
       prev === 0 ? property.images.length - 1 : prev - 1
     );
   };
 
   const handleNextImage = () => {
     if (!property) return;
-    setActiveImageIndex((prev) => 
+    setActiveImageIndex((prev) =>
       prev === property.images.length - 1 ? 0 : prev + 1
     );
   };
@@ -210,7 +210,7 @@ export default function PropertyPage() {
     if (!isMapLoaded) return null;
 
     const hasExactLocation = property?.lat && property?.lng;
-    const center = hasExactLocation 
+    const center = hasExactLocation
       ? { lat: property.lat, lng: property.lng }
       : areaCoords;
 
@@ -244,7 +244,7 @@ export default function PropertyPage() {
 
             {Object.entries(directions).map(([mode, result]) => {
               if (!result?.routes[0]) return null;
-              
+
               const route = result.routes[0];
               const leg = route.legs[0];
               if (!leg) return null;
@@ -268,8 +268,8 @@ export default function PropertyPage() {
           </div>
         )}
 
-        <div className="h-[400px] rounded-lg overflow-hidden">
-          <GoogleMap
+      <div className="h-[400px] md:h-[250px] rounded-lg overflow-hidden, w:full">
+        <GoogleMap
             mapContainerStyle={{ width: '100%', height: '100%' }}
             center={center}
             zoom={hasExactLocation ? 16 : 14}
@@ -287,7 +287,7 @@ export default function PropertyPage() {
             }}
           >
             {hasExactLocation ? (
-              <Marker 
+              <Marker
                 position={{ lat: property.lat, lng: property.lng }}
                 onClick={handleMarkerClick}
                 options={{
@@ -387,7 +387,7 @@ export default function PropertyPage() {
 
           {/* Main Image with Gallery */}
           <div className="relative mb-8">
-            <div 
+            <div
               className="aspect-[16/9] overflow-hidden rounded-xl cursor-pointer bg-gray-100"
               onClick={() => setShowGallery(true)}
             >
@@ -457,8 +457,10 @@ export default function PropertyPage() {
                   <span className="font-medium">{property.parkingAvailable ? 'Available' : 'Not Available'}</span>
                 </div>
               </div>
+              {/* Property Details Component */}
+
             </div>
-            
+
             {/* Property Highlight on mobile */}
             {property.highlight && (
               <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 mb-6">
@@ -466,9 +468,13 @@ export default function PropertyPage() {
                 <p className="text-gray-700">{property.highlight}</p>
               </div>
             )}
-            
+
             {/* Horizontal divider for mobile */}
             <div className="h-px bg-gray-200 w-full my-6 md:hidden"></div>
+          </div>
+
+          <div className="md:hidden mb-6">
+            {property && <PropertyDetails property={property} />}
           </div>
 
           <div className="grid lg:grid-cols-3 gap-8">
@@ -477,7 +483,7 @@ export default function PropertyPage() {
               <div className="hidden md:block mb-8">
                 {property && <PropertyDetails property={property} />}
               </div>
-              
+
               {/* Floor Plan */}
               {property.floorPlanImage && (
                 <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
@@ -495,7 +501,7 @@ export default function PropertyPage() {
 
               {/* Location Map */}
               {renderMap()}
-              
+
               {/* Nearby Places */}
               {property.lat && property.lng && (
                 <NearbyPlaces propertyLat={property.lat} propertyLng={property.lng} />
@@ -534,7 +540,7 @@ export default function PropertyPage() {
                     </div>
                   </div>
                 </div>
-              
+
                 {/* Highlight Feature */}
                 {property.highlight && (
                   <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 mt-6">
@@ -559,7 +565,7 @@ export default function PropertyPage() {
               <X className="h-6 w-6 text-white" />
             </button>
           </div>
-          
+
           <div className="h-full flex items-center justify-center">
             <img
               src={property.images[activeImageIndex]}

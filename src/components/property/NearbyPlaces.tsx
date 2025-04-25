@@ -100,18 +100,18 @@ export default function NearbyPlaces({ propertyLat, propertyLng, placeTypes = de
   };
 
   return (
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+      <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-8">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold">Nearby Places</h2>
           <MapPin className="h-6 w-6 text-gray-400" />
         </div>
 
-        <div className="flex overflow-x-auto space-x-2 pb-2 mb-4">
+        <div className="flex flex-wrap overflow-x-auto space-x-2 pb-2 mb-4">
           {placeTypes.map(({ type, label, icon: Icon }) => (
               <button
                   key={type}
                   onClick={() => setSelectedType(type)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-full whitespace-nowrap
+                  className={`flex items-center space-x-2 px-4 py-2 my-1 rounded-full whitespace-nowrap
               ${selectedType === type
                       ? 'bg-black text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'

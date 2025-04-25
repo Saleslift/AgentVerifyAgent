@@ -23,7 +23,7 @@ interface PropertyManagementProps {
   showOriginTag?: boolean;
 }
 
-export default function PropertyManagement({ 
+export default function PropertyManagement({
   agentId,
   properties: initialProperties,
   onDelete,
@@ -101,10 +101,10 @@ export default function PropertyManagement({
 
   const handleDelete = async () => {
     if (!propertyToDelete || !agentId) return;
-    
+
     try {
       setDeletingProperty(propertyToDelete.id);
-      
+
       if (propertyToDelete.source === 'marketplace') {
         // For marketplace properties, just remove from agent's listings
         const { error } = await supabase
@@ -179,7 +179,7 @@ export default function PropertyManagement({
             <h2 className="text-2xl font-bold text-gray-900">
               {onAddToListings ? 'Marketplace Properties' : 'My Properties'}
             </h2>
-            
+
             {showAddButton && (
               <button
                 onClick={() => {
@@ -194,7 +194,7 @@ export default function PropertyManagement({
               </button>
             )}
           </div>
-          
+
           {/* Controls - Responsive layout */}
           <div className="grid grid-cols-1 sm:flex sm:flex-wrap items-center gap-3">
             {/* Sort dropdown - Full width on mobile, auto on larger screens */}
@@ -207,12 +207,12 @@ export default function PropertyManagement({
               <option value="price_asc">Price: Low to High</option>
               <option value="price_desc">Price: High to Low</option>
             </select>
-            
+
             {/* Currency selector */}
             <div className="h-11 w-full sm:w-auto">
               <CurrencySelector />
             </div>
-            
+
             {/* View mode toggle */}
             <div className="flex items-center bg-gray-100 rounded-lg p-1 h-11 w-full sm:w-auto">
               <button
@@ -238,7 +238,7 @@ export default function PropertyManagement({
                 Map
               </button>
             </div>
-            
+
             {/* Filter button */}
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -264,7 +264,7 @@ export default function PropertyManagement({
               />
             </div>
           )}
-          
+
           <div className={showFilters ? 'lg:col-span-3' : 'lg:col-span-4'}>
             {viewMode === 'list' ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
