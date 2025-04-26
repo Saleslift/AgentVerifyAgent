@@ -125,20 +125,20 @@ export default function AgencyCollaborationTab() {
     try {
       // Get current agency data
       const agency = agencies.find(a => a.id === agencyId);
-      
+
       // Validate required documents for approval
       if (status === 'active') {
         if (!agency?.agency_license_url || !agency?.agency_signed_contract_url || !agency?.agency_registration_url) {
           toast.error('Cannot approve: Agency has not uploaded all required documents');
           return;
         }
-        
+
         if (!agency?.developer_contract_url) {
           toast.error('Cannot approve: You must download, sign and upload the contract first');
           return;
         }
       }
-      
+
       const { error } = await supabase
         .from('developer_agency_contracts')
         .update({ status })
@@ -147,8 +147,8 @@ export default function AgencyCollaborationTab() {
       if (error) throw error;
 
       // Update local state
-      setAgencies(prev => 
-        prev.map(agency => 
+      setAgencies(prev =>
+        prev.map(agency =>
           agency.id === agencyId ? { ...agency, status } : agency
         )
       );
@@ -165,7 +165,7 @@ export default function AgencyCollaborationTab() {
     .filter(agency => {
       // Apply status filter
       if (statusFilter !== 'all' && agency.status !== statusFilter) return false;
-      
+
       // Apply search filter
       if (searchTerm) {
         const searchLower = searchTerm.toLowerCase();
@@ -176,7 +176,7 @@ export default function AgencyCollaborationTab() {
           agency.agency?.registration_number?.toLowerCase().includes(searchLower)
         );
       }
-      
+
       return true;
     })
     .sort((a, b) => {
@@ -186,7 +186,7 @@ export default function AgencyCollaborationTab() {
           ? new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
           : new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
       }
-      
+
       if (sortBy === 'name') {
         const nameA = a.agency?.agency_name || a.agency?.full_name || '';
         const nameB = b.agency?.agency_name || b.agency?.full_name || '';
@@ -194,14 +194,14 @@ export default function AgencyCollaborationTab() {
           ? nameA.localeCompare(nameB)
           : nameB.localeCompare(nameA);
       }
-      
+
       if (sortBy === 'status') {
         const statusOrder = { active: 0, pending: 1, rejected: 2 };
         return sortDirection === 'asc'
           ? statusOrder[a.status] - statusOrder[b.status]
           : statusOrder[b.status] - statusOrder[a.status];
       }
-      
+
       return 0;
     });
 
@@ -258,7 +258,7 @@ export default function AgencyCollaborationTab() {
       </div>
 
       {/* Filters and Search */}
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col gap-4 md:flex-row">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <input
@@ -269,8 +269,8 @@ export default function AgencyCollaborationTab() {
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
           />
         </div>
-        
-        <div className="flex gap-4">
+
+        <div className="flex flex-col gap-4 sm:flex-row sm:gap-4">
           <div className="relative">
             <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <select
@@ -284,7 +284,7 @@ export default function AgencyCollaborationTab() {
               <option value="rejected">Rejected</option>
             </select>
           </div>
-          
+
           <select
             value={`${sortBy}-${sortDirection}`}
             onChange={(e) => {

@@ -348,7 +348,7 @@ export default function EditProfilePage() {
         <div className="container mx-auto px-4 py-20">
           <div className="bg-white rounded-lg shadow-sm">
             <div className="p-6">
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
                 <h1 className="text-2xl font-bold text-gray-900">Edit Agent Profile</h1>
                 <div className="flex space-x-4">
                   <button
@@ -989,3 +989,4 @@ export default function EditProfilePage() {
       </div>
   );
 }
+

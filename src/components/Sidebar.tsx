@@ -100,7 +100,7 @@ export default function Sidebar({
 
         {/* Mobile Fullscreen Menu */}
         {isFullscreen && (
-          <div className="fixed inset-0 bg-black z-50 pt-safe-top pb-safe-bottom">
+          <div className="fixed inset-0 bg-black z-50 pt-safe-top pb-safe-bottom overflow-y-auto">
             <div className="flex items-center justify-between px-6 py-4 border-b border-white/10">
               <div className="flex items-center">
                 <img src={logoSrc} alt={appName} className="h-8 w-8" />
@@ -110,7 +110,7 @@ export default function Sidebar({
                 <X className="h-6 w-6" />
               </button>
             </div>
-            <div className="p-6 space-y-6">
+            <div className="p-4 space-y-4">
               {/* Navigation Items */}
               {menuItems.map((item) => (
                 <div key={item.id}>
@@ -123,7 +123,7 @@ export default function Sidebar({
                         setIsFullscreen(false);
                       }
                     }}
-                    className={`flex items-center w-full px-4 py-3 rounded-lg ${
+                    className={`flex items-center w-full px-4 py-2 rounded-lg ${
                       activeTab === item.id
                         ? 'bg-[#cefa05] text-black'
                         : 'text-white hover:bg-[#333333]'
@@ -164,7 +164,7 @@ export default function Sidebar({
               ))}
 
               {/* Divider */}
-              <div className="border-t border-[#333333] my-4"></div>
+              <div className="border-t border-[#333333] my-3"></div>
 
               {/* Action Items */}
               {actionItems.map((item) => (
@@ -174,7 +174,7 @@ export default function Sidebar({
                     item.onClick();
                     setIsFullscreen(false);
                   }}
-                  className="flex items-center w-full px-4 py-3 rounded-lg bg-[#cefa05] text-black hover:bg-opacity-90 mb-3"
+                  className="flex items-center w-full px-4 py-2 rounded-lg bg-[#cefa05] text-black hover:bg-opacity-90 mb-2"
                 >
                   <item.icon className="h-5 w-5 mr-3" />
                   <span>{item.label}</span>
@@ -182,19 +182,19 @@ export default function Sidebar({
               ))}
 
               {/* Support and Logout */}
-              <div className="pt-6 border-t border-[#333333]">
+              <div className="pt-4 border-t border-[#333333]">
                 <a
                   href="https://wa.me/971543106444"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center w-full px-4 py-3 text-white hover:bg-[#333333] rounded-lg mb-3"
+                  className="flex items-center w-full px-4 py-2 text-white hover:bg-[#333333] rounded-lg mb-2"
                 >
                   <HelpCircle className="h-5 w-5 mr-3" />
                   <span>Support</span>
                 </a>
                 <button
                   onClick={onLogout}
-                  className="flex items-center w-full px-4 py-3 text-white hover:bg-[#333333] rounded-lg"
+                  className="flex items-center w-full px-4 py-2 text-white hover:bg-[#333333] rounded-lg"
                 >
                   <LogOut className="h-5 w-5 mr-3" />
                   <span>Log Out</span>
@@ -317,3 +317,4 @@ export default function Sidebar({
     </aside>
   );
 }
+

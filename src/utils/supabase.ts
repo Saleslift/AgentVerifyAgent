@@ -91,7 +91,7 @@ if (!supabaseAnonKey) {
 }
 
 // Create Supabase client with enhanced configuration
-export const supabase = createClient(
+export const supabase = createClient<Database>(
   // Use a fallback URL if we're in WebContainer with localhost URL to prevent repeated connection attempts
   (isInWebContainer && isLocalhost(supabaseUrl)) ? getFallbackUrl() : (supabaseUrl || getFallbackUrl()),
   supabaseAnonKey || 'placeholder-anon-key',

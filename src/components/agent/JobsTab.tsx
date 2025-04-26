@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Briefcase, 
-  MapPin, 
-  Calendar, 
-  ChevronRight, 
-  Star, 
-  X, 
+import {
+  Briefcase,
+  MapPin,
+  Calendar,
+  ChevronRight,
+  Star,
+  X,
   AlertCircle,
-  Globe2,
   Phone,
   Mail,
   Building2,
@@ -194,26 +193,26 @@ export default function JobsTab({ agentId }: JobsTabProps) {
   const handleDeleteJob = async (jobId: string) => {
     try {
       setDeletingJobId(jobId);
-      
+
       // If there's no application, just remove from UI
       if (!applications[jobId]) {
         // Just remove from local state
         setJobs(prev => prev.filter(job => job.id !== jobId));
         return;
       }
-      
+
       // If there is an application, delete it from the database
       const { error } = await supabase
         .from('job_applications')
         .delete()
         .eq('job_id', jobId)
         .eq('agent_id', agentId);
-        
+
       if (error) throw error;
-      
+
       // Remove from local state
       setJobs(prev => prev.filter(job => job.id !== jobId));
-      
+
       // Remove from applications state
       const newApplications = { ...applications };
       delete newApplications[jobId];
@@ -240,7 +239,7 @@ export default function JobsTab({ agentId }: JobsTabProps) {
 
   const filteredJobs = jobs.filter(job => {
     const applicationStatus = applications[job.id];
-    
+
     switch (filterType) {
       case 'new':
         return !applicationStatus;
@@ -257,10 +256,10 @@ export default function JobsTab({ agentId }: JobsTabProps) {
     // Sort by application status (applied jobs first)
     const aHasApplication = !!applications[a.id];
     const bHasApplication = !!applications[b.id];
-    
+
     if (aHasApplication && !bHasApplication) return -1;
     if (!aHasApplication && bHasApplication) return 1;
-    
+
     // Then sort by updated_at date (most recent first)
     return new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime();
   });
@@ -283,7 +282,7 @@ export default function JobsTab({ agentId }: JobsTabProps) {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
         <h2 className="text-2xl font-bold">Job Opportunities</h2>
         <div className="relative" ref={filterRef}>
           <div className="flex items-center bg-gray-100 rounded-lg px-3 py-2 shadow-sm">
@@ -308,7 +307,7 @@ export default function JobsTab({ agentId }: JobsTabProps) {
         {filteredJobs.length > 0 ? (
           filteredJobs.map(job => {
             const applicationStatus = applications[job.id];
-            
+
             return (
               <div
                 key={job.id}
@@ -392,7 +391,7 @@ export default function JobsTab({ agentId }: JobsTabProps) {
                       {job.description}
                     </div>
                     {job.description.length > 150 && (
-                      <button 
+                      <button
                         onClick={() => toggleDescription(job.id)}
                         className="mt-1 text-sm text-primary-300 hover:underline"
                       >
@@ -419,7 +418,7 @@ export default function JobsTab({ agentId }: JobsTabProps) {
                             ? 'bg-red-100 text-red-800'
                             : 'bg-gray-100 text-gray-800'
                         }`}>
-                          {applicationStatus === 'accepted' ? 'Shortlisted' : 
+                          {applicationStatus === 'accepted' ? 'Shortlisted' :
                            applicationStatus.charAt(0).toUpperCase() + applicationStatus.slice(1)}
                         </span>
                       )}

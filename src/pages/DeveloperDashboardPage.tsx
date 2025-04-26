@@ -73,7 +73,6 @@ export default function DeveloperDashboardPage() {
               <Route path="/edit-project/:projectId" element={
                 <DeveloperProjectForm
                   projectId={window.location.pathname.split('/').pop()}
-                  userId={user.id}
                   onSuccess={() => navigate('/developer-dashboard')}
                   onCancel={() => navigate('/developer-dashboard')}
                 />

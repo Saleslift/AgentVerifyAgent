@@ -348,7 +348,7 @@ export default function AgencyAgents() {
   return (
     <div>
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold">Agents</h1>
           <p className="text-gray-500">Manage your agency's real estate agents</p>
@@ -368,7 +368,7 @@ export default function AgencyAgents() {
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm p-4 mb-8">
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center justify-between">
           <div className="flex-1">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -382,7 +382,7 @@ export default function AgencyAgents() {
             </div>
           </div>
 
-          <div className="flex gap-4">
+          <div className="flex flex-col gap-4 md:flex-row md:gap-4">
             <select
               value={filter}
               onChange={(e) => setFilter(e.target.value)}
@@ -422,7 +422,10 @@ export default function AgencyAgents() {
 
           <div className="space-y-4">
             {pendingInvitations.map(invitation => (
-              <div key={invitation.id} className="flex items-center justify-between bg-white p-4 rounded-lg shadow-sm">
+              <div
+                key={invitation.id}
+                className="flex flex-col sm:flex-row items-start sm:items-center justify-between bg-white p-4 rounded-lg shadow-sm space-y-4 sm:space-y-0"
+              >
                 <div className="flex items-center">
                   <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
                     <User className="h-6 w-6 text-gray-400" />
@@ -440,7 +443,7 @@ export default function AgencyAgents() {
                     </p>
                   </div>
                 </div>
-                <div className="flex space-x-1">
+                <div className="flex space-x-2">
                   {invitation.whatsapp && (
                     <button
                       onClick={() => handleWhatsAppInvite(invitation.whatsapp!, invitation.id)}
@@ -525,7 +528,7 @@ export default function AgencyAgents() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredAgents.map(agent => (
-                  <tr key={agent.id}>
+                  <tr key={agent.id} className="flex flex-col sm:table-row">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-10 w-10 flex-shrink-0">

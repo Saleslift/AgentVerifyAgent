@@ -23,7 +23,6 @@ export default function AgentDashboardPage() {
   const { user } = useAuth();
   const { profile, properties, loading, error } = useUserData();
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<ActiveTabs>('properties');
 
   // Initialize page visibility handling to prevent reloads
@@ -107,8 +106,6 @@ export default function AgentDashboardPage() {
   return (
     <div className="min-h-screen bg-white">
       <AgentSidebar
-        isOpen={isSidebarOpen}
-        onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         agentId={user.id}
         activeTab={activeTab}
         onTabChange={handleTabChange}

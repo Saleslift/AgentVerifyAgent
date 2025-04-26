@@ -21,7 +21,6 @@ export default function AgencyPropertyForm({ agencyId, property, onSuccess }: Ag
   const [draggedIndex, setDraggedIndex] = useState<number | null>(null);
   const [selectedAgentIds, setSelectedAgentIds] = useState<string[]>([]);
   const [shareWithAllAgents, setShareWithAllAgents] = useState(false);
-  const [agencyAgents, setAgencyAgents] = useState<Agent[]>([]);
   const [propertyData, setPropertyData] = useState<Partial<Property>>({
     type: 'Apartment',
     contractType: 'Sale',
@@ -123,7 +122,6 @@ export default function AgencyPropertyForm({ agencyId, property, onSuccess }: Ag
           }))
         : [];
 
-      setAgencyAgents(transformedAgents);
     } catch (error) {
       console.error('Error fetching agents:', error);
     }
@@ -464,9 +462,9 @@ export default function AgencyPropertyForm({ agencyId, property, onSuccess }: Ag
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center mb-6">
         <h1 className="text-2xl font-bold text-gray-900">{property ? 'Edit Property' : 'Add New Property'}</h1>
-        <div className="flex space-x-4">
+        <div className="flex flex-col gap-4 sm:flex-row sm:space-x-4">
           <button
             type="button"
             onClick={() => navigate(-1)}

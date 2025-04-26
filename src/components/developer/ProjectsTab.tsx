@@ -16,7 +16,7 @@ async function fetchWithRetry<T>(
   baseDelay: number = 1000
 ): Promise<T> {
   let retries = 0;
-  
+
   while (true) {
     try {
       return await fetchFn();
@@ -24,11 +24,11 @@ async function fetchWithRetry<T>(
       if (retries >= maxRetries) {
         throw error; // Throw the error after all retries are exhausted
       }
-      
+
       // Calculate exponential backoff delay
       const delayTime = baseDelay * Math.pow(2, retries);
       console.log(`Fetch failed, retrying in ${delayTime}ms... (Attempt ${retries + 1}/${maxRetries})`);
-      
+
       // Wait before next retry
       await delay(delayTime);
       retries++;
@@ -107,43 +107,43 @@ export default function ProjectsTab() {
 
   const handleDeleteProject = async () => {
     if (!projectToDelete || !user) return;
-    
+
     try {
       setIsDeleting(true);
-      
+
       // First delete all unit types associated with this project
       const { error: unitTypesError } = await supabase
         .from('unit_types')
         .delete()
         .eq('project_id', projectToDelete.id);
-      
+
       if (unitTypesError) throw unitTypesError;
-      
+
       // Delete all agent_projects references
       const { error: agentProjectsError } = await supabase
         .from('agent_projects')
         .delete()
         .eq('project_id', projectToDelete.id);
-      
+
       if (agentProjectsError) throw agentProjectsError;
-      
+
       // Delete all agency_project_requests
       const { error: requestsError } = await supabase
         .from('agency_project_requests')
         .delete()
         .eq('project_id', projectToDelete.id);
-      
+
       if (requestsError) throw requestsError;
-      
+
       // Finally delete the project itself
       const { error: deleteError } = await supabase
         .from('properties')
         .delete()
         .eq('id', projectToDelete.id)
         .eq('creator_id', user.id); // Security check
-      
+
       if (deleteError) throw deleteError;
-      
+
       // Update local state
       setProjects(prev => prev.filter(p => p.id !== projectToDelete.id));
       toast.success('Project deleted successfully');
@@ -164,46 +164,46 @@ export default function ProjectsTab() {
     } else {
       direction = 'asc';
     }
-    
+
     setSortConfig({ key, direction });
   };
 
   // Filter and sort projects
   const filteredAndSortedProjects = React.useMemo(() => {
     let filteredProjects = [...projects];
-    
+
     // Apply search and filters
     filteredProjects = filteredProjects.filter(project => {
-      const matchesSearch = 
+      const matchesSearch =
         project.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         project.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (project.description && project.description.toLowerCase().includes(searchTerm.toLowerCase()));
-      
+
       if (filter === 'all') return matchesSearch;
       if (filter === 'prelaunch') return matchesSearch && project.is_prelaunch;
       if (filter === 'imported') return matchesSearch && project.entry_type === 'imported';
       if (filter === 'regular') return matchesSearch && !project.is_prelaunch && project.entry_type !== 'imported';
-      
+
       return matchesSearch;
     });
-    
+
     // Apply sorting
     filteredProjects.sort((a, b) => {
       let aValue = a[sortConfig.key];
       let bValue = b[sortConfig.key];
-      
+
       // Handle dates
       if (sortConfig.key === 'created_at' || sortConfig.key === 'updated_at' || sortConfig.key === 'launch_date') {
         aValue = new Date(aValue || 0).getTime();
         bValue = new Date(bValue || 0).getTime();
       }
-      
+
       // Handle title
       if (sortConfig.key === 'title') {
         aValue = aValue?.toLowerCase() || '';
         bValue = bValue?.toLowerCase() || '';
       }
-      
+
       if (aValue < bValue) {
         return sortConfig.direction === 'asc' ? -1 : 1;
       }
@@ -212,7 +212,7 @@ export default function ProjectsTab() {
       }
       return 0;
     });
-    
+
     return filteredProjects;
   }, [projects, searchTerm, filter, sortConfig]);
 
@@ -221,9 +221,9 @@ export default function ProjectsTab() {
       <div className="flex justify-between items-center">
         <h3 className="text-xl font-semibold">Development Projects</h3>
       </div>
-      
+
       {/* Search and Filters */}
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col gap-4 md:flex-row">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <input
@@ -234,8 +234,8 @@ export default function ProjectsTab() {
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
           />
         </div>
-        
-        <div className="flex space-x-3">
+
+        <div className="flex flex-col gap-4 sm:flex-row sm:space-x-3">
           <div className="relative">
             <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <select
@@ -250,7 +250,7 @@ export default function ProjectsTab() {
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
           </div>
-          
+
           <div className="relative">
             <SortDesc className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
             <select
@@ -275,7 +275,7 @@ export default function ProjectsTab() {
           </div>
         </div>
       </div>
-      
+
       {loading ? (
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-black"></div>
@@ -291,7 +291,7 @@ export default function ProjectsTab() {
             </div>
           </div>
           <div className="mt-3 flex">
-            <button 
+            <button
               onClick={fetchProjects}
               className="text-sm text-blue-600 hover:text-blue-500 font-medium"
             >
@@ -302,10 +302,10 @@ export default function ProjectsTab() {
       ) : filteredAndSortedProjects.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredAndSortedProjects.map(project => (
-            <ProjectCard 
-              key={project.id} 
-              project={project} 
-              onDelete={handleDeleteClick} 
+            <ProjectCard
+              key={project.id}
+              project={project}
+              onDelete={handleDeleteClick}
             />
           ))}
         </div>
@@ -332,7 +332,7 @@ export default function ProjectsTab() {
           </div>
         </div>
       )}
-      
+
       {/* Delete Confirmation Modal */}
       {showDeleteModal && projectToDelete && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
