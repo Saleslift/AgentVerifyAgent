@@ -168,6 +168,11 @@ export default function ProjectsTab() {
     setSortConfig({ key, direction });
   };
 
+  const handleEditProject = (projectId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    navigate(`edit-project/${projectId}`)
+  }
+
   // Filter and sort projects
   const filteredAndSortedProjects = React.useMemo(() => {
     let filteredProjects = [...projects];
@@ -305,6 +310,7 @@ export default function ProjectsTab() {
             <ProjectCard
               key={project.id}
               project={project}
+              onEdit={handleEditProject}
               onDelete={handleDeleteClick}
             />
           ))}

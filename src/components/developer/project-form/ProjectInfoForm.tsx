@@ -1,17 +1,16 @@
 import React, { useState, useRef } from 'react';
-import { Upload, X, Image as ImageIcon, FileText, Calendar, MapPin, DollarSign } from 'lucide-react';
-import { supabase } from '../../../utils/supabase';
+import {  X, Image as ImageIcon, FileText, Calendar, DollarSign } from 'lucide-react';
 import AddressAutocomplete from '../../AddressAutocomplete';
 
 interface ProjectFormData {
   title: string;
   location: string;
-  description: string;
+  description: string | null;
   handoverDate: string;
   paymentPlan: string;
   brochureUrl?: string;
   brochureFile?: File;
-  imageFiles: File[];
+  imageFiles: (File | string)[]; // Allow both File and string for pre-filled images
 }
 
 interface ProjectInfoFormProps {
@@ -21,11 +20,9 @@ interface ProjectInfoFormProps {
 }
 
 export default function ProjectInfoForm({ projectData, onChange, onNext }: ProjectInfoFormProps) {
-  const [uploadingImages, setUploadingImages] = useState(false);
-  const [uploadingBrochure, setUploadingBrochure] = useState(false);
   const [imageError, setImageError] = useState<string | null>(null);
   const [brochureError, setBrochureError] = useState<string | null>(null);
-  
+
   const imageInputRef = useRef<HTMLInputElement>(null);
   const brochureInputRef = useRef<HTMLInputElement>(null);
 
@@ -34,29 +31,27 @@ export default function ProjectInfoForm({ projectData, onChange, onNext }: Proje
     if (!files || files.length === 0) return;
 
     try {
-      setUploadingImages(true);
-      setImageError(null);
 
       const newImageFiles = [...(projectData.imageFiles || [])];
-      
+
       for (let i = 0; i < files.length; i++) {
         const file = files[i];
-        
+
         // Validate file type
         if (!file.type.startsWith('image/')) {
           throw new Error('Please upload only image files');
         }
-        
+
         // Validate file size (5MB max)
         if (file.size > 120 * 1024 * 1024) {
           throw new Error('Image size should not exceed 120MB');
         }
-        
+
         newImageFiles.push(file);
       }
-      
+
       onChange({ imageFiles: newImageFiles });
-      
+
       // Clear the input
       if (imageInputRef.current) {
         imageInputRef.current.value = '';
@@ -64,8 +59,6 @@ export default function ProjectInfoForm({ projectData, onChange, onNext }: Proje
     } catch (err) {
       console.error('Error handling image upload:', err);
       setImageError(err instanceof Error ? err.message : 'Failed to process images');
-    } finally {
-      setUploadingImages(false);
     }
   };
 
@@ -74,25 +67,22 @@ export default function ProjectInfoForm({ projectData, onChange, onNext }: Proje
     if (!file) return;
 
     try {
-      setUploadingBrochure(true);
       setBrochureError(null);
 
       // Validate file type
       if (file.type !== 'application/pdf') {
         throw new Error('Please upload a PDF file for the brochure');
       }
-      
+
       // Validate file size (10MB max)
       if (file.size > 120 * 1024 * 1024) {
         throw new Error('Brochure size should not exceed 120MB');
       }
-      
+
       onChange({ brochureFile: file });
     } catch (err) {
       console.error('Error handling brochure upload:', err);
       setBrochureError(err instanceof Error ? err.message : 'Failed to process brochure');
-    } finally {
-      setUploadingBrochure(false);
     }
   };
 
@@ -103,22 +93,26 @@ export default function ProjectInfoForm({ projectData, onChange, onNext }: Proje
   };
 
   const handleRemoveBrochure = () => {
-    onChange({ brochureFile: undefined });
+    onChange({ brochureFile: undefined, brochureUrl: undefined }); // Clear both file and URL
     if (brochureInputRef.current) {
       brochureInputRef.current.value = '';
     }
   };
 
   const handleLocationChange = (address: string, lat?: number, lng?: number) => {
-    onChange({ 
+    onChange({
       location: address,
     });
   };
 
+  const getImageUrlToDisplay = (file: File | string) => {
+    return typeof file === 'string' ? file : URL.createObjectURL(file);
+  }
+
   return (
     <div className="space-y-8">
       <h2 className="text-xl font-semibold text-gray-900">Project Information</h2>
-      
+
       {/* Project Title */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -133,7 +127,7 @@ export default function ProjectInfoForm({ projectData, onChange, onNext }: Proje
           required
         />
       </div>
-      
+
       {/* Location */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -145,7 +139,7 @@ export default function ProjectInfoForm({ projectData, onChange, onNext }: Proje
           error={undefined}
         />
       </div>
-      
+
       {/* Description */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -160,7 +154,7 @@ export default function ProjectInfoForm({ projectData, onChange, onNext }: Proje
           required
         />
       </div>
-      
+
       {/* Handover Date */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -177,7 +171,7 @@ export default function ProjectInfoForm({ projectData, onChange, onNext }: Proje
           />
         </div>
       </div>
-      
+
       {/* Payment Plan */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -200,7 +194,7 @@ export default function ProjectInfoForm({ projectData, onChange, onNext }: Proje
           </select>
         </div>
       </div>
-      
+
       {/* Project Images */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -210,7 +204,7 @@ export default function ProjectInfoForm({ projectData, onChange, onNext }: Proje
           {(projectData.imageFiles || []).map((file, index) => (
             <div key={index} className="relative aspect-square">
               <img
-                src={URL.createObjectURL(file)}
+                src={getImageUrlToDisplay(file)}
                 alt={`Project ${index + 1}`}
                 className="w-full h-full object-cover rounded-lg"
               />
@@ -248,7 +242,7 @@ export default function ProjectInfoForm({ projectData, onChange, onNext }: Proje
           Upload high-quality images of the project (up to 120MB each). First image will be used as the cover photo.
         </p>
       </div>
-      
+
       {/* Brochure Upload */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -263,6 +257,30 @@ export default function ProjectInfoForm({ projectData, onChange, onNext }: Proje
                 <p className="text-sm text-gray-500">
                   {(projectData.brochureFile.size / 1024 / 1024).toFixed(2)} MB
                 </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={handleRemoveBrochure}
+              className="text-red-600 hover:text-red-700"
+            >
+              <X className="h-5 w-5" />
+            </button>
+          </div>
+        ) : projectData.brochureUrl ? (
+          <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+            <div className="flex items-center">
+              <FileText className="h-6 w-6 text-gray-500 mr-3" />
+              <div>
+                <p className="font-medium">Existing Brochure</p>
+                <a
+                  href={projectData.brochureUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline"
+                >
+                  View Brochure
+                </a>
               </div>
             </div>
             <button
@@ -303,7 +321,7 @@ export default function ProjectInfoForm({ projectData, onChange, onNext }: Proje
           <p className="text-sm text-red-600 mt-1">{brochureError}</p>
         )}
       </div>
-      
+
       {/* Next Button */}
       <div className="flex justify-end">
         <button

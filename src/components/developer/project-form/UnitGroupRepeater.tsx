@@ -11,7 +11,7 @@ interface UnitGroup {
   priceMin: string;
   priceMax: string;
   unitsAvailable: string;
-  images?: File[];
+  images?: (File | string)[];
   floorPlans?: File[];
 }
 
@@ -37,10 +37,10 @@ const unitTypes = [
   'Loft'
 ];
 
-const UnitGroupRepeater = ({ 
+const UnitGroupRepeater = ({
   unitGroups = [], // Provide default empty array
-  onChange, 
-  onPrev, 
+  onChange,
+  onPrev,
   onSubmit,
   loading
 }: UnitGroupRepeaterProps) => {
@@ -58,7 +58,7 @@ const UnitGroupRepeater = ({
       images: [],
       floorPlans: []
     };
-    
+
     onChange([...unitGroups, newGroup]);
   };
 
@@ -66,13 +66,13 @@ const UnitGroupRepeater = ({
     if (unitGroups.length <= 1) {
       return; // Don't remove the last group
     }
-    
+
     onChange(unitGroups.filter(group => group.id !== id));
   };
 
   const handleUnitGroupChange = (id: string, field: keyof UnitGroup, value: string) => {
     onChange(
-      unitGroups.map(group => 
+      unitGroups.map(group =>
         group.id === id ? { ...group, [field]: value } : group
       )
     );
@@ -81,20 +81,20 @@ const UnitGroupRepeater = ({
   const handleImageUpload = (id: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
-    
+
     // Find the current group
     const currentGroup = unitGroups.find(group => group.id === id);
     if (!currentGroup) return;
-    
+
     // Get current images or initialize empty array
     const currentImages = currentGroup.images || [];
-    
+
     // Check if adding these files would exceed the 20 image limit
     if (currentImages.length + files.length > 20) {
       alert('You can upload a maximum of 20 images per unit type');
       return;
     }
-    
+
     // Add new files to the images array
     const newImages = [...currentImages];
     for (let i = 0; i < files.length; i++) {
@@ -103,46 +103,46 @@ const UnitGroupRepeater = ({
         alert('Please upload only image files');
         continue;
       }
-      
+
       // Validate file size (120MB max)
       if (files[i].size > 120 * 1024 * 1024) {
         alert('Image size should not exceed 120MB');
         continue;
       }
-      
+
       newImages.push(files[i]);
     }
-    
+
     // Update the unit group with new images
     onChange(
-      unitGroups.map(group => 
+      unitGroups.map(group =>
         group.id === id ? { ...group, images: newImages } : group
       )
     );
-    
+
     // Clear the input
     if (event.target) {
       event.target.value = '';
     }
   };
-  
+
   const handleFloorPlanUpload = (id: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
-    
+
     // Find the current group
     const currentGroup = unitGroups.find(group => group.id === id);
     if (!currentGroup) return;
-    
+
     // Get current floor plans or initialize empty array
     const currentFloorPlans = currentGroup.floorPlans || [];
-    
+
     // Check if adding these files would exceed the 3 floor plan limit
     if (currentFloorPlans.length + files.length > 3) {
       alert('You can upload a maximum of 3 floor plan images per unit type');
       return;
     }
-    
+
     // Add new files to the floor plans array
     const newFloorPlans = [...currentFloorPlans];
     for (let i = 0; i < files.length; i++) {
@@ -151,68 +151,68 @@ const UnitGroupRepeater = ({
         alert('Please upload only image files');
         continue;
       }
-      
+
       // Validate file size (120MB max)
       if (files[i].size > 120 * 1024 * 1024) {
         alert('Image size should not exceed 120MB');
         continue;
       }
-      
+
       newFloorPlans.push(files[i]);
     }
-    
+
     // Update the unit group with new floor plans
     onChange(
-      unitGroups.map(group => 
+      unitGroups.map(group =>
         group.id === id ? { ...group, floorPlans: newFloorPlans } : group
       )
     );
-    
+
     // Clear the input
     if (event.target) {
       event.target.value = '';
     }
   };
-  
+
   const handleRemoveFloorPlan = (groupId: string, imageIndex: number) => {
     // Find the current group
     const currentGroup = unitGroups.find(group => group.id === groupId);
     if (!currentGroup || !currentGroup.floorPlans) return;
-    
+
     // Remove the floor plan at the specified index
     const newFloorPlans = [...currentGroup.floorPlans];
     newFloorPlans.splice(imageIndex, 1);
-    
+
     // Update the unit group with new floor plans
     onChange(
-      unitGroups.map(group => 
+      unitGroups.map(group =>
         group.id === groupId ? { ...group, floorPlans: newFloorPlans } : group
       )
     );
   };
-  
+
   const handleRemoveImage = (groupId: string, imageIndex: number) => {
     // Find the current group
     const currentGroup = unitGroups.find(group => group.id === groupId);
     if (!currentGroup || !currentGroup.images) return;
-    
+
     // Remove the image at the specified index
     const newImages = [...currentGroup.images];
     newImages.splice(imageIndex, 1);
-    
+
     // Update the unit group with new images
     onChange(
-      unitGroups.map(group => 
+      unitGroups.map(group =>
         group.id === groupId ? { ...group, images: newImages } : group
       )
     );
   };
   const formatCurrency = (value: string) => {
     if (!value) return '';
-    
+
     // Remove non-numeric characters
     const numericValue = value.replace(/[^0-9]/g, '');
-    
+
     // Format with commas
     return numericValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   };
@@ -227,11 +227,11 @@ const UnitGroupRepeater = ({
   return (
     <div className="space-y-8">
       <h2 className="text-xl font-semibold text-gray-900">Unit Types</h2>
-      
+
       <div className="space-y-6">
         {unitGroups.map((group, index) => (
-          <div 
-            key={group.id} 
+          <div
+            key={group.id}
             className="bg-gray-50 rounded-lg p-6 border border-gray-200"
           >
             <div className="flex justify-between items-center mb-4">
@@ -245,7 +245,7 @@ const UnitGroupRepeater = ({
                 <Trash2 className="h-5 w-5" />
               </button>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Unit Type */}
               <div>
@@ -263,7 +263,7 @@ const UnitGroupRepeater = ({
                   ))}
                 </select>
               </div>
-              
+
               {/* Area Range */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -288,7 +288,7 @@ const UnitGroupRepeater = ({
                   />
                 </div>
               </div>
-              
+
               {/* Units Available */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -304,7 +304,7 @@ const UnitGroupRepeater = ({
                   min="1"
                 />
               </div>
-              
+
               {/* Floor Range */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -327,7 +327,7 @@ const UnitGroupRepeater = ({
                   />
                 </div>
               </div>
-              
+
               {/* Price Range */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -367,7 +367,7 @@ const UnitGroupRepeater = ({
                 {group.images && group.images.map((file, index) => (
                   <div key={index} className="relative aspect-square">
                     <img
-                      src={URL.createObjectURL(file)}
+                      src={typeof file === 'string' ? file : URL.createObjectURL(file)}
                       alt={`Unit ${index + 1}`}
                       className="w-full h-full object-cover rounded-lg"
                     />
@@ -380,7 +380,7 @@ const UnitGroupRepeater = ({
                     </button>
                   </div>
                 ))}
-                
+
                 {/* Upload button - only show if less than 20 images */}
                 {(!group.images || group.images.length < 20) && (
                   <label className="relative aspect-square border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 cursor-pointer flex flex-col items-center justify-center">
@@ -403,7 +403,7 @@ const UnitGroupRepeater = ({
                 Upload images specific to this unit type (floor plans, interior views, etc.)
               </p>
             </div>
-            
+
             {/* Floor Plan Images */}
             <div className="mt-6">
               <label className="block text-sm font-medium text-gray-700 mb-1">
@@ -427,7 +427,7 @@ const UnitGroupRepeater = ({
                     </button>
                   </div>
                 ))}
-                
+
                 {/* Upload button - only show if less than 3 floor plans */}
                 {(!group.floorPlans || group.floorPlans.length < 3) && (
                   <label className="relative aspect-[4/3] border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 cursor-pointer flex flex-col items-center justify-center">
@@ -453,7 +453,7 @@ const UnitGroupRepeater = ({
           </div>
         ))}
       </div>
-      
+
       {/* Add Unit Group Button */}
       <div>
         <button
@@ -465,7 +465,7 @@ const UnitGroupRepeater = ({
           Add Another Unit Type
         </button>
       </div>
-      
+
       {/* Navigation Buttons */}
       <div className="flex justify-between pt-6 border-t border-gray-200">
         <button
@@ -476,7 +476,7 @@ const UnitGroupRepeater = ({
           <ArrowLeft className="h-5 w-5 mr-2" />
           Back to Project Details
         </button>
-        
+
         <div>
           <button
             type="button"

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { supabase } from '../../utils/supabase';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { useRoleAuth } from '../../hooks/useRoleAuth';
 import ProjectInfoForm from './project-form/ProjectInfoForm';
@@ -10,12 +10,13 @@ import { toast } from 'react-hot-toast';
 
 interface ProjectFormData {
   title: string;
-  description: string;
+  description: string | null;
   location: string;
   handoverDate: string;
   paymentPlan: string;
-  brochureFile?: FileList;
-  imageFiles: File[];
+  brochureFile?: File;
+  brochureUrl?: string;
+  imageFiles: File[] | string[];
   unitGroups: {
     id: string;
     type: string;
@@ -26,7 +27,7 @@ interface ProjectFormData {
     priceMin: string;
     priceMax: string;
     unitsAvailable: string;
-    images?: File[];
+    images?: File[] | string[];
   }[];
 }
 
@@ -63,7 +64,7 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { role } = useRoleAuth();
-  const { register, handleSubmit, control, watch, setValue, formState: { errors } } = useForm<ProjectFormData>({
+  const { handleSubmit, watch, setValue } = useForm<ProjectFormData>({
     defaultValues: defaultFormValues
   });
 
@@ -80,49 +81,42 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
   const fetchProjectData = async (id: string) => {
     try {
       setIsLoading(true);
-      
-      // Fetch project details
+
       const { data: project, error: projectError } = await supabase
         .from('properties')
         .select('*')
         .eq('id', id)
         .single();
-      
+
       if (projectError) throw projectError;
-      
-      // Fetch unit types
+
       const { data: unitTypes, error: unitTypesError } = await supabase
         .from('unit_types')
         .select('*')
         .eq('project_id', id);
-      
+
       if (unitTypesError) throw unitTypesError;
-      
-      // Set form values
-      setValue('title', project.title);
-      setValue('description', project.description);
-      setValue('location', project.location);
+
+      setValue('title', project.title || '');
+      setValue('description', project.description || '');
+      setValue('location', project.location || '');
       setValue('handoverDate', project.handover_date || '');
       setValue('paymentPlan', project.payment_plan || '40/60');
-      
-      // Set unit groups
-      if (unitTypes && unitTypes.length > 0) {
-        const formattedUnitGroups = unitTypes.map(unit => ({
-          id: unit.id,
-          type: unit.name,
-          areaMin: unit.size_range?.split('-')[0]?.trim() || '',
-          areaMax: unit.size_range?.split('-')[1]?.trim() || '',
-          floorMin: unit.floor_range?.split('-')[0]?.trim() || '',
-          floorMax: unit.floor_range?.split('-')[1]?.trim() || '',
-          priceMin: unit.price_range?.split('-')[0]?.replace(/[^0-9]/g, '') || '',
-          priceMax: unit.price_range?.split('-')[1]?.replace(/[^0-9]/g, '') || '',
-          unitsAvailable: unit.units_available?.toString() || '0',
-          images: []
-        }));
-        
-        setValue('unitGroups', formattedUnitGroups);
-      }
-      
+      setValue('imageFiles', project.images || []); // Pre-fill images from database
+      setValue('brochureUrl', project.brochure_url || ''); // Pre-fill brochure URL
+      setValue('brochureFile', undefined); // Ensure no file is set
+      setValue('unitGroups', unitTypes?.map(unit => ({
+        id: unit.id,
+        type: unit.name,
+        areaMin: unit.size_range?.split('-')[0]?.trim() || '',
+        areaMax: unit.size_range?.split('-')[1]?.trim() || '',
+        floorMin: unit.floor_range?.split('-')[0]?.trim() || '',
+        floorMax: unit.floor_range?.split('-')[1]?.trim() || '',
+        priceMin: unit.price_range?.split('-')[0]?.replace(/[^0-9]/g, '') || '',
+        priceMax: unit.price_range?.split('-')[1]?.replace(/[^0-9]/g, '') || '',
+        unitsAvailable: unit.units_available?.toString() || '0',
+        images: []
+      })) || []);
     } catch (error) {
       console.error('Error fetching project data:', error);
       toast.error('Failed to load project data');
@@ -143,6 +137,12 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
 
       setIsSubmitting(true);
 
+      // Handle brochure upload if a new file is provided
+      let brochureUrl = data.brochureUrl || null;
+      if (data.brochureFile) {
+        brochureUrl = await uploadBrochure(data.brochureFile);
+      }
+
       // Common properties data
       const propertyData = {
         title: data.title,
@@ -151,23 +151,19 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
         handover_date: data.handoverDate,
         payment_plan: data.paymentPlan,
         type: 'Apartment',
+        images: data.imageFiles.filter(file => typeof file === 'string'), // Only include URLs for pre-filled images
+        brochure_url: brochureUrl, // Use the uploaded brochure URL
         contract_type: 'Sale',
         price: 0, // Placeholder price
         creator_id: user.id,
         creator_type: role, // Use the actual role from useRoleAuth
-        agent_id: user.id // For developers, agent_id is the same as creator_id
+        agent_id: user.id, // For developers, agent_id is the same as creator_id
       };
 
-      // Handle brochure file upload if provided
-      if (data.brochureFile && data.brochureFile.length > 0) {
-        const brochureUrl = await uploadBrochure(data.brochureFile[0]);
-        propertyData.brochure_url = brochureUrl;
-      }
-      
       // Handle project images if provided
       if (data.imageFiles && data.imageFiles.length > 0) {
-        const imageUrls = await uploadProjectImages(data.imageFiles);
-        propertyData.images = imageUrls;
+        const imageUrls = await uploadProjectImages(data.imageFiles.filter(file => file instanceof File) as File[]);
+        propertyData.images = propertyData.images.concat(imageUrls);
       }
 
       if (isEditMode && currentProjectId) {
@@ -355,19 +351,19 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
         </div>
       ) : (
         <>
-          <ProjectInfoForm 
-            projectData={projectData} 
+          <ProjectInfoForm
+            projectData={projectData}
             onChange={(data) => {
               Object.entries(data).forEach(([key, value]) => {
                 setValue(key as keyof ProjectFormData, value);
               });
             }}
-            onNext={() => {}} 
+            onNext={() => {}}
           />
-          <UnitGroupRepeater 
+          <UnitGroupRepeater
             unitGroups={projectData.unitGroups}
             onChange={(groups) => setValue('unitGroups', groups)}
-            onPrev={() => {}}
+            onPrev={() => navigate(-1)}
             onSubmit={handleSubmit(onSubmit)}
             loading={isSubmitting}
           />
