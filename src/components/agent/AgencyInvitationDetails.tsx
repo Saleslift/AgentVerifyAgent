@@ -4,12 +4,12 @@ import { supabase } from '../../utils/supabase';
 import { useAuth } from '../../contexts/AuthContext';
 
 interface AgencyInvitationDetailsProps {
-  notificationId: string;
+  notificationToken: string;
   agencyId: string;
   onStatusChange: () => void;
 }
 
-export default function AgencyInvitationDetails({ notificationId, agencyId, onStatusChange }: AgencyInvitationDetailsProps) {
+export default function AgencyInvitationDetails({ notificationToken, agencyId, onStatusChange }: AgencyInvitationDetailsProps) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
@@ -29,7 +29,7 @@ export default function AgencyInvitationDetails({ notificationId, agencyId, onSt
       setLoading(true);
       setError(null);
       console.log('Fetching agency details for ID:', agencyId);
-      
+
       const { data, error: fetchError } = await supabase
         .from('profiles')
         .select(`
@@ -43,12 +43,12 @@ export default function AgencyInvitationDetails({ notificationId, agencyId, onSt
         `)
         .eq('id', agencyId)
         .single();
-      
+
       if (fetchError) {
         console.error('Error from Supabase:', fetchError);
         throw fetchError;
       }
-      
+
       console.log('Agency details fetched:', data);
       setAgency(data);
     } catch (err) {
@@ -61,16 +61,16 @@ export default function AgencyInvitationDetails({ notificationId, agencyId, onSt
 
   const fetchInvitationStatus = async () => {
     try {
-      console.log('Fetching invitation status for agency ID:', agencyId, 'and email:', user?.email);
       const { data, error: profileError } = await supabase
-        .from('agent_invitations')
-        .select('status')
-        .eq('agency_id', agencyId)
-        .eq('email', user?.email)
+          .from('agent_invitations')
+          .select('*')
+          .eq('agency_id', agencyId)
+          .eq('email', user?.email)
+          .eq('token', notificationToken)
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
-      
+
       if (profileError) {
         if (profileError.code !== 'PGRST116') { // Not found is ok
           console.error('Error from Supabase:', profileError);
@@ -79,7 +79,7 @@ export default function AgencyInvitationDetails({ notificationId, agencyId, onSt
           console.log('No invitation found, default to pending');
         }
       }
-      
+
       if (data) {
         console.log('Invitation status found:', data.status);
         setInvitationStatus(data.status);
@@ -95,62 +95,60 @@ export default function AgencyInvitationDetails({ notificationId, agencyId, onSt
 
   const handleAcceptInvitation = async (e: React.MouseEvent) => {
     if (!user) return;
-    
+
     // Triple protection against navigation
     e.preventDefault();
     e.stopPropagation();
     if (e.nativeEvent) {
       e.nativeEvent.stopImmediatePropagation();
     }
-    
+
     console.log('Accepting invitation for agency:', agencyId);
-    
+
     try {
       setAccepting(true);
       setError(null);
-      
+
       // 1. Update agent invitation status
       const { error: inviteError } = await supabase
         .from('agent_invitations')
         .update({ status: 'accepted' })
         .eq('agency_id', agencyId)
         .eq('email', user.email)
+          .eq('token', notificationToken)
         .eq('status', 'pending');
-      
+
       if (inviteError) {
         console.error('Error updating invitation:', inviteError);
         throw inviteError;
       }
-      
+
       // 2. Update profiles table to set agency_id
       const { error: profileError } = await supabase
         .from('profiles')
         .update({ agency_id: agencyId })
         .eq('id', user.id);
-      
+
       if (profileError) {
         console.error('Error updating profile:', profileError);
         throw profileError;
       }
-      
+
       // 3. Create or update agency_agents link
       const { error: agencyAgentsError } = await supabase
         .from('agency_agents')
-        .upsert({
-          agency_id: agencyId,
-          agent_id: user.id,
+        .update({
           status: 'active',
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'agency_id,agent_id'
-        });
-      
+        })
+          .eq('agency_id', agencyId)
+          .eq('agent_id', user.id)
+          .eq('status', 'pending');
+
       if (agencyAgentsError) {
         console.error('Error updating agency_agents:', agencyAgentsError);
         throw agencyAgentsError;
       }
-      
+
       // 4. Create notification about acceptance
       const { error: notificationError } = await supabase
         .from('notifications')
@@ -162,14 +160,14 @@ export default function AgencyInvitationDetails({ notificationId, agencyId, onSt
           is_read: false,
           created_at: new Date().toISOString()
         });
-      
+
       if (notificationError) {
         console.error('Error creating notification:', notificationError);
         throw notificationError;
       }
-      
+
       console.log('Invitation accepted successfully');
-      
+
       // Update local state
       setInvitationStatus('accepted');
       onStatusChange();
@@ -183,33 +181,34 @@ export default function AgencyInvitationDetails({ notificationId, agencyId, onSt
 
   const handleRejectInvitation = async (e: React.MouseEvent) => {
     if (!user) return;
-    
+
     // Triple protection against navigation
     e.preventDefault();
     e.stopPropagation();
     if (e.nativeEvent) {
       e.nativeEvent.stopImmediatePropagation();
     }
-    
+
     console.log('Rejecting invitation for agency:', agencyId);
-    
+
     try {
       setRejecting(true);
       setError(null);
-      
+
       // 1. Update agent invitation status
       const { error: inviteError } = await supabase
-        .from('agent_invitations')
-        .update({ status: 'refused' })
-        .eq('agency_id', agencyId)
-        .eq('email', user.email)
-        .eq('status', 'pending');
-      
+          .from('agent_invitations')
+          .update({ status: 'refused' })
+          .eq('agency_id', agencyId)
+          .eq('email', user.email)
+          .eq('token', notificationToken)
+          .eq('status', 'pending');
+
       if (inviteError) {
         console.error('Error updating invitation:', inviteError);
         throw inviteError;
       }
-      
+
       // 2. Create or update agency_agents link with status=inactive
       const { error: agencyAgentsError } = await supabase
         .from('agency_agents')
@@ -222,12 +221,12 @@ export default function AgencyInvitationDetails({ notificationId, agencyId, onSt
         }, {
           onConflict: 'agency_id,agent_id'
         });
-      
+
       if (agencyAgentsError) {
         console.error('Error updating agency_agents:', agencyAgentsError);
         throw agencyAgentsError;
       }
-      
+
       // 3. Create notification about rejection
       const { error: notificationError } = await supabase
         .from('notifications')
@@ -239,14 +238,14 @@ export default function AgencyInvitationDetails({ notificationId, agencyId, onSt
           is_read: false,
           created_at: new Date().toISOString()
         });
-      
+
       if (notificationError) {
         console.error('Error creating notification:', notificationError);
         throw notificationError;
       }
-      
+
       console.log('Invitation rejected successfully');
-      
+
       // Update local state
       setInvitationStatus('refused');
       onStatusChange();
@@ -258,7 +257,6 @@ export default function AgencyInvitationDetails({ notificationId, agencyId, onSt
     }
   };
 
-  console.log('Rendering agency invitation details, loading:', loading, 'agency:', agency, 'status:', invitationStatus);
 
   if (loading) {
     return (
@@ -291,7 +289,7 @@ export default function AgencyInvitationDetails({ notificationId, agencyId, onSt
       <div className="flex flex-col md:flex-row md:items-center gap-4">
         <div className="flex-shrink-0">
           {agency.agency_logo ? (
-            <img 
+            <img
               src={agency.agency_logo}
               alt={agency.agency_name || agency.full_name}
               className="w-16 h-16 rounded-full object-cover"
@@ -302,7 +300,7 @@ export default function AgencyInvitationDetails({ notificationId, agencyId, onSt
             </div>
           )}
         </div>
-        
+
         <div className="flex-1">
           <h3 className="text-lg font-bold">
             {agency.agency_name || agency.full_name}
@@ -312,7 +310,7 @@ export default function AgencyInvitationDetails({ notificationId, agencyId, onSt
               {agency.introduction}
             </p>
           )}
-          
+
           <div className="flex flex-wrap gap-2 mt-2">
             {agency.whatsapp && (
               <a
@@ -326,7 +324,7 @@ export default function AgencyInvitationDetails({ notificationId, agencyId, onSt
                 WhatsApp
               </a>
             )}
-            
+
             {agency.whatsapp && (
               <a
                 href={`tel:${agency.whatsapp}`}
@@ -337,7 +335,7 @@ export default function AgencyInvitationDetails({ notificationId, agencyId, onSt
                 Call
               </a>
             )}
-            
+
             {agency.email && (
               <a
                 href={`mailto:${agency.email}`}
@@ -351,7 +349,7 @@ export default function AgencyInvitationDetails({ notificationId, agencyId, onSt
           </div>
         </div>
       </div>
-      
+
       {invitationStatus === 'pending' ? (
         <div className="mt-4 flex flex-col sm:flex-row gap-2">
           <button
@@ -366,7 +364,7 @@ export default function AgencyInvitationDetails({ notificationId, agencyId, onSt
             )}
             Decline
           </button>
-          
+
           <button
             onClick={handleAcceptInvitation}
             disabled={accepting || rejecting}

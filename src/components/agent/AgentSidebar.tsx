@@ -1,5 +1,6 @@
-import React, { useEffect, useMemo } from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import {
+  Bell,
   Building2,
   UserCog,
   BarChart2,
@@ -22,6 +23,7 @@ export default function AgentSidebar({ agentId, activeTab, onTabChange, agentSlu
   const navigate = useNavigate();
   const { role } = useRoleAuth();
   const { signOut } = useAuth();
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     if (role && role !== 'agent') {
@@ -59,6 +61,10 @@ export default function AgentSidebar({ agentId, activeTab, onTabChange, agentSlu
         { id: 'marketplace', label: 'Marketplace', icon: Store, onClick: () => onTabChange('marketplace') },
         { id: 'projects', label: 'Projects', icon: Building, onClick: () => onTabChange('projects') }
       ]
+    },
+    {
+      id: 'notifications', label: 'Notifications', icon: Bell,
+      onClick: () => onTabChange('notifications'), badge: unreadCount > 0 ? unreadCount : undefined
     },
     {
       id: 'crm',

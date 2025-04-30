@@ -177,7 +177,9 @@ export default function AgencyAgents() {
         .eq('email', email)
         .maybeSingle();
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       return data?.id || null;
     } catch (error) {
@@ -185,6 +187,33 @@ export default function AgencyAgents() {
       return null;
     }
   };
+
+  const createNotificationForInvitation = async (recipientId: string, token: string) => {
+    // Create a notification for the invited agent
+    const { error: notificationError } = await supabase
+        .from('notifications')
+        .insert({
+          recipient_id: recipientId, // Assuming recipient_id can be an email
+          type: 'alert',
+          title: 'You have been invited to join an agency',
+          message: `${profile.full_name || 'An agency'} has invited you to join their team.`,
+          link_url: `/notifications?agency_id=${profile.id}`,
+          is_read: false,
+          created_at: new Date().toISOString(),
+          agency_id: profile.id,
+          token
+        });
+
+
+
+    if (notificationError) {
+      console.error('Error creating notification:', notificationError);
+    }
+
+  }
+
+  const generateTokenForInvitation = () => Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+
 
   const handleInviteSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -208,9 +237,8 @@ export default function AgencyAgents() {
 
       // Check if user already exists in the system
       const existingUserId = await checkExistingUser(inviteForm.email);
+      const token = generateTokenForInvitation();
 
-      // Generate token
-      const token = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
       // Create invitation
       const { data: invitationData, error } = await supabase
@@ -221,27 +249,34 @@ export default function AgencyAgents() {
           whatsapp: inviteForm.whatsapp,
           phone: inviteForm.phone || inviteForm.whatsapp,
           agency_id: profile.id,
-          token,
+          token: token,
           status: 'pending',
           expires_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days
         })
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
-      // If user exists, create an agency_agents record with pending status
+
       if (existingUserId) {
+        await createNotificationForInvitation(existingUserId, token)
+
+        // If user exists, create an agency_agents record with pending status
         const { error: linkError } = await supabase
-          .from('agency_agents')
-          .upsert({
-            agency_id: profile.id,
-            agent_id: existingUserId,
-            status: 'pending',
-            created_at: new Date().toISOString()
+            .from('agency_agents')
+            .upsert({
+              agency_id: profile.id,
+              agent_id: existingUserId,
+              status: 'pending',
+              created_at: new Date().toISOString()
           });
 
-        if (linkError) console.error('Error linking existing agent:', linkError);
+        if (linkError) {
+          console.error('Error linking existing agent:', linkError);
+        }
       }
 
       // Set invitation link for WhatsApp message

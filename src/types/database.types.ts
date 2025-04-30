@@ -2304,6 +2304,7 @@ export type Database = {
           recipient_id: string
           title: string
           type: string
+          token?: string
         }
         Insert: {
           agency_id?: string | null
@@ -2315,6 +2316,7 @@ export type Database = {
           recipient_id: string
           title: string
           type: string
+          token?: string
         }
         Update: {
           agency_id?: string | null
@@ -2326,6 +2328,7 @@ export type Database = {
           recipient_id?: string
           title?: string
           type?: string
+          token?: string
         }
         Relationships: []
       }
