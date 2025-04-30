@@ -7,7 +7,7 @@ export function useAgentProperties(agentId: string | undefined) {
   const [error, setError] = useState<string | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
 
-  useEffect(() => {
+    useEffect(() => {
     let mounted = true;
 
     async function fetchProperties() {

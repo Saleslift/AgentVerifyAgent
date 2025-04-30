@@ -57,7 +57,6 @@ export default function EditProfilePage() {
   const [linkedAgency, setLinkedAgency] = useState<{id: string, name: string} | null>(null);
   const [agencyDetails, setAgencyDetails] = useState<any | null>(null);
   const [isShowingAgencySearch, setIsShowingAgencySearch] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const logoInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<AgentProfileData>({
     fullName: '',
@@ -146,7 +145,7 @@ export default function EditProfilePage() {
         agencyLogo: data.agency_logo || '',
         agencyWebsite: data.agency_website || '',
         agencyEmail: data.agency_email || '',
-        agencyFormationDate: data.agency_formation_date || '',
+        agencyFormationDate: data.agency_formation_date || null,
         agencyTeamSize: data.agency_team_size || 0,
         agencyId: data.agency_id
       });
@@ -297,7 +296,7 @@ export default function EditProfilePage() {
         updateFields.agency_logo = formData.agencyLogo;
         updateFields.agency_website = formData.agencyWebsite;
         updateFields.agency_email = formData.agencyEmail;
-        updateFields.agency_formation_date = formData.agencyFormationDate;
+        updateFields.agency_formation_date = formData.agencyFormationDate ;
         updateFields.agency_team_size = formData.agencyTeamSize;
       }
 

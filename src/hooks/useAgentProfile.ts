@@ -8,7 +8,7 @@ export function useAgentProfile(slug: string | undefined) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [agent, setAgent] = useState<Agent | null>(null);
-  
+
   const { serviceAreas, loading: areasLoading } = useAgentServiceAreas(agent?.id);
   const { certifications, loading: certsLoading } = useAgentCertifications(agent?.id);
 
@@ -43,6 +43,7 @@ export function useAgentProfile(slug: string | undefined) {
           .eq('role', 'agent')
           .single();
 
+
         if (profileError) throw profileError;
 
         if (!profile) {
@@ -51,14 +52,15 @@ export function useAgentProfile(slug: string | undefined) {
 
         if (mounted) {
           // Calculate total properties by summing created and marketplace properties
-          const totalProperties = (profile.created_properties?.count || 0) + 
-                                (profile.marketplace_properties?.count || 0);
+          const totalProperties = (profile.created_properties[0]?.count || 0) +
+                                (profile.marketplace_properties[0]?.count || 0);
 
           setAgent({
             id: profile.id,
             name: profile.full_name || '',
             introduction: profile.introduction || '',
             photo: profile.avatar_url || '',
+            agencyId: profile.agency_id || '',
             agencyLogo: profile.agency_logo || '',
             agencyName: profile.agency_name || '',
             agencyWebsite: profile.agency_website || '',
@@ -110,9 +112,9 @@ export function useAgentProfile(slug: string | undefined) {
     };
   }, [slug, serviceAreas, certifications]);
 
-  return { 
-    agent, 
-    loading: loading || areasLoading || certsLoading, 
-    error 
+  return {
+    agent,
+    loading: loading || areasLoading || certsLoading,
+    error
   };
 }

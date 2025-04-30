@@ -41,7 +41,7 @@ const PROPERTY_TYPES = [
 // Price ranges
 const PRICE_RANGES = [
   { value: '', label: 'Any Price' },
-  { value: '500000-1000000', label: 'AED 500K - 1M' }, 
+  { value: '500000-1000000', label: 'AED 500K - 1M' },
   { value: '1000000-2000000', label: 'AED 1M - 2M' },
   { value: '2000000-5000000', label: 'AED 2M - 5M' },
   { value: '5000000-10000000', label: 'AED 5M - 10M' },
@@ -49,8 +49,8 @@ const PRICE_RANGES = [
 ];
 
 interface SearchFilterProps {
-  onSearch: (filters: { 
-    propertyType: string; 
+  onSearch: (filters: {
+    propertyType: string;
     priceRange: string;
     location?: string;
   }) => void;
@@ -105,69 +105,69 @@ export default function SearchFilter({ onSearch, initialFilters = {} }: SearchFi
         setShowSuggestions(false);
       }
     };
-    
+
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
   // Debounced location search
-  const debouncedLocationSearch = useCallback(
-    debounce((query: string) => {
-      if (!query.trim()) {
-        setLocationSuggestions([]);
-        return;
-      }
-
-      // Check cache first
-      if (locationCache.current.has(query.toLowerCase())) {
-        setLocationSuggestions(locationCache.current.get(query.toLowerCase()) || []);
-        return;
-      }
-
-      // Fuzzy search implementation
-      const results = POPULAR_LOCATIONS.filter(loc => {
-        return loc.toLowerCase().includes(query.toLowerCase());
-      }).slice(0, 10); // Limit to 10 results
-
-      // Cache the results
-      locationCache.current.set(query.toLowerCase(), results);
-      setLocationSuggestions(results);
-    }, 300),
-    []
-  );
+  // const debouncedLocationSearch = useCallback(
+  //   debounce((query: string) => {
+  //     if (!query.trim()) {
+  //       setLocationSuggestions([]);
+  //       return;
+  //     }
+  //
+  //     // Check cache first
+  //     if (locationCache.current.has(query.toLowerCase())) {
+  //       setLocationSuggestions(locationCache.current.get(query.toLowerCase()) || []);
+  //       return;
+  //     }
+  //
+  //     // Fuzzy search implementation
+  //     const results = POPULAR_LOCATIONS.filter(loc => {
+  //       return loc.toLowerCase().includes(query.toLowerCase());
+  //     }).slice(0, 10); // Limit to 10 results
+  //
+  //     // Cache the results
+  //     locationCache.current.set(query.toLowerCase(), results);
+  //     setLocationSuggestions(results);
+  //   }, 300),
+  //   []
+  // );
 
   // Handle location input change
-  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = e.target.value;
-    setLocationInput(value);
-    setShowSuggestions(true);
-    debouncedLocationSearch(value);
-  };
+  // const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const value = e.target.value;
+  //   setLocationInput(value);
+  //   setShowSuggestions(true);
+  //   debouncedLocationSearch(value);
+  // };
 
   // Handle location suggestion selection
-  const handleLocationSelect = (suggestion: string) => {
-    setLocationInput(suggestion);
-    setShowSuggestions(false);
-  };
+  // const handleLocationSelect = (suggestion: string) => {
+  //   setLocationInput(suggestion);
+  //   setShowSuggestions(false);
+  // };
 
   // Handle search submission
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Update URL with search params
     const searchParams = new URLSearchParams();
     if (propertyType) searchParams.set('type', propertyType);
     if (priceRange) searchParams.set('price', priceRange);
-    if (locationInput) searchParams.set('location', locationInput);
-    
+    // if (locationInput) searchParams.set('location', locationInput);
+
     const newUrl = `${location.pathname}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
     navigate(newUrl, { replace: true });
-    
+
     // Scroll to listings section
     const listingsTab = document.querySelector('[data-tab="listings"]');
     if (listingsTab) {
       (listingsTab as HTMLElement).click();
-      
+
       // Smooth scroll to the listings section
       setTimeout(() => {
         const listingsSection = document.getElementById('listings-section');
@@ -176,10 +176,10 @@ export default function SearchFilter({ onSearch, initialFilters = {} }: SearchFi
         }
       }, 100);
     }
-    
+
     // Pass search filters to parent component
-    onSearch({ 
-      propertyType, 
+    onSearch({
+      propertyType,
       priceRange,
       location: locationInput
     });
@@ -191,10 +191,10 @@ export default function SearchFilter({ onSearch, initialFilters = {} }: SearchFi
     setPriceRange('');
     setLocationInput('');
     setLocationSuggestions([]);
-    
+
     // Update URL by removing search params
     navigate(location.pathname, { replace: true });
-    
+
     // Pass empty filters to parent component
     onSearch({ propertyType: '', priceRange: '', location: '' });
   };
@@ -208,7 +208,7 @@ export default function SearchFilter({ onSearch, initialFilters = {} }: SearchFi
             <label className="text-xl font-bold text-gray-900 whitespace-nowrap md:min-w-[220px]">
               Find the best properties in Dubai
             </label>
-            
+
             {/* Dropdowns in a row */}
             <div className="flex flex-1 flex-col sm:flex-row gap-3">
               {/* Property Type Dropdown */}
@@ -228,48 +228,48 @@ export default function SearchFilter({ onSearch, initialFilters = {} }: SearchFi
               </div>
 
               {/* Location Input with Autocomplete */}
-              <div className="flex-1 relative">
-                <input
-                  type="text"
-                  value={locationInput}
-                  onChange={handleLocationChange}
-                  onFocus={() => setShowSuggestions(true)}
-                  placeholder="Enter location"
-                  className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-black focus:border-transparent"
-                />
-                {locationInput && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setLocationInput('');
-                      setLocationSuggestions([]);
-                    }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                )}
-                
-                {/* Location Suggestions */}
-                {showSuggestions && locationSuggestions.length > 0 && (
-                  <div 
-                    ref={suggestionsRef}
-                    className="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-auto"
-                  >
-                    {locationSuggestions.map((suggestion) => (
-                      <button
-                        key={suggestion}
-                        type="button"
-                        onClick={() => handleLocationSelect(suggestion)}
-                        className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center"
-                      >
-                        <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                        <span className="truncate">{suggestion}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
-              </div>
+              {/*<div className="flex-1 relative">*/}
+              {/*  <input*/}
+              {/*    type="text"*/}
+              {/*    value={locationInput}*/}
+              {/*    onChange={handleLocationChange}*/}
+              {/*    onFocus={() => setShowSuggestions(true)}*/}
+              {/*    placeholder="Enter location"*/}
+              {/*    className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white focus:ring-2 focus:ring-black focus:border-transparent"*/}
+              {/*  />*/}
+              {/*  {locationInput && (*/}
+              {/*    <button*/}
+              {/*      type="button"*/}
+              {/*      onClick={() => {*/}
+              {/*        setLocationInput('');*/}
+              {/*        setLocationSuggestions([]);*/}
+              {/*      }}*/}
+              {/*      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"*/}
+              {/*    >*/}
+              {/*      <X className="h-5 w-5" />*/}
+              {/*    </button>*/}
+              {/*  )}*/}
+
+              {/*  /!* Location Suggestions *!/*/}
+              {/*  {showSuggestions && locationSuggestions.length > 0 && (*/}
+              {/*    <div*/}
+              {/*      ref={suggestionsRef}*/}
+              {/*      className="absolute z-10 w-full mt-1 bg-white rounded-lg shadow-lg border border-gray-200 max-h-60 overflow-auto"*/}
+              {/*    >*/}
+              {/*      {locationSuggestions.map((suggestion) => (*/}
+              {/*        <button*/}
+              {/*          key={suggestion}*/}
+              {/*          type="button"*/}
+              {/*          onClick={() => handleLocationSelect(suggestion)}*/}
+              {/*          className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center"*/}
+              {/*        >*/}
+              {/*          <MapPin className="h-4 w-4 text-gray-400 mr-2" />*/}
+              {/*          <span className="truncate">{suggestion}</span>*/}
+              {/*        </button>*/}
+              {/*      ))}*/}
+              {/*    </div>*/}
+              {/*  )}*/}
+              {/*</div>*/}
 
               {/* Price Range Dropdown */}
               <div className="sm:w-40 relative">
@@ -296,7 +296,7 @@ export default function SearchFilter({ onSearch, initialFilters = {} }: SearchFi
                   <Search className="h-5 w-5 mr-2" />
                   <span>Search</span>
                 </button>
-                
+
                 {isFiltersApplied && (
                   <button
                     type="button"
@@ -310,15 +310,15 @@ export default function SearchFilter({ onSearch, initialFilters = {} }: SearchFi
               </div>
             </div>
           </div>
-          
+
           {/* Applied Filters */}
           {isFiltersApplied && (
             <div className="flex flex-wrap gap-2 pt-2">
               {propertyType && (
                 <div className="inline-flex items-center bg-gray-100 rounded-full px-3 py-1 text-sm">
                   <span>Type: {propertyType}</span>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setPropertyType('')}
                     className="ml-2 text-gray-500 hover:text-gray-700"
                   >
@@ -329,8 +329,8 @@ export default function SearchFilter({ onSearch, initialFilters = {} }: SearchFi
               {priceRange && (
                 <div className="inline-flex items-center bg-gray-100 rounded-full px-3 py-1 text-sm">
                   <span>Price: {PRICE_RANGES.find(r => r.value === priceRange)?.label}</span>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setPriceRange('')}
                     className="ml-2 text-gray-500 hover:text-gray-700"
                   >
@@ -341,8 +341,8 @@ export default function SearchFilter({ onSearch, initialFilters = {} }: SearchFi
               {locationInput && (
                 <div className="inline-flex items-center bg-gray-100 rounded-full px-3 py-1 text-sm">
                   <span>Location: {locationInput}</span>
-                  <button 
-                    type="button" 
+                  <button
+                    type="button"
                     onClick={() => setLocationInput('')}
                     className="ml-2 text-gray-500 hover:text-gray-700"
                   >

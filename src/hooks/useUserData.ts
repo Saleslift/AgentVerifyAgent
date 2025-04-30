@@ -6,7 +6,7 @@ export function useUserData() {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [profile, setProfile] = useState<Profile>(null);
+  const [profile, setProfile] = useState<DB_Profile>(null);
   const [properties, setProperties] = useState([]);
   const [marketplaceProperties, setMarketplaceProperties] = useState([]);
   const [reviews, setReviews] = useState([]);

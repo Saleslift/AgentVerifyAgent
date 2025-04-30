@@ -16,6 +16,7 @@ import AgentListingsTab from '../components/agent/AgentListingsTab';
 import { supabase } from '../utils/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import ConnectModal from '../components/agent/ConnectModal';
+import AgentAgencyProfile from '../components/agent/AgentAgencyProfile';
 
 export default function AgentProfilePage() {
   const { slug } = useParams();
@@ -23,7 +24,7 @@ export default function AgentProfilePage() {
   const { user } = useAuth();
   const { agent, loading, error } = useAgentProfile(slug);
   const { properties, loading: propertiesLoading, error: propertiesError } = useAgentProperties(agent?.id);
-  const [activeTab, setActiveTab] = useState<'listings' | 'about' | 'reviews'>('about');
+  const [activeTab, setActiveTab] = useState<'listings' | 'about' | 'reviews'>('listings');
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [showShareModal, setShowShareModal] = useState(false);
   const [showCopiedMessage, setShowCopiedMessage] = useState(false);
@@ -259,9 +260,8 @@ export default function AgentProfilePage() {
       <Header />
 
       {/* Hero Section */}
-      <AgentHeroSection agent={agent} averageRating={averageRating} />
+      <AgentHeroSection agent={agent} averageRating={averageRating} propertiesCount={properties.length} />
 
-      {/* Search Filter */}
       <SearchFilter
         onSearch={handleSearch}
         initialFilters={{
@@ -276,17 +276,7 @@ export default function AgentProfilePage() {
       <div className="container mx-auto px-4 py-8 md:py-12" id="listings-section">
         {/* Navigation Tabs */}
         <div className="flex justify-center border-b border-gray-200 mb-8 md:mb-12 overflow-x-auto">
-          <button
-            data-tab="about"
-            className={`px-4 sm:px-8 py-4 text-lg font-medium border-b-2 whitespace-nowrap transition-colors duration-200 ${
-              activeTab === 'about'
-                ? 'border-primary-300 text-primary-300'
-                : 'border-transparent text-gray-500 hover:text-gray-700'
-            }`}
-            onClick={() => setActiveTab('about')}
-          >
-            About
-          </button>
+
           <button
             data-tab="listings"
             className={`px-4 sm:px-8 py-4 text-lg font-medium border-b-2 whitespace-nowrap transition-colors duration-200 ${
@@ -309,6 +299,17 @@ export default function AgentProfilePage() {
           >
             Reviews
           </button>
+          <button
+              data-tab="about"
+              className={`px-4 sm:px-8 py-4 text-lg font-medium border-b-2 whitespace-nowrap transition-colors duration-200 ${
+                  activeTab === 'about'
+                      ? 'border-primary-300 text-primary-300'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+              }`}
+              onClick={() => setActiveTab('about')}
+          >
+            About
+          </button>
         </div>
 
         {/* Listings Tab */}
@@ -328,125 +329,31 @@ export default function AgentProfilePage() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div className="lg:col-span-2 space-y-8">
               {/* About Me Section */}
-              <div className="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
-                <h2 className="text-2xl md:text-3xl font-bold mb-6">About Me</h2>
-                <p className="text-gray-600 leading-relaxed text-base md:text-lg">{agent.bio}</p>
-
                 {/* Social Media Links */}
                 {(agent.youtube || agent.facebook || agent.instagram || agent.linkedin || agent.tiktok || agent.x) && (
-                  <div className="mt-6 pt-6 border-t border-gray-100">
-                    <h3 className="text-lg font-semibold mb-4">Connect With Me</h3>
-                    <SocialMediaLinks
-                      youtube={agent.youtube}
-                      facebook={agent.facebook}
-                      instagram={agent.instagram}
-                      linkedin={agent.linkedin}
-                      tiktok={agent.tiktok}
-                      x={agent.x}
-                    />
-                  </div>
+                    <div className="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
+                      <h2 className="text-2xl md:text-3xl font-bold mb-6">About Me</h2>
+                      <p className="text-gray-600 leading-relaxed text-base md:text-lg">{agent.bio}</p>
+
+                      <div className="mt-6 pt-6 border-t border-gray-100">
+                        <h3 className="text-lg font-semibold mb-4">Connect With Me</h3>
+                        <SocialMediaLinks
+                            youtube={agent.youtube}
+                            facebook={agent.facebook}
+                            instagram={agent.instagram}
+                            linkedin={agent.linkedin}
+                            tiktok={agent.tiktok}
+                            x={agent.x}
+                        />
+                      </div>
+                    </div>
                 )}
-              </div>
+
 
               {/* Agency Information Section */}
-              <div className="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
-                  <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-0">My Agency</h2>
-                  {agent.agencyLogo && (
-                    <img
-                      src={agent.agencyLogo}
-                      alt={agent.agencyName}
-                      className="h-12 md:h-16 object-contain"
-                    />
-                  )}
-                </div>
-
-                <div className="space-y-6">
-                  <div>
-                    <h3 className="text-xl font-semibold mb-3">{agent.agencyName}</h3>
-                    {agent.agencyWebsite && (
-                      <a
-                        href={agent.agencyWebsite}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary-300 hover:text-primary-400 break-all"
-                      >
-                        {agent.agencyWebsite}
-                      </a>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-sm text-gray-500 block">Address</label>
-                        <div className="flex items-start mt-1">
-                          <span className="text-gray-800">{agent.location}</span>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="text-sm text-gray-500 block">Phone</label>
-                        <div className="flex items-center mt-1">
-                          <a
-                            href={`tel:${agent.whatsapp}`}
-                            className="text-primary-300 hover:text-primary-400"
-                          >
-                            {agent.whatsapp}
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="space-y-4">
-                      <div>
-                        <label className="text-sm text-gray-500 block">License</label>
-                        <div className="flex items-center mt-1">
-                          <span className="text-gray-800">{agent.registrationNumber}</span>
-                        </div>
-                      </div>
-
-                      <div>
-                        <label className="text-sm text-gray-500 block">Email</label>
-                        <div className="flex items-center mt-1">
-                          <a
-                            href={`mailto:${agent.name.toLowerCase().replace(/\s+/g, '.')}@${agent.agencyName.toLowerCase().replace(/\s+/g, '')}.com`}
-                            className="text-primary-300 hover:text-primary-400 break-all"
-                          >
-                            {agent.name.toLowerCase().replace(/\s+/g, '.')}@{agent.agencyName.toLowerCase().replace(/\s+/g, '')}.com
-                          </a>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Agency Formation Date and Team Size */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 pt-4 border-t border-gray-100">
-                    {agent.agencyFormationDate && (
-                      <div>
-                        <label className="text-sm text-gray-500 block">Agency Formation Date</label>
-                        <div className="flex items-center mt-1">
-                          <span className="text-gray-800">
-                            {new Date(agent.agencyFormationDate).toLocaleDateString()}
-                          </span>
-                        </div>
-                      </div>
-                    )}
-
-                    {agent.agencyTeamSize && (
-                      <div>
-                        <label className="text-sm text-gray-500 block">Agency Team Size</label>
-                        <div className="flex items-center mt-1">
-                          <span className="text-gray-800">
-                            {agent.agencyTeamSize} members
-                          </span>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
+              <AgentAgencyProfile agent={agent} />
             </div>
+
 
             <div className="space-y-8">
               {/* Service Areas */}
@@ -760,3 +667,4 @@ export default function AgentProfilePage() {
     </div>
   );
 }
+

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { FileText, Star, Building2, MapPin, Clock, Home, Package, MessageSquare } from 'lucide-react';
+import { FileText, Star, MapPin, Clock, Home, Package } from 'lucide-react';
 import { Agent } from '../../types';
 import ConnectModal from './ConnectModal';
 import BrokerCertificateModal from './BrokerCertificateModal';
@@ -7,19 +7,20 @@ import BrokerCertificateModal from './BrokerCertificateModal';
 interface AgentHeroSectionProps {
   agent: Agent;
   averageRating: number;
+  propertiesCount: number;
 }
 
-export default function AgentHeroSection({ agent, averageRating }: AgentHeroSectionProps) {
+export default function AgentHeroSection({ agent, averageRating, propertiesCount = 0 }: AgentHeroSectionProps) {
   // State for modals
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [showCertificateModal, setShowCertificateModal] = useState(false);
-  
+
   // Extract specialties for tags
   const specialtyTags = agent.specialties?.slice(0, 3) || [];
-  
+
   // Check if agent has RERA certificate
   const hasReraCertificate = agent.certifications?.some(cert => cert.is_rera);
-  
+
   return (
     <section className="relative bg-white overflow-hidden pt-0 md:pt-0">
       <div className="container mx-auto px-4">
@@ -29,7 +30,7 @@ export default function AgentHeroSection({ agent, averageRating }: AgentHeroSect
           <div className="flex flex-col justify-center bg-gray-50 p-6 rounded-3xl h-full min-h-[400px]">
             {/* Broker Certificate Badge - Only show if RERA certificate exists */}
             {hasReraCertificate && (
-              <button 
+              <button
                 className="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-800 rounded-full hover:bg-gray-300 transition-shadow self-start mb-4"
                 onClick={() => setShowCertificateModal(true)}
               >
@@ -37,12 +38,12 @@ export default function AgentHeroSection({ agent, averageRating }: AgentHeroSect
                 <span className="text-sm font-medium">Broker Certificate #{agent.registrationNumber || 'N/A'}</span>
               </button>
             )}
-            
+
             {/* Main Heading */}
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight tracking-tighter mb-4">
               I am {agent.name}, your real estate agent in {agent.location || 'Dubai'}.
             </h1>
-            
+
             {/* Tags with Icons - Wrapped on mobile */}
             <div className="flex flex-wrap items-center gap-3">
               {specialtyTags.map((specialty, index) => (
@@ -61,10 +62,10 @@ export default function AgentHeroSection({ agent, averageRating }: AgentHeroSect
               </span>
               <span className="inline-flex items-center px-3 py-1.5 bg-black text-white rounded-full text-sm whitespace-nowrap">
                 <Home className="h-4 w-4 mr-1.5" />
-                {agent.activeListings || 0} properties
+                {agent.activeListings} properties
               </span>
             </div>
-            
+
             {/* Languages Section */}
             <div className="text-gray-600 mt-4">
               <span className="font-medium">Languages:</span>{' '}
@@ -111,7 +112,7 @@ export default function AgentHeroSection({ agent, averageRating }: AgentHeroSect
             <div className="flex flex-col justify-center h-full space-y-6">
               {/* Broker Certificate Badge - Only show if RERA certificate exists */}
               {hasReraCertificate && (
-                <button 
+                <button
                   className="inline-flex items-center px-4 py-2 bg-gray-200 text-gray-800 rounded-full hover:bg-gray-300 transition-shadow self-start"
                   onClick={() => setShowCertificateModal(true)}
                 >
@@ -119,12 +120,12 @@ export default function AgentHeroSection({ agent, averageRating }: AgentHeroSect
                   <span className="text-sm font-medium">Broker Certificate #{agent.registrationNumber || 'N/A'}</span>
                 </button>
               )}
-              
+
               {/* Main Heading */}
               <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight tracking-tighter">
                 I am {agent.name}, your real estate agent in {agent.location || 'Dubai'}.
               </h1>
-              
+
               {/* Tags with Icons */}
               <div className="flex flex-wrap items-center gap-3">
                 {specialtyTags.map((specialty, index) => (
@@ -146,10 +147,10 @@ export default function AgentHeroSection({ agent, averageRating }: AgentHeroSect
                 </span>
                 <span className="inline-flex items-center px-3 py-1.5 bg-black text-white rounded-full text-sm whitespace-nowrap">
                   <Home className="h-4 w-4 mr-1.5" />
-                  {agent.activeListings || 0} properties
+                  {agent.activeListings} properties
                 </span>
               </div>
-              
+
               {/* Languages Section */}
               <div className="text-gray-600">
                 <span className="font-medium">Languages:</span>{' '}
@@ -195,7 +196,7 @@ export default function AgentHeroSection({ agent, averageRating }: AgentHeroSect
       </div>
 
       {/* Connect Modal */}
-      <ConnectModal 
+      <ConnectModal
         isOpen={showConnectModal}
         onClose={() => setShowConnectModal(false)}
         agent={agent}
