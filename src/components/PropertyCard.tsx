@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Share2, Plus, Trash2, Edit } from 'lucide-react';
 import { Property } from '../types';
 import { useCurrency } from '../contexts/CurrencyContext';
+import { useTranslation } from 'react-i18next'; // Added
 // Lazy load the ShareModal component
 const ShareModal = React.lazy(() => import('./property/ShareModal'));
 import OptimizedImage from './OptimizedImage';
@@ -29,6 +30,7 @@ const PropertyCard = memo(function PropertyCard({
 }: PropertyCardProps) {
   const navigate = useNavigate();
   const { formatPrice } = useCurrency();
+  const { t } = useTranslation(); // Added
   const [showShareOptions, setShowShareOptions] = useState(false);
   const [showCopiedMessage, setShowCopiedMessage] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
@@ -129,7 +131,7 @@ const PropertyCard = memo(function PropertyCard({
               ? 'bg-black text-white' 
               : 'bg-[#cefa05] text-black'
           }`}>
-            {source === 'direct' ? 'My Property' : 'Marketplace'}
+            {source === 'direct' ? t('myProperty') : t('marketplace')}
           </div>
         )}
 
@@ -151,17 +153,17 @@ const PropertyCard = memo(function PropertyCard({
             </div>
             {property.bedrooms !== undefined && (
               <div className="flex items-center px-2 py-1 bg-gray-100 rounded-md">
-                <span>{property.bedrooms} bed</span>
+                <span>{property.bedrooms} {t('bed')}</span>
               </div>
             )}
             {property.bathrooms !== undefined && (
               <div className="flex items-center px-2 py-1 bg-gray-100 rounded-md">
-                <span>{property.bathrooms} bath</span>
+                <span>{property.bathrooms} {t('bath')}</span>
               </div>
             )}
             {property.sqft !== undefined && (
               <div className="flex items-center px-2 py-1 bg-gray-100 rounded-md">
-                <span>{property.sqft} sqft</span>
+                <span>{property.sqft} {t('sqft')}</span>
               </div>
             )}
           </div>
@@ -196,7 +198,7 @@ const PropertyCard = memo(function PropertyCard({
                   ) : (
                     <Plus className="h-4 w-4 mr-1" />
                   )}
-                  Add
+                  {t('add')}
                 </button>
               )}
 
@@ -213,7 +215,7 @@ const PropertyCard = memo(function PropertyCard({
                       ) : (
                         <Edit className="h-4 w-4 mr-1" />
                       )}
-                      Edit
+                      {t('edit')}
                     </button>
                   )}
                   {onDelete && (
@@ -227,7 +229,7 @@ const PropertyCard = memo(function PropertyCard({
                       ) : (
                         <Trash2 className="h-4 w-4 mr-1" />
                       )}
-                      Delete
+                      {t('delete')}
                     </button>
                   )}
                 </div>
@@ -244,7 +246,7 @@ const PropertyCard = memo(function PropertyCard({
                   ) : (
                     <Trash2 className="h-4 w-4 mr-1" />
                   )}
-                  Remove
+                  {t('remove')}
                 </button>
               )}
             </div>
@@ -263,7 +265,7 @@ const PropertyCard = memo(function PropertyCard({
       {/* Copied Message */}
       {showCopiedMessage && (
         <div className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-black text-white px-4 py-2 rounded-lg text-sm animate-fade-in z-50">
-          Link copied!
+          {t('linkCopied')}
         </div>
       )}
     </>
@@ -280,3 +282,4 @@ const PropertyCard = memo(function PropertyCard({
 });
 
 export default PropertyCard;
+

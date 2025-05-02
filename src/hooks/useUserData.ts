@@ -71,8 +71,6 @@ export function useUserData() {
           .select('*')
           .eq('id', user.id)
           .maybeSingle();
-      console.log('profileData', profileData)
-      console.log('profileError', profileError)
 
       if (profileError) {
         if (profileError.code === 'PGRST116') {
@@ -121,9 +119,6 @@ export function useUserData() {
       }));
 
       setProperties(transformedOwnedProperties);
-
-
-      console.log('profile.role', profile?.role)
 
       // Fetch marketplace properties (Agent-specific)
       if (profile?.role === 'agent') {

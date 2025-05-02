@@ -43,7 +43,6 @@ export function useAgentProfile(slug: string | undefined) {
           .eq('role', 'agent')
           .single();
 
-
         if (profileError) throw profileError;
 
         if (!profile) {
@@ -60,6 +59,7 @@ export function useAgentProfile(slug: string | undefined) {
             name: profile.full_name || '',
             introduction: profile.introduction || '',
             photo: profile.avatar_url || '',
+            email: profile.email || '',
             agencyId: profile.agency_id || '',
             agencyLogo: profile.agency_logo || '',
             agencyName: profile.agency_name || '',

@@ -3,14 +3,16 @@ import { FileText, Star, MapPin, Clock, Home, Package } from 'lucide-react';
 import { Agent } from '../../types';
 import ConnectModal from './ConnectModal';
 import BrokerCertificateModal from './BrokerCertificateModal';
+import { useTranslation } from 'react-i18next'; // Added
 
 interface AgentHeroSectionProps {
   agent: Agent;
   averageRating: number;
-  propertiesCount: number;
 }
 
-export default function AgentHeroSection({ agent, averageRating, propertiesCount = 0 }: AgentHeroSectionProps) {
+export default function AgentHeroSection({ agent, averageRating }: AgentHeroSectionProps) {
+  const { t } = useTranslation(); // Added
+
   // State for modals
   const [showConnectModal, setShowConnectModal] = useState(false);
   const [showCertificateModal, setShowCertificateModal] = useState(false);
@@ -35,13 +37,15 @@ export default function AgentHeroSection({ agent, averageRating, propertiesCount
                 onClick={() => setShowCertificateModal(true)}
               >
                 <FileText className="h-4 w-4 mr-2" />
-                <span className="text-sm font-medium">Broker Certificate #{agent.registrationNumber || 'N/A'}</span>
+                <span className="text-sm font-medium">
+                  {t('brokerCertificate')} #{agent.registrationNumber || t('notAvailable')}
+                </span>
               </button>
             )}
 
             {/* Main Heading */}
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight tracking-tighter mb-4">
-              I am {agent.name}, your real estate agent in {agent.location || 'Dubai'}.
+              {t('agentIntroduction', { name: agent.name, location: agent.location || t('defaultLocation') })}
             </h1>
 
             {/* Tags with Icons - Wrapped on mobile */}
@@ -54,22 +58,22 @@ export default function AgentHeroSection({ agent, averageRating, propertiesCount
               ))}
               <span className="inline-flex items-center px-3 py-1.5 bg-black text-white rounded-full text-sm whitespace-nowrap">
                 <MapPin className="h-4 w-4 mr-1.5" />
-                {agent.location || 'Dubai'}
+                {agent.location || t('defaultLocation')}
               </span>
               <span className="inline-flex items-center px-3 py-1.5 bg-black text-white rounded-full text-sm whitespace-nowrap">
                 <Clock className="h-4 w-4 mr-1.5" />
-                {agent.experience || '5+ years'}
+                {agent.experience || t('defaultExperience')}
               </span>
               <span className="inline-flex items-center px-3 py-1.5 bg-black text-white rounded-full text-sm whitespace-nowrap">
                 <Home className="h-4 w-4 mr-1.5" />
-                {agent.activeListings} properties
+                {t('property_count', { count: agent.activeListings })}
               </span>
             </div>
 
             {/* Languages Section */}
             <div className="text-gray-600 mt-4">
-              <span className="font-medium">Languages:</span>{' '}
-              {agent.languages?.join(', ') || 'English'}
+              <span className="font-medium">{t('languages')}:</span>{' '}
+              {agent.languages?.join(', ') || t('defaultLanguage')}
             </div>
           </div>
 
@@ -77,7 +81,7 @@ export default function AgentHeroSection({ agent, averageRating, propertiesCount
           <div className="w-full">
             <div className="relative w-full aspect-square rounded-2xl overflow-hidden mx-auto h-full min-h-[400px]">
               <img
-                src={agent.photo || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=500&h=500&fit=crop'}
+                src={agent.photo || t('defaultPhoto')}
                 alt={agent.name}
                 className="w-full h-full object-cover"
                 loading="eager"
@@ -117,13 +121,15 @@ export default function AgentHeroSection({ agent, averageRating, propertiesCount
                   onClick={() => setShowCertificateModal(true)}
                 >
                   <FileText className="h-4 w-4 mr-2" />
-                  <span className="text-sm font-medium">Broker Certificate #{agent.registrationNumber || 'N/A'}</span>
+                  <span className="text-sm font-medium">
+                    {t('brokerCertificate')} #{agent.registrationNumber || t('notAvailable')}
+                  </span>
                 </button>
               )}
 
               {/* Main Heading */}
               <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight tracking-tighter">
-                I am {agent.name}, your real estate agent in {agent.location || 'Dubai'}.
+                {t('agentIntroduction', { name: agent.name, location: agent.location || t('defaultLocation') })}
               </h1>
 
               {/* Tags with Icons */}
@@ -139,22 +145,22 @@ export default function AgentHeroSection({ agent, averageRating, propertiesCount
                 ))}
                 <span className="inline-flex items-center px-3 py-1.5 bg-black text-white rounded-full text-sm whitespace-nowrap">
                   <MapPin className="h-4 w-4 mr-1.5" />
-                  {agent.location || 'Dubai'}
+                  {agent.location || t('defaultLocation')}
                 </span>
                 <span className="inline-flex items-center px-3 py-1.5 bg-black text-white rounded-full text-sm whitespace-nowrap">
                   <Clock className="h-4 w-4 mr-1.5" />
-                  {agent.experience || '5+ years'}
+                  {agent.experience || t('defaultExperience')}
                 </span>
                 <span className="inline-flex items-center px-3 py-1.5 bg-black text-white rounded-full text-sm whitespace-nowrap">
                   <Home className="h-4 w-4 mr-1.5" />
-                  {agent.activeListings} properties
+                  {t('property_count', { count: agent.activeListings })}
                 </span>
               </div>
 
               {/* Languages Section */}
               <div className="text-gray-600">
-                <span className="font-medium">Languages:</span>{' '}
-                {agent.languages?.join(', ') || 'English'}
+                <span className="font-medium">{t('languages')}:</span>{' '}
+                {agent.languages?.join(', ') || t('defaultLanguage')}
               </div>
             </div>
           </div>
@@ -163,7 +169,7 @@ export default function AgentHeroSection({ agent, averageRating, propertiesCount
           <div className="relative h-full flex items-center">
             <div className="w-full aspect-square rounded-2xl overflow-hidden mx-auto h-full min-h-[450px]">
               <img
-                src={agent.photo || 'https://images.unsplash.com/photo-1560250097-0b93528c311a?w=500&h=500&fit=crop'}
+                src={agent.photo || t('defaultPhoto')}
                 alt={agent.name}
                 className="w-full h-full object-cover"
                 loading="eager"
@@ -186,7 +192,7 @@ export default function AgentHeroSection({ agent, averageRating, propertiesCount
                     {averageRating.toFixed(1)}
                   </span>
                   <span className="ml-2 text-gray-500">
-                    ({agent.reviews.length} reviews)
+                    ({t('reviewsCount', { count: agent.reviews.length })})
                   </span>
                 </div>
               )}
@@ -213,3 +219,4 @@ export default function AgentHeroSection({ agent, averageRating, propertiesCount
     </section>
   );
 }
+

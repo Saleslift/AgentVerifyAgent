@@ -108,7 +108,6 @@ export function useAgentProperties(agentId: string | undefined) {
 
         // Combine all properties into a single unified list
         const allProperties = [...transformedDirectProperties, ...marketplaceProperties, ...projectProperties];
-
         if (mounted) {
           setProperties(allProperties);
           setLoading(false);

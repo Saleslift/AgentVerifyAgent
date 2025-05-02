@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { X, MapPin } from 'lucide-react';
 import { Combobox } from '@headlessui/react';
 import { PropertyFilters as PropertyFiltersType } from '../types';
+import { useTranslation } from 'react-i18next';
 
 interface PropertyFiltersProps {
-  filters: PropertyFiltersType; 
+  filters: PropertyFiltersType;
   onFilterChange: (filters: PropertyFiltersType) => void;
   onReset: () => void;
 }
@@ -24,18 +25,38 @@ const locations = [
 ];
 
 export default function PropertyFilterPanel({ filters, onFilterChange, onReset }: PropertyFiltersProps) {
-  const propertyTypes = ['Any', 'Apartment', 'Penthouse', 'Townhouse', 'House', 'Villa', 'Land'];
-  const furnishingStatuses = ['Any', 'Furnished', 'Unfurnished', 'Semi-Furnished'];
-  const completionStatuses = ['Any', 'Ready', 'Off-plan resale', 'Off-Plan'];
+  const { t } = useTranslation();
+
+  const propertyTypes = [
+    { label: t('any'), value: 'Any' },
+    { label: t('apartment'), value: 'Apartment' },
+    { label: t('penthouse'), value: 'Penthouse' },
+    { label: t('townhouse'), value: 'Townhouse' },
+    { label: t('house'), value: 'House' },
+    { label: t('villa'), value: 'Villa' },
+    { label: t('land'), value: 'Land' }
+  ];
+  const furnishingStatuses = [
+    { label: t('any'), value: 'Any' },
+    { label: t('furnished'), value: 'Furnished' },
+    { label: t('unfurnished'), value: 'Unfurnished' },
+    { label: t('semiFurnished'), value: 'Semi-Furnished' }
+  ];
+  const completionStatuses = [
+    { label: t('any'), value: 'Any' },
+    { label: t('ready'), value: 'Ready' },
+    { label: t('offPlanResale'), value: 'Off-plan resale' },
+    { label: t('offPlan'), value: 'Off-Plan' }
+  ];
   const amenitiesList = [
-    'Balcony',
-    'Pool',
-    'Gym',
-    'Parking',
-    'Security',
-    'Central A/C',
-    'Built-in Wardrobes',
-    'Concierge'
+    { label: t('balcony'), value: 'Balcony' },
+    { label: t('pool'), value: 'Pool' },
+    { label: t('gym'), value: 'Gym' },
+    { label: t('parking'), value: 'Parking' },
+    { label: t('security'), value: 'Security' },
+    { label: t('centralAC'), value: 'Central A/C' },
+    { label: t('builtInWardrobes'), value: 'Built-in Wardrobes' },
+    { label: t('concierge'), value: 'Concierge' }
   ];
 
   const [query, setQuery] = useState('');
@@ -77,20 +98,20 @@ export default function PropertyFilterPanel({ filters, onFilterChange, onReset }
   return (
     <div className="bg-white rounded-xl shadow-lg p-6 lg:p-8 transition-all duration-300 hover:shadow-xl sticky top-4 border border-gray-200">
       <div className="flex justify-between items-center border-b border-gray-100 pb-6">
-        <h3 className="text-xl font-bold text-gray-800">Filters</h3>
+        <h3 className="text-xl font-bold text-gray-800">{t('filters')}</h3>
         <button
           onClick={handleReset}
           className="text-sm text-gray-500 hover:text-gray-700 flex items-center transition-colors duration-200"
         >
           <X className="h-4 w-4 mr-1" />
-          Reset
+          {t('reset')}
         </button>
       </div>
 
       {/* Property Type */}
       <div className="space-y-3 mt-6">
         <label className="block text-sm font-semibold text-gray-700">
-          Property Type
+          {t('propertyType')}
         </label>
         <select
           value={filters.type || 'Any'}
@@ -98,8 +119,8 @@ export default function PropertyFilterPanel({ filters, onFilterChange, onReset }
           className="w-full px-4 py-2.5 rounded-lg border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-all duration-200"
         >
           {propertyTypes.map((type) => (
-            <option key={type} value={type}>
-              {type}
+            <option key={type.value} value={type.value}>
+              {type.label}
             </option>
           ))}
         </select>
@@ -108,7 +129,7 @@ export default function PropertyFilterPanel({ filters, onFilterChange, onReset }
       {/* Location */}
       <div className="space-y-3 mt-6">
         <label className="block text-sm font-semibold text-gray-700">
-          Location
+          {t('location')}
         </label>
         <div className="relative">
           <Combobox value={query} onChange={handleLocationSelect}>
@@ -131,7 +152,7 @@ export default function PropertyFilterPanel({ filters, onFilterChange, onReset }
                 ))}
                 <Combobox.Input
                   className="flex-1 min-w-[150px] bg-transparent border-none focus:ring-0 text-sm"
-                  placeholder="Search locations..."
+                  placeholder={t('searchLocations')}
                   onChange={(e) => setQuery(e.target.value)}
                   value={query}
                 />
@@ -139,7 +160,7 @@ export default function PropertyFilterPanel({ filters, onFilterChange, onReset }
               <Combobox.Options className="absolute z-10 w-full mt-1 bg-white rounded-md shadow-lg max-h-60 overflow-auto">
                 {filteredLocations.length === 0 && query !== '' ? (
                   <div className="px-4 py-2 text-sm text-gray-500">
-                    No locations found
+                    {t('noLocationsFound')}
                   </div>
                 ) : (
                   filteredLocations.map((location) => (
@@ -170,30 +191,31 @@ export default function PropertyFilterPanel({ filters, onFilterChange, onReset }
       {/* Price Range */}
       <div className="space-y-3 mt-6">
         <label className="block text-sm font-semibold text-gray-700">
-          Price Range
+          {t('minPrice')}
         </label>
-        <div className="space-y-3">
-          <input
-            type="number"
-            value={filters.minPrice || ''}
-            onChange={(e) => handleChange('minPrice', e.target.value ? Number(e.target.value) : undefined)}
-            placeholder="Min Price"
-            className="w-full px-4 py-2.5 rounded-lg border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-all duration-200"
-          />
-          <input
-            type="number"
-            value={filters.maxPrice || ''}
-            onChange={(e) => handleChange('maxPrice', e.target.value ? Number(e.target.value) : undefined)}
-            placeholder="Max Price"
-            className="w-full px-4 py-2.5 rounded-lg border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-all duration-200"
-          />
-        </div>
+        <input
+          type="number"
+          value={filters.minPrice || ''}
+          onChange={(e) => handleChange('minPrice', e.target.value ? Number(e.target.value) : undefined)}
+          placeholder={t('minPrice')}
+          className="w-full px-4 py-2.5 rounded-lg border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-all duration-200"
+        />
+        <label className="block text-sm font-semibold text-gray-700">
+          {t('maxPrice')}
+        </label>
+        <input
+          type="number"
+          value={filters.maxPrice || ''}
+          onChange={(e) => handleChange('maxPrice', e.target.value ? Number(e.target.value) : undefined)}
+          placeholder={t('maxPrice')}
+          className="w-full px-4 py-2.5 rounded-lg border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-all duration-200"
+        />
       </div>
 
       {/* Beds & Baths */}
       <div className="space-y-3 mt-6">
         <label className="block text-sm font-semibold text-gray-700">
-          Rooms
+          {t('rooms')}
         </label>
         <div className="space-y-3">
           <select
@@ -201,10 +223,10 @@ export default function PropertyFilterPanel({ filters, onFilterChange, onReset }
             onChange={(e) => handleChange('minBeds', e.target.value === 'Any' ? undefined : Number(e.target.value))}
             className="w-full px-4 py-2.5 rounded-lg border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-all duration-200"
           >
-            <option value="Any">Any Beds</option>
+            <option value="Any">{t('beds')}</option>
             {[1, 2, 3, 4, 5, 6].map((num) => (
               <option key={num} value={num}>
-                {num}+ Beds
+                {num}+ {t('beds')}
               </option>
             ))}
           </select>
@@ -213,10 +235,10 @@ export default function PropertyFilterPanel({ filters, onFilterChange, onReset }
             onChange={(e) => handleChange('minBaths', e.target.value === 'Any' ? undefined : Number(e.target.value))}
             className="w-full px-4 py-2.5 rounded-lg border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-all duration-200"
           >
-            <option value="Any">Any Baths</option>
+            <option value="Any">{t('baths')}</option>
             {[1, 2, 3, 4, 5].map((num) => (
               <option key={num} value={num}>
-                {num}+ Baths
+                {num}+ {t('baths')}
               </option>
             ))}
           </select>
@@ -226,7 +248,7 @@ export default function PropertyFilterPanel({ filters, onFilterChange, onReset }
       {/* Furnishing Status */}
       <div className="space-y-3 mt-6">
         <label className="block text-sm font-semibold text-gray-700">
-          Furnishing Status
+          {t('furnishingStatus')}
         </label>
         <select
           value={filters.furnishingStatus || 'Any'}
@@ -234,8 +256,8 @@ export default function PropertyFilterPanel({ filters, onFilterChange, onReset }
           className="w-full px-4 py-2.5 rounded-lg border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-all duration-200"
         >
           {furnishingStatuses.map((status) => (
-            <option key={status} value={status}>
-              {status}
+            <option key={status.value} value={status.value}>
+              {status.label}
             </option>
           ))}
         </select>
@@ -244,7 +266,7 @@ export default function PropertyFilterPanel({ filters, onFilterChange, onReset }
       {/* Completion Status */}
       <div className="space-y-3 mt-6">
         <label className="block text-sm font-semibold text-gray-700">
-          Completion Status
+          {t('completionStatus')}
         </label>
         <select
           value={filters.completionStatus || 'Any'}
@@ -252,8 +274,8 @@ export default function PropertyFilterPanel({ filters, onFilterChange, onReset }
           className="w-full px-4 py-2.5 rounded-lg border-gray-200 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-all duration-200"
         >
           {completionStatuses.map((status) => (
-            <option key={status} value={status}>
-              {status}
+            <option key={status.value} value={status.value}>
+              {status.label}
             </option>
           ))}
         </select>
@@ -262,25 +284,25 @@ export default function PropertyFilterPanel({ filters, onFilterChange, onReset }
       {/* Amenities */}
       <div className="space-y-3 mt-6">
         <label className="block text-sm font-semibold text-gray-700">
-          Amenities
+          {t('amenities')}
         </label>
         <div className="grid grid-cols-1 gap-3">
           {amenitiesList.map((amenity) => (
-            <label key={amenity} className="flex items-center space-x-3 group cursor-pointer">
+            <label key={amenity.value} className="flex items-center space-x-3 group cursor-pointer">
               <input
                 type="checkbox"
-                checked={filters.amenities?.includes(amenity) || false}
+                checked={filters.amenities?.includes(amenity.value) || false}
                 onChange={(e) => {
                   const currentAmenities = filters.amenities || [];
                   const newAmenities = e.target.checked
-                    ? [...currentAmenities, amenity]
-                    : currentAmenities.filter((a) => a !== amenity);
+                    ? [...currentAmenities, amenity.value]
+                    : currentAmenities.filter((a) => a !== amenity.value);
                   handleChange('amenities', newAmenities.length > 0 ? newAmenities : undefined);
                 }}
                 className="w-5 h-5 rounded border-gray-300 text-primary-300 focus:ring-primary-300 transition-colors duration-200"
               />
               <span className="text-gray-600 group-hover:text-gray-900 transition-colors duration-200">
-                {amenity}
+                {amenity.label}
               </span>
             </label>
           ))}

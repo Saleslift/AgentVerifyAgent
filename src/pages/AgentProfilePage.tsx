@@ -6,7 +6,7 @@ import Header from '../components/Header';
 import ServiceAreasPanel from '../components/ServiceAreasPanel';
 import CertificationsPanel from '../components/CertificationsPanel';
 import SocialMediaLinks from '../components/SocialMediaLinks';
-import { Star, Share2, MessageSquare, Trash2 } from 'lucide-react';
+import { Star, MessageSquare, Trash2 } from 'lucide-react';
 import { Property, PropertyFilters } from '../types';
 import { initPageVisibilityHandling, cleanupPageVisibilityHandling } from '../utils/pageVisibility';
 import ShareModal from '../components/property/ShareModal';
@@ -17,6 +17,7 @@ import { supabase } from '../utils/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import ConnectModal from '../components/agent/ConnectModal';
 import AgentAgencyProfile from '../components/agent/AgentAgencyProfile';
+import { useTranslation } from 'react-i18next';
 
 export default function AgentProfilePage() {
   const { slug } = useParams();
@@ -31,6 +32,7 @@ export default function AgentProfilePage() {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
   const listingsSectionRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   // Search filters state
   const [searchFilters, setSearchFilters] = useState<PropertyFilters>({
@@ -118,19 +120,19 @@ export default function AgentProfilePage() {
 
       // Validate form
       if (!reviewForm.name.trim()) {
-        throw new Error('Please enter your name');
+        throw new Error(t('enterName'));
       }
       if (!reviewForm.email.trim()) {
-        throw new Error('Please enter your email');
+        throw new Error(t('enterEmail'));
       }
       if (!reviewForm.whatsapp.trim()) {
-        throw new Error('Please enter your WhatsApp number');
+        throw new Error(t('enterWhatsApp'));
       }
       if (reviewForm.rating === 0) {
-        throw new Error('Please select a rating');
+        throw new Error(t('selectRating'));
       }
       if (!reviewForm.comment.trim()) {
-        throw new Error('Please enter your review');
+        throw new Error(t('enterReview'));
       }
 
       // Submit review to Supabase
@@ -164,8 +166,8 @@ export default function AgentProfilePage() {
       }, 3000);
 
     } catch (err) {
-      console.error('Error submitting review:', err);
-      setReviewError(err instanceof Error ? err.message : 'Failed to submit review');
+      console.error(t('errorSubmittingReview'), err);
+      setReviewError(err instanceof Error ? err.message : t('failedSubmitReview'));
     } finally {
       setReviewSubmitting(false);
     }
@@ -180,7 +182,7 @@ export default function AgentProfilePage() {
 
       // Validate form
       if (!replyForm.reply.trim()) {
-        throw new Error('Please enter your reply');
+        throw new Error(t('enterReply'));
       }
 
       // Submit reply to Supabase
@@ -201,15 +203,15 @@ export default function AgentProfilePage() {
       setShowReplyForm(null);
 
     } catch (err) {
-      console.error('Error submitting reply:', err);
-      setReplyError(err instanceof Error ? err.message : 'Failed to submit reply');
+      console.error(t('errorSubmittingReply'), err);
+      setReplyError(err instanceof Error ? err.message : t('failedSubmitReply'));
     } finally {
       setReplySubmitting(false);
     }
   };
 
   const handleDeleteReview = async (reviewId: string) => {
-    if (!window.confirm('Are you sure you want to delete this review?')) {
+    if (!window.confirm(t('confirmDeleteReview'))) {
       return;
     }
 
@@ -222,8 +224,8 @@ export default function AgentProfilePage() {
       if (error) throw error;
 
     } catch (err) {
-      console.error('Error deleting review:', err);
-      alert('Failed to delete review');
+      console.error(t('errorDeletingReview'), err);
+      alert(t('failedDeleteReview'));
     }
   };
 
@@ -242,13 +244,13 @@ export default function AgentProfilePage() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Error</h2>
-          <p className="text-gray-600">{error || propertiesError || 'Agent not found'}</p>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('error')}</h2>
+          <p className="text-gray-600">{error || propertiesError || t('agentNotFound')}</p>
           <button
             onClick={() => navigate('/')}
             className="mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900"
           >
-            Return Home
+            {t('returnHome')}
           </button>
         </div>
       </div>
@@ -256,11 +258,11 @@ export default function AgentProfilePage() {
   }
 
   return (
-    <div className="min-h-screen bg-white">
-      <Header />
+    <div className="min-h-screen bg-white relative z-[1]">
+      <Header agent={agent} />
 
       {/* Hero Section */}
-      <AgentHeroSection agent={agent} averageRating={averageRating} propertiesCount={properties.length} />
+      <AgentHeroSection agent={agent} averageRating={averageRating} />
 
       <SearchFilter
         onSearch={handleSearch}
@@ -286,7 +288,7 @@ export default function AgentProfilePage() {
             }`}
             onClick={() => setActiveTab('listings')}
           >
-            Listings
+            {t('listings')}
           </button>
           <button
             data-tab="reviews"
@@ -297,7 +299,7 @@ export default function AgentProfilePage() {
             }`}
             onClick={() => setActiveTab('reviews')}
           >
-            Reviews
+            {t('reviews')}
           </button>
           <button
               data-tab="about"
@@ -308,7 +310,7 @@ export default function AgentProfilePage() {
               }`}
               onClick={() => setActiveTab('about')}
           >
-            About
+            {t('about')}
           </button>
         </div>
 
@@ -332,11 +334,11 @@ export default function AgentProfilePage() {
                 {/* Social Media Links */}
                 {(agent.youtube || agent.facebook || agent.instagram || agent.linkedin || agent.tiktok || agent.x) && (
                     <div className="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
-                      <h2 className="text-2xl md:text-3xl font-bold mb-6">About Me</h2>
+                      <h2 className="text-2xl md:text-3xl font-bold mb-6">{t('aboutMe')}</h2>
                       <p className="text-gray-600 leading-relaxed text-base md:text-lg">{agent.bio}</p>
 
                       <div className="mt-6 pt-6 border-t border-gray-100">
-                        <h3 className="text-lg font-semibold mb-4">Connect With Me</h3>
+                        <h3 className="text-lg font-semibold mb-4">{t('connectWithMe')}</h3>
                         <SocialMediaLinks
                             youtube={agent.youtube}
                             facebook={agent.facebook}
@@ -359,7 +361,7 @@ export default function AgentProfilePage() {
               {/* Service Areas */}
               {agent.serviceAreas && agent.serviceAreas.length > 0 && (
                 <div className="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
-                  <h3 className="text-xl md:text-2xl font-bold mb-6">Service Areas</h3>
+                  <h3 className="text-xl md:text-2xl font-bold mb-6">{t('serviceAreas')}</h3>
                   <ServiceAreasPanel serviceAreas={agent.serviceAreas} />
                 </div>
               )}
@@ -367,7 +369,7 @@ export default function AgentProfilePage() {
               {/* Certifications */}
               {agent.certifications && agent.certifications.length > 0 && (
                 <div className="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
-                  <h3 className="text-xl md:text-2xl font-bold mb-6">Certifications</h3>
+                  <h3 className="text-xl md:text-2xl font-bold mb-6">{t('certifications')}</h3>
                   <CertificationsPanel certifications={agent.certifications} />
                 </div>
               )}
@@ -375,7 +377,7 @@ export default function AgentProfilePage() {
               {/* Languages */}
               {agent.languages && agent.languages.length > 0 && (
                 <div className="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
-                  <h3 className="text-xl md:text-2xl font-bold mb-6">Languages</h3>
+                  <h3 className="text-xl md:text-2xl font-bold mb-6">{t('languages')}</h3>
                   <div className="flex flex-wrap gap-2">
                     {agent.languages.map(language => (
                       <span
@@ -392,7 +394,7 @@ export default function AgentProfilePage() {
               {/* Specialties */}
               {agent.specialties && agent.specialties.length > 0 && (
                 <div className="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
-                  <h3 className="text-xl md:text-2xl font-bold mb-6">Specialties</h3>
+                  <h3 className="text-xl md:text-2xl font-bold mb-6">{t('specialties')}</h3>
                   <div className="flex flex-wrap gap-2">
                     {agent.specialties.map(specialty => (
                       <span
@@ -418,18 +420,18 @@ export default function AgentProfilePage() {
                 onClick={() => setShowReviewForm(!showReviewForm)}
                 className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 transition-colors"
               >
-                {showReviewForm ? 'Cancel Review' : 'Add a Review'}
+                {showReviewForm ? t('cancelReview') : t('addReview')}
               </button>
             </div>
 
             {/* Review Form */}
             {showReviewForm && (
               <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8">
-                <h3 className="text-xl font-bold mb-4">Write a Review</h3>
+                <h3 className="text-xl font-bold mb-4">{t('writeReview')}</h3>
 
                 {reviewSuccess && (
                   <div className="mb-4 p-4 bg-green-50 border-l-4 border-green-500 text-green-700">
-                    Your review has been submitted successfully!
+                    {t('reviewSubmitted')}
                   </div>
                 )}
 
@@ -442,14 +444,14 @@ export default function AgentProfilePage() {
                 <form className="space-y-4" onSubmit={handleReviewSubmit}>
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Your Name *
+                      {t('yourName')} *
                     </label>
                     <input
                       type="text"
                       value={reviewForm.name}
                       onChange={(e) => setReviewForm({...reviewForm, name: e.target.value})}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent"
-                      placeholder="Enter your name"
+                      placeholder={t('enterNamePlaceholder')}
                       required
                     />
                   </div>
@@ -457,28 +459,28 @@ export default function AgentProfilePage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Email Address *
+                        {t('emailAddress')} *
                       </label>
                       <input
                         type="email"
                         value={reviewForm.email}
                         onChange={(e) => setReviewForm({...reviewForm, email: e.target.value})}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent"
-                        placeholder="your.email@example.com"
+                        placeholder={t('emailPlaceholder')}
                         required
                       />
                     </div>
 
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
-                        WhatsApp Number *
+                        {t('whatsappNumber')} *
                       </label>
                       <input
                         type="tel"
                         value={reviewForm.whatsapp}
                         onChange={(e) => setReviewForm({...reviewForm, whatsapp: e.target.value})}
                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent"
-                        placeholder="+971 50 123 4567"
+                        placeholder={t('whatsappPlaceholder')}
                         required
                       />
                     </div>
@@ -486,7 +488,7 @@ export default function AgentProfilePage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Rating *
+                      {t('rating')} *
                     </label>
                     <div className="flex items-center space-x-1">
                       {[1, 2, 3, 4, 5].map((star) => (
@@ -510,14 +512,14 @@ export default function AgentProfilePage() {
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Your Review *
+                      {t('yourReview')} *
                     </label>
                     <textarea
                       rows={4}
                       value={reviewForm.comment}
                       onChange={(e) => setReviewForm({...reviewForm, comment: e.target.value})}
                       className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent"
-                      placeholder="Share your experience with this agent..."
+                      placeholder={t('reviewPlaceholder')}
                       required
                     ></textarea>
                   </div>
@@ -528,7 +530,7 @@ export default function AgentProfilePage() {
                       disabled={reviewSubmitting}
                       className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 disabled:opacity-50"
                     >
-                      {reviewSubmitting ? 'Submitting...' : 'Submit Review'}
+                      {reviewSubmitting ? t('submitting') : t('submitReview')}
                     </button>
                   </div>
                 </form>
@@ -545,7 +547,7 @@ export default function AgentProfilePage() {
                         <h3 className="text-xl font-bold text-gray-900">
                           {review.reviewer?.full_name ||
                            (review.reviewer_contact && review.reviewer_contact.name) ||
-                           "Anonymous"}
+                           t('anonymous')}
                         </h3>
                         <span className="text-gray-500 text-sm">{new Date(review.created_at).toLocaleDateString()}</span>
                       </div>
@@ -582,7 +584,7 @@ export default function AgentProfilePage() {
                             className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900"
                           >
                             <MessageSquare className="h-4 w-4 inline mr-2" />
-                            Reply
+                            {t('reply')}
                           </button>
                         )}
 
@@ -591,7 +593,7 @@ export default function AgentProfilePage() {
                           className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
                         >
                           <Trash2 className="h-4 w-4 inline mr-2" />
-                          Delete
+                          {t('delete')}
                         </button>
                       </div>
                     )}
@@ -599,7 +601,7 @@ export default function AgentProfilePage() {
                     {/* Reply Form */}
                     {showReplyForm === review.id && (
                       <div className="mt-6 p-4 bg-gray-50 rounded-lg border border-gray-200">
-                        <h4 className="font-medium mb-2">Reply to this review</h4>
+                        <h4 className="font-medium mb-2">{t('replyToReview')}</h4>
 
                         {replyError && (
                           <div className="mb-4 p-3 bg-red-50 border-l-4 border-red-500 text-red-700 text-sm">
@@ -613,7 +615,7 @@ export default function AgentProfilePage() {
                             value={replyForm.reply}
                             onChange={(e) => setReplyForm({...replyForm, reply: e.target.value})}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent mb-3"
-                            placeholder="Write your reply here..."
+                            placeholder={t('replyPlaceholder')}
                             required
                           ></textarea>
 
@@ -623,14 +625,14 @@ export default function AgentProfilePage() {
                               onClick={() => setShowReplyForm(null)}
                               className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300"
                             >
-                              Cancel
+                              {t('cancel')}
                             </button>
                             <button
                               type="submit"
                               disabled={replySubmitting}
                               className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900 disabled:opacity-50"
                             >
-                              {replySubmitting ? 'Submitting...' : 'Submit Reply'}
+                              {replySubmitting ? t('submitting') : t('submitReply')}
                             </button>
                           </div>
                         </form>
@@ -640,7 +642,7 @@ export default function AgentProfilePage() {
                 ))
               ) : (
                 <div className="text-center py-12 bg-white rounded-xl border border-gray-200">
-                  <p className="text-gray-500">No reviews yet. Be the first to review {agent.name}!</p>
+                  <p className="text-gray-500">{t('noReviews', { agentName: agent.name })}</p>
                 </div>
               )}
             </div>

@@ -1,14 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../utils/supabase';
 import type { DB_Profile } from '../../global.d';
+import { useTranslation } from 'react-i18next'; // Added
 
 interface AgentAgencyProfileProps {
   agent: DB_Profile;
 }
 
 const AgentAgencyProfile: React.FC<AgentAgencyProfileProps> = ({ agent }) => {
+  const { t } = useTranslation(); // Added
   const [agencyProfile, setAgencyProfile] = useState<DB_Profile | null>(null);
-  console.log('Agent Agency Profile:', agent);
 
   const profile = agencyProfile || {
     name: agent.agencyName,
@@ -53,12 +54,10 @@ const AgentAgencyProfile: React.FC<AgentAgencyProfileProps> = ({ agent }) => {
     fetchAgencyProfile();
   }, [agent.agency_id]);
 
-
-
   return (
     <div className="bg-white rounded-xl border border-gray-200 p-6 md:p-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between mb-8">
-        <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-0">My Agency</h2>
+        <h2 className="text-2xl md:text-3xl font-bold mb-4 md:mb-0">{t('myAgency')}</h2>
         {profile.logo && (
           <img
             src={profile.logo}
@@ -86,14 +85,14 @@ const AgentAgencyProfile: React.FC<AgentAgencyProfileProps> = ({ agent }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-4">
             <div>
-              <label className="text-sm text-gray-500 block">Address</label>
+              <label className="text-sm text-gray-500 block">{t('address')}</label>
               <div className="flex items-start mt-1">
                 <span className="text-gray-800">{profile.location}</span>
               </div>
             </div>
 
             <div>
-              <label className="text-sm text-gray-500 block">Phone</label>
+              <label className="text-sm text-gray-500 block">{t('phone')}</label>
               <div className="flex items-center mt-1">
                 <a
                   href={`tel:${profile.phone}`}
@@ -107,14 +106,14 @@ const AgentAgencyProfile: React.FC<AgentAgencyProfileProps> = ({ agent }) => {
 
           <div className="space-y-4">
             <div>
-              <label className="text-sm text-gray-500 block">License</label>
+              <label className="text-sm text-gray-500 block">{t('license')}</label>
               <div className="flex items-center mt-1">
                 <span className="text-gray-800">{profile.license}</span>
               </div>
             </div>
 
             <div>
-              <label className="text-sm text-gray-500 block">Email</label>
+              <label className="text-sm text-gray-500 block">{t('email')}</label>
               <div className="flex items-center mt-1">
                 <a
                   href={`mailto:${profile.email}`}
@@ -130,7 +129,7 @@ const AgentAgencyProfile: React.FC<AgentAgencyProfileProps> = ({ agent }) => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4 pt-4 border-t border-gray-100">
           {profile.formation_date && (
             <div>
-              <label className="text-sm text-gray-500 block">Agency Formation Date</label>
+              <label className="text-sm text-gray-500 block">{t('agencyFormationDate')}</label>
               <div className="flex items-center mt-1">
                 <span className="text-gray-800">
                   {new Date(profile.formation_date).toLocaleDateString()}
@@ -141,9 +140,9 @@ const AgentAgencyProfile: React.FC<AgentAgencyProfileProps> = ({ agent }) => {
 
           {profile.team_size && (
             <div>
-              <label className="text-sm text-gray-500 block">Agency Team Size</label>
+              <label className="text-sm text-gray-500 block">{t('agencyTeamSize')}</label>
               <div className="flex items-center mt-1">
-                <span className="text-gray-800">{profile.team_size} members</span>
+                <span className="text-gray-800">{t('teamMembers', { count: profile.team_size })}</span>
               </div>
             </div>
           )}
