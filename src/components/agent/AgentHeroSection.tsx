@@ -3,6 +3,7 @@ import { FileText, Star, MapPin, Clock, Home, Package } from 'lucide-react';
 import { Agent } from '../../types';
 import ConnectModal from './ConnectModal';
 import BrokerCertificateModal from './BrokerCertificateModal';
+import AgentMediaDisplay from './AgentMediaDisplay';
 import { useTranslation } from 'react-i18next'; // Added
 
 interface AgentHeroSectionProps {
@@ -77,35 +78,32 @@ export default function AgentHeroSection({ agent, averageRating }: AgentHeroSect
             </div>
           </div>
 
-          {/* Profile Image for Mobile - Full width */}
+          {/* Media Display for Mobile */}
           <div className="w-full">
-            <div className="relative w-full aspect-square rounded-2xl overflow-hidden mx-auto h-full min-h-[400px]">
-              <img
-                src={agent.photo || t('defaultPhoto')}
-                alt={agent.name}
-                className="w-full h-full object-cover"
-                loading="eager"
-              />
-              {agent.reviews && agent.reviews.length > 0 && (
-                <div className="absolute bottom-4 left-4 flex items-center bg-white bg-opacity-95 backdrop-blur-sm px-4 py-3 rounded-xl">
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, index) => (
-                      <Star
-                        key={index}
-                        className={`h-4 w-4 ${
-                          index < Math.floor(averageRating)
-                            ? 'text-[#cefa05] fill-current'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="ml-2 font-semibold text-gray-900 text-sm">
-                    {averageRating.toFixed(1)}
-                  </span>
+            <AgentMediaDisplay
+              videoUrl={agent.promotionVideoUrl}
+              imageUrl={agent.photo || t('defaultPhoto')}
+              altText={agent.name}
+            />
+            {agent.reviews && agent.reviews.length > 0 && (
+              <div className="absolute bottom-4 left-4 flex items-center bg-white bg-opacity-95 backdrop-blur-sm px-4 py-3 rounded-xl">
+                <div className="flex items-center">
+                  {[...Array(5)].map((_, index) => (
+                    <Star
+                      key={index}
+                      className={`h-4 w-4 ${
+                        index < Math.floor(averageRating)
+                          ? 'text-[#cefa05] fill-current'
+                          : 'text-gray-300'
+                      }`}
+                    />
+                  ))}
                 </div>
-              )}
-            </div>
+                <span className="ml-2 font-semibold text-gray-900 text-sm">
+                  {averageRating.toFixed(1)}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -165,38 +163,35 @@ export default function AgentHeroSection({ agent, averageRating }: AgentHeroSect
             </div>
           </div>
 
-          {/* Right Column - 1/3 width on desktop */}
+          {/* Media Display for Desktop */}
           <div className="relative h-full flex items-center">
-            <div className="w-full aspect-square rounded-2xl overflow-hidden mx-auto h-full min-h-[450px]">
-              <img
-                src={agent.photo || t('defaultPhoto')}
-                alt={agent.name}
-                className="w-full h-full object-cover"
-                loading="eager"
-              />
-              {agent.reviews && agent.reviews.length > 0 && (
-                <div className="absolute bottom-4 left-4 flex items-center bg-white bg-opacity-95 backdrop-blur-sm px-4 py-3 rounded-xl shadow-lg">
-                  <div className="flex items-center">
-                    {[...Array(5)].map((_, index) => (
-                      <Star
-                        key={index}
-                        className={`h-5 w-5 ${
-                          index < Math.floor(averageRating)
-                            ? 'text-[#cefa05] fill-current'
-                            : 'text-gray-300'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="ml-2 font-semibold text-gray-900">
-                    {averageRating.toFixed(1)}
-                  </span>
-                  <span className="ml-2 text-gray-500">
-                    ({t('reviewsCount', { count: agent.reviews.length })})
-                  </span>
+            <AgentMediaDisplay
+              videoUrl={agent.promotionVideoUrl}
+              imageUrl={agent.photo || t('defaultPhoto')}
+              altText={agent.name}
+            />
+            {agent.reviews && agent.reviews.length > 0 && (
+              <div className="absolute bottom-4 left-4 flex items-center bg-white bg-opacity-95 backdrop-blur-sm px-4 py-3 rounded-xl shadow-lg">
+                <div className="flex items-center">
+                  {[...Array(5)].map((_, index) => (
+                    <Star
+                      key={index}
+                      className={`h-5 w-5 ${
+                        index < Math.floor(averageRating)
+                          ? 'text-[#cefa05] fill-current'
+                          : 'text-gray-300'
+                      }`}
+                    />
+                  ))}
                 </div>
-              )}
-            </div>
+                <span className="ml-2 font-semibold text-gray-900">
+                  {averageRating.toFixed(1)}
+                </span>
+                <span className="ml-2 text-gray-500">
+                  ({t('reviewsCount', { count: agent.reviews.length })})
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -219,4 +214,3 @@ export default function AgentHeroSection({ agent, averageRating }: AgentHeroSect
     </section>
   );
 }
-

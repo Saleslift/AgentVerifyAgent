@@ -85,7 +85,8 @@ export function useAgentProfile(slug: string | undefined) {
             x: profile.x || '',
             serviceAreas: serviceAreas,
             certifications: certifications,
-            slug: profile.slug || ''
+            slug: profile.slug || '',
+            promotionVideoUrl: profile.promotion_video_url || '',
           });
 
           // Track page view

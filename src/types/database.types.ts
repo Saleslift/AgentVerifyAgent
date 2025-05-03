@@ -2422,6 +2422,7 @@ export type Database = {
           languages: string[] | null
           linkedin: string | null
           location: string | null
+          promotion_video_url: string | null
           registration_number: string | null
           role: string
           slug: string | null
@@ -2456,6 +2457,7 @@ export type Database = {
           languages?: string[] | null
           linkedin?: string | null
           location?: string | null
+          promotion_video_url: string | null
           registration_number?: string | null
           role?: string
           slug?: string | null
@@ -2491,6 +2493,7 @@ export type Database = {
           linkedin?: string | null
           location?: string | null
           registration_number?: string | null
+          promotion_video_url: string | null
           role?: string
           slug?: string | null
           specialties?: string[] | null

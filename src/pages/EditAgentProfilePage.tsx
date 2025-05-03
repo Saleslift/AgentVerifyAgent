@@ -12,6 +12,8 @@ import CertificationModal from '../components/CertificationModal';
 import { supabase } from '../utils/supabase';
 import AgencySection from '../components/agent/AgencySection';
 import AgencySearchSection from '../components/agent/AgencySearchSection';
+import ProfileImageUpload from '../components/ProfileImageUpload';
+import PromotionVideoUpload from '../components/PromotionVideoUpload';
 
 interface AgentProfileData {
   fullName: string;
@@ -36,6 +38,7 @@ interface AgentProfileData {
   agencyFormationDate?: string;
   agencyTeamSize?: number;
   agencyId?: string | null; // Add agency_id field to track if linked to an agency
+  promotionVideoUrl?: string;
 }
 
 export default function EditProfilePage() {
@@ -53,6 +56,7 @@ export default function EditProfilePage() {
   const [newServiceArea, setNewServiceArea] = useState('');
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [agencyLogoPreview, setAgencyLogoPreview] = useState<string | null>(null);
+  const [videoPreview, setVideoPreview] = useState<string | null>(null);
   const [showCertModal, setShowCertModal] = useState(false);
   const [linkedAgency, setLinkedAgency] = useState<{id: string, name: string} | null>(null);
   const [agencyDetails, setAgencyDetails] = useState<any | null>(null);
@@ -80,7 +84,8 @@ export default function EditProfilePage() {
     agencyEmail: '',
     agencyFormationDate: '',
     agencyTeamSize: 0,
-    agencyId: null
+    agencyId: null,
+    promotionVideoUrl: ''
   });
 
   // Check if agent has RERA certificate
@@ -147,12 +152,14 @@ export default function EditProfilePage() {
         agencyEmail: data.agency_email || '',
         agencyFormationDate: data.agency_formation_date || null,
         agencyTeamSize: data.agency_team_size || 0,
-        agencyId: data.agency_id
+        agencyId: data.agency_id,
+        promotionVideoUrl: data.promotion_video_url || ''
       });
 
       // Set previews
       setAvatarPreview(data.avatar_url || null);
       setAgencyLogoPreview(data.agency_logo || null);
+      setVideoPreview(data.promotion_video_url || null);
 
     } catch (err) {
       console.error('Error fetching profile data:', err);
@@ -256,6 +263,81 @@ export default function EditProfilePage() {
     }
   };
 
+  const handleVideoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || !user) return;
+
+    try {
+      // Validate file type
+      if (!['video/mp4', 'video/webm'].includes(file.type)) {
+        throw new Error('Please upload an MP4 or WebM video');
+      }
+
+      // Validate file size (50MB)
+      if (file.size > 50 * 1024 * 1024) {
+        throw new Error('Video size must be less than 50MB');
+      }
+
+      // Create preview
+      const reader = new FileReader();
+      reader.onload = (e) => setVideoPreview(e.target?.result as string);
+      reader.readAsDataURL(file);
+
+      // Remove spaces from the file name
+      const sanitizedFileName = file.name.replace(/\s+/g, '_');
+      const fileName = `${user.id}/${sanitizedFileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('videos')
+        .upload(fileName, file, {
+          upsert: true,
+          contentType: file.type,
+        });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('videos')
+        .getPublicUrl(fileName);
+
+      setFormData((prev) => ({
+        ...prev,
+        promotionVideoUrl: publicUrl,
+      }));
+    } catch (err) {
+      console.error('Error uploading video:', err);
+      setError(err instanceof Error ? err.message : 'Failed to upload video');
+    }
+  };
+
+  const handleRemoveVideo = async () => {
+    try {
+      if (!user || !formData.promotionVideoUrl) return;
+
+      // Extract file name from the URL
+      const fileName = formData.promotionVideoUrl.split('/').pop();
+
+      if (!fileName) throw new Error('Invalid video URL');
+
+      // Remove video from Supabase storage
+      const { error: deleteError } = await supabase.storage
+        .from('videos')
+        .remove([fileName]);
+
+      if (deleteError) throw deleteError;
+
+      // Update state
+      setFormData((prev) => ({
+        ...prev,
+        promotionVideoUrl: '',
+      }));
+      setVideoPreview(null);
+    } catch (err) {
+      console.error('Error removing video:', err);
+      setError(err instanceof Error ? err.message : 'Failed to remove video');
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -287,6 +369,7 @@ export default function EditProfilePage() {
         linkedin: formData.linkedin,
         tiktok: formData.tiktok,
         x: formData.x,
+        promotion_video_url: formData.promotionVideoUrl,
         updated_at: new Date().toISOString()
       };
 
@@ -424,40 +507,20 @@ export default function EditProfilePage() {
                 {/* Profile Photo */}
                 <section>
                   <h2 className="text-lg font-semibold mb-4">Profile Photo</h2>
-                  <div className="flex items-center space-x-6">
-                    <div className="relative">
-                      {avatarPreview ? (
-                          <img
-                              src={avatarPreview}
-                              alt="Profile"
-                              className="w-32 h-32 rounded-full object-cover"
-                          />
-                      ) : (
-                          <div className="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center">
-                            <Upload className="h-8 w-8 text-gray-400" />
-                          </div>
-                      )}
-                      <label className="absolute bottom-0 right-0 bg-white rounded-full p-2 shadow-md cursor-pointer">
-                        <input
-                            type="file"
-                            accept=".jpg,.jpeg,.png,.webp"
-                            onChange={handleAvatarUpload}
-                            className="hidden"
-                        />
-                        <Upload className="h-5 w-5 text-gray-600" />
-                      </label>
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-600 mb-2">
-                        Upload a professional profile photo.
-                      </p>
-                      <ul className="text-sm text-gray-500 list-disc list-inside space-y-1">
-                        <li>Maximum file size: 2MB</li>
-                        <li>Recommended dimensions: 400x400 pixels</li>
-                        <li>Accepted formats: JPG, PNG, WebP</li>
-                      </ul>
-                    </div>
-                  </div>
+                  <ProfileImageUpload
+                    imagePreview={avatarPreview}
+                    onUpload={handleAvatarUpload}
+                  />
+                </section>
+
+                {/* Promotion Video */}
+                <section>
+                  <h2 className="text-lg font-semibold mb-4">Promotion Video</h2>
+                  <PromotionVideoUpload
+                    videoPreview={videoPreview}
+                    onUpload={handleVideoUpload}
+                    onRemove={handleRemoveVideo}
+                  />
                 </section>
 
                 {/* Basic Information */}
