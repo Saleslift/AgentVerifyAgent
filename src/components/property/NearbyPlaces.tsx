@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { MapPin, Coffee, ShoppingBag, Utensils, School, Bus, Building2, Star, Clock } from 'lucide-react';
+import { MapPin, Coffee, ShoppingBag, Utensils, School, Bus, Building2, Star } from 'lucide-react';
+import {useMap, useMapsLibrary} from "@vis.gl/react-google-maps";
 
 interface Place {
   id: string; // Unified ID to handle both `id` and `place_id`
@@ -26,6 +27,7 @@ interface NearbyPlacesProps {
   propertyLng: number;
   placeTypes?: PlaceType[]; // Made `placeTypes` configurable
 }
+
 
 const defaultPlaceTypes: PlaceType[] = [
   { type: 'restaurant', label: 'Restaurants', radius: 1000, icon: Utensils },
@@ -60,6 +62,7 @@ export default function NearbyPlaces({ propertyLat, propertyLng, placeTypes = de
     };
 
     service.nearbySearch(request, (results, status) => {
+
       if (status === google.maps.places.PlacesServiceStatus.OK && results) {
         const propertyLocation = new google.maps.LatLng(propertyLat, propertyLng);
 
@@ -89,6 +92,7 @@ export default function NearbyPlaces({ propertyLat, propertyLng, placeTypes = de
             })
             .filter(place => place !== null) as Place[];
 
+        console.log('processedPlaces', processedPlaces)
         processedPlaces.sort((a, b) => (a.distance || 0) - (b.distance || 0)); // Sort by distance
         setPlaces(processedPlaces.slice(0, 6)); // Limit to 6 places
       } else {

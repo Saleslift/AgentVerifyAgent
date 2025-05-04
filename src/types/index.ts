@@ -1,36 +1,6 @@
 // Unified Property Interface
-export interface Property {
-  id: string;
-  title: string;
-  description?: string;
-  type: 'Apartment' | 'Penthouse' | 'Townhouse' | 'House' | 'Villa' | 'Land' | 'Town house';
-  contractType: 'Sale' | 'Rent';
-  price: number;
-  location: string;
-  bedrooms?: number;
-  bathrooms?: number;
-  sqft?: number;
-  highlight?: string;
-  images: string[];
-  videos?: string[];
-  agentId: string;
-  shared?: boolean;
-  amenities?: string[];
-  customAmenities?: string[]; // Added from AgentVerifyAgent
-  furnishingStatus?: 'Furnished' | 'Unfurnished' | 'Semi-Furnished';
-  completionStatus?: 'Ready' | 'Off-plan resale' | 'Off-Plan';
-  lat?: number;
-  lng?: number;
-  floorPlanImage?: string;
-  parkingAvailable?: boolean;
-  slug?: string;
-  handoverDate?: string;
-  payment_plan?: string; // Added from AgentVerifyAgency
-  brochureUrl?: string; // Added from AgentVerifyAgency
-  source?: 'direct' | 'marketplace'; // Added from AgentVerifyAgent
-  creator_type?: 'agent' | 'agency' | 'developer'; // Added from AgentVerifyAgent
-  creator_id?: string; // Added from AgentVerifyAgent
-}
+
+export type Property = CamelizeKeys<DB_Properties>
 
 // Unified Certification Interface
 export interface Certification {
@@ -216,3 +186,11 @@ export interface PropertyFilters {
   amenities?: string[];
   completionStatus?: string;
 }
+
+export type Camelize<T extends string> = T extends `${infer A}_${infer B}` ? `${A}${Camelize<Capitalize<B>>}` : T
+
+
+export type CamelizeKeys<T extends object> = {
+  [key in keyof T as key extends string ? Camelize<key> : key]: T[key]
+}
+

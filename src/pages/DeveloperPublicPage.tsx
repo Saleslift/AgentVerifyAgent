@@ -29,7 +29,10 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import PrelaunchProjectCard from '../components/developer/PrelaunchProjectCard';
 import ContactOptions from '../components/ContactOptions';
-import MapWithProjects from '../components/MapWithProjects';
+import PropertyMap from "../components/PropertyMap.tsx";
+import PropertyModal from '../components/PropertyModal';
+import DeveloperProjectCard from '../components/DeveloperProjectCard';
+import {Property} from "../types";
 
 interface DeveloperProfile {
   id: string;
@@ -69,27 +72,18 @@ interface DeveloperProfile {
   };
 }
 
-interface Project {
-  id: string;
-  title: string;
-  description: string;
-  location: string;
-  price: number;
-  images: string[];
-  is_prelaunch: boolean;
-  launch_date?: string;
-}
 
 export default function DeveloperPublicPage() {
   const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [developer, setDeveloper] = useState<DeveloperProfile | null>(null);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [prelaunchProjects, setPrelaunchProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<DB_Properties[]>([]);
+  const [prelaunchProjects, setPrelaunchProjects] = useState<DB_Properties[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [projectType, setProjectType] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedProjectSlug, setSelectedProjectSlug] = useState<string | null>(null);
 
   useEffect(() => {
     if (slug) {
@@ -148,6 +142,23 @@ export default function DeveloperPublicPage() {
       case 'on_completion': return 'On Completion';
       default: return timeline.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
     }
+  };
+
+  const handleOnSelectPropertyMap = (property: Property | DB_Properties)=> {
+    // Set flag to allow navigation
+    sessionStorage.setItem('intentional_navigation', 'true');
+    window.open(`/property/${property.slug || property.id}`, '_blank');
+  }
+
+  const handleOpenModal = (slug: string | null) => {
+    if (slug) {
+      setSelectedProjectSlug(slug);
+
+    }
+  };
+
+  const handleCloseModal = () => {
+    setSelectedProjectSlug(null);
   };
 
   // Filter projects based on search term and project type
@@ -621,50 +632,24 @@ export default function DeveloperPublicPage() {
 
                 {filteredProjects().length > 0 ? (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {filteredProjects().map(project => (
+                    {filteredProjects().map(project =>
                       project.is_prelaunch ? (
                         <PrelaunchProjectCard
                           key={project.id}
+                          onOpenModal={handleOpenModal}
                           project={{
                             ...project,
                             whatsapp: developer.whatsapp
                           }}
                         />
                       ) : (
-                        <div key={project.id} className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
-                          <div className="aspect-video bg-gray-200">
-                            {project.images && project.images[0] ? (
-                              <img
-                                src={project.images[0]}
-                                alt={project.title}
-                                className="w-full h-full object-cover"
-                              />
-                            ) : (
-                              <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                                <Home className="h-12 w-12 text-gray-400" />
-                              </div>
-                            )}
-                          </div>
-                          <div className="p-4">
-                            <h3 className="font-semibold text-lg mb-1">{project.title}</h3>
-                            <div className="flex items-center text-gray-500 text-sm mb-2">
-                              <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
-                              <span className="truncate">{project.location}</span>
-                            </div>
-                            <div className="text-xl font-bold mb-2">
-                              AED {project.price.toLocaleString()}
-                            </div>
-                            <p className="text-gray-600 mb-3 line-clamp-2">{project.description}</p>
-                            <a
-                              href={`/property/${project.id}`}
-                              className="block w-full py-2 text-center bg-black text-white rounded-lg hover:bg-gray-800 transition-colors"
-                            >
-                              View Details
-                            </a>
-                          </div>
-                        </div>
+                        <DeveloperProjectCard
+                          key={project.id}
+                          project={project}
+                          onOpenModal={handleOpenModal}
+                        />
                       )
-                    ))}
+                    )}
                   </div>
                 ) : (
                   <div className="text-center py-12 bg-gray-50 rounded-lg">
@@ -686,10 +671,11 @@ export default function DeveloperPublicPage() {
                 <div className="p-6">
                   <h2 className="text-2xl font-bold mb-4">Project Locations</h2>
                   <div className="h-[400px] rounded-lg overflow-hidden">
-                    <MapWithProjects
-                      developerId={developer.id}
-                      height="400px"
-                    />
+                    <PropertyMap
+                        mapID={'project-map'}
+                        properties={[...prelaunchProjects, ...projects]}
+                        onPropertySelect={handleOnSelectPropertyMap}
+                        customMapStyle={{height: 400}}/>
                   </div>
                 </div>
               </div>
@@ -698,7 +684,17 @@ export default function DeveloperPublicPage() {
         </div>
       </div>
 
+      {/* Modal for PropertyPage */}
+      {selectedProjectSlug && (
+        <PropertyModal
+          isOpen={!!selectedProjectSlug}
+          onClose={handleCloseModal}
+          slug={selectedProjectSlug}
+        />
+      )}
+
       <Footer />
     </div>
   );
 }
+

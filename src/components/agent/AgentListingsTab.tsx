@@ -67,7 +67,7 @@ export default function AgentListingsTab({
     return filtered;
   }, [properties, filters, sortBy]);
 
-  const handlePropertySelect = (property: Property) => {
+  const handlePropertySelect = (property: Property | DB_Properties) => {
     // Set flag to allow navigation
     sessionStorage.setItem('intentional_navigation', 'true');
     window.open(`/property/${property.slug || property.id}`, '_blank');
@@ -187,8 +187,9 @@ export default function AgentListingsTab({
           ) : (
             <div className="h-[500px] sm:h-[600px] md:h-[700px] rounded-lg overflow-hidden">
               <PropertyMap
-                properties={filteredProperties}
-                onPropertySelect={handlePropertySelect}
+                  initialZoom={5}
+                  properties={filteredProperties}
+                  onPropertySelect={handlePropertySelect}
               />
             </div>
           )}

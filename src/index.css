@@ -62,11 +62,11 @@ html {
   border-radius: 9999px;
   padding: 1px;
   background: linear-gradient(135deg, #C5DD58, #F5EC39);
-  -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
-  mask: 
-    linear-gradient(#fff 0 0) content-box, 
+  mask:
+    linear-gradient(#fff 0 0) content-box,
     linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
   mask-composite: exclude;
@@ -160,3 +160,5 @@ html {
 .timeline-step:last-child::before {
   display: none;
 }
+
+@layer base { img { display: initial; } }

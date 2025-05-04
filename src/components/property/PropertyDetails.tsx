@@ -59,12 +59,14 @@ const PropertyDetailsUnified: React.FC<PropertyDetailsProps> = ({ property }) =>
         );
       }
     };
+    if (property?.id) {
+      fetchAllAmenities();
 
-    fetchAllAmenities();
+    }
   }, [property.id, property.amenities]);
 
   return (
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
+      <div className="bg-white rounded-xl shadow-sm p-6 mb-8" id={'property-details'}>
         <h2 className="text-xl font-semibold mb-6">Property Details</h2>
 
         {/* Property Details Section */}
@@ -126,7 +128,7 @@ const PropertyDetailsUnified: React.FC<PropertyDetailsProps> = ({ property }) =>
                 Amenities
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                {Object.entries(groupedAmenities).map(([category, amenities]) => (
+                {Object.entries(groupedAmenities).map(([category, amenities]) => amenities.length ? (
                     <div key={category}>
                       <h4 className="text-md font-semibold mb-2">{category}</h4>
                       {amenities.map((amenity, index) => (
@@ -135,7 +137,7 @@ const PropertyDetailsUnified: React.FC<PropertyDetailsProps> = ({ property }) =>
                           </div>
                       ))}
                     </div>
-                ))}
+                ): null)}
               </div>
             </div>
         )}

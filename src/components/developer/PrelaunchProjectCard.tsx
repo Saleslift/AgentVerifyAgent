@@ -1,24 +1,16 @@
 import React from 'react';
-import { Building2, MapPin, Calendar, ArrowRight } from 'lucide-react';
+import {Building2, MapPin, Calendar, ArrowRight, Download} from 'lucide-react';
 import { format } from 'date-fns';
 
 interface PrelaunchProjectCardProps {
-  project: {
-    id: string;
-    title: string;
-    description: string;
-    location: string;
-    images: string[];
-    price: number;
-    launch_date?: string;
-    whatsapp?: string;
-  };
+  project: DB_Properties & { whatsapp?: string };
   onClick?: () => void;
+  onOpenModal: (slug: string | null) => void;
 }
 
-export default function PrelaunchProjectCard({ project, onClick }: PrelaunchProjectCardProps) {
+export default function PrelaunchProjectCard({ project, onClick , onOpenModal}: PrelaunchProjectCardProps) {
   // Format launch date if it exists
-  const formattedLaunchDate = project.launch_date 
+  const formattedLaunchDate = project.launch_date
     ? format(new Date(project.launch_date), 'MMM dd, yyyy')
     : 'Coming Soon';
 
@@ -29,7 +21,7 @@ export default function PrelaunchProjectCard({ project, onClick }: PrelaunchProj
   const handleWhatsAppClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!project.whatsapp) return;
-    
+
     const message = encodeURIComponent(
       `Hello! I'm interested in the prelaunch project "${project.title}" at ${project.location}. Could you provide more information?`
     );
@@ -37,15 +29,15 @@ export default function PrelaunchProjectCard({ project, onClick }: PrelaunchProj
   };
 
   return (
-    <div 
+    <div
       className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow"
       onClick={onClick}
     >
       <div className="relative aspect-video">
         {project.images && project.images[0] ? (
-          <img 
-            src={project.images[0]} 
-            alt={project.title} 
+          <img
+            src={project.images[0]}
+            alt={project.title}
             className="w-full h-full object-cover"
           />
         ) : (
@@ -63,7 +55,7 @@ export default function PrelaunchProjectCard({ project, onClick }: PrelaunchProj
           <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
           <span className="truncate">{project.location}</span>
         </div>
-        
+
         <div className="flex items-center justify-between mb-2">
           <div className="text-gray-900 font-semibold">
             From {formattedPrice}
@@ -73,16 +65,24 @@ export default function PrelaunchProjectCard({ project, onClick }: PrelaunchProj
             <span>{formattedLaunchDate}</span>
           </div>
         </div>
-        
+
         <p className="text-gray-600 mb-3 line-clamp-2">{project.description}</p>
-        
+
+        <div className="flex space-x-2">
         <button
           onClick={handleWhatsAppClick}
           className="w-full py-2 bg-[#cefa05] text-black rounded-md hover:bg-opacity-90 flex items-center justify-center font-medium"
         >
           WhatsApp for Details
-          <ArrowRight className="ml-1 h-4 w-4" />
+          {/*<ArrowRight className="ml-1 h-4 w-4" />*/}
         </button>
+        <button
+            onClick={() => onOpenModal(project.slug)}
+            className="flex items-center justify-center w-1/3 py-2 bg-gray-800 text-white rounded-lg hover:bg-black transition-colors"
+        >
+          <Download className="h-5 w-5 mr-2" />
+        </button>
+        </div>
       </div>
     </div>
   );

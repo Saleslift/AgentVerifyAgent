@@ -156,89 +156,91 @@ const DealsList: React.FC<DealsListProps> = ({ deals }) => {
             </div>
 
             {/* Desktop View */}
-            <div className="hidden lg:grid lg:grid-cols-7 lg:gap-4 lg:items-center">
-              <div className="flex items-center">
-                <div className="w-10 h-10 flex-shrink-0 rounded overflow-hidden mr-3 bg-gray-100">
-                  {deal.property?.images?.[0] ? (
-                    <img
-                      src={deal.property.images[0]}
-                      alt={deal.property.title}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                      <Home className="h-5 w-5 text-gray-400" />
-                    </div>
-                  )}
-                </div>
-                <div>
-                  <p className="font-medium text-gray-900 truncate max-w-[200px]">
-                    {deal.property?.title || deal.project?.title || 'Unnamed Property'}
-                  </p>
-                  <p className="text-xs text-gray-500 truncate max-w-[200px]">
-                    {deal.property?.location || deal.project?.location || 'No location'}
-                  </p>
-                </div>
-              </div>
-
-              <div>
-                <p className="font-medium text-gray-900 truncate max-w-[150px]">
-                  {deal.lead?.full_name || 'No contact'}
-                </p>
-                <p className="text-xs text-gray-500 truncate max-w-[150px]">
-                  {deal.lead?.phone_number || ''}
-                </p>
-              </div>
-
-              <div>
-                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getDealTypeColor(deal.deal_type)}`}>
-                  {deal.deal_type === 'Collaboration' || deal.deal_type === 'Marketplace Property' ? (
-                    <Users className="h-3 w-3 mr-1" />
-                  ) : (
-                    <Home className="h-3 w-3 mr-1" />
-                  )}
-                  {getDealTypeLabel(deal.deal_type)}
-                </span>
-              </div>
-
-              <div>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(deal.status)}`}>
-                  {deal.status}
-                </span>
-              </div>
-
-              <div>
-                {getStageForStatus(deal.status)}
-              </div>
-
-              <div className="truncate max-w-[150px]">
-                {deal.co_agent ? (
-                  <div className="flex items-center">
-                    {deal.co_agent.avatar_url ? (
+            <div className="hidden lg:block overflow-x-auto">
+              <div className="grid grid-cols-7 gap-4 items-center min-w-[1024px]">
+                <div className="flex items-center justify-center">
+                  <div className="w-10 h-10 flex-shrink-0 rounded overflow-hidden mr-3 bg-gray-100">
+                    {deal.property?.images?.[0] ? (
                       <img
-                        src={deal.co_agent.avatar_url}
-                        alt={deal.co_agent.full_name}
-                        className="w-6 h-6 rounded-full mr-2 object-cover"
+                        src={deal.property.images[0]}
+                        alt={deal.property.title}
+                        className="w-full h-full object-cover"
                       />
                     ) : (
-                      <div className="w-6 h-6 rounded-full mr-2 bg-gray-200 flex items-center justify-center">
-                        <User className="h-3 w-3 text-gray-500" />
+                      <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                        <Home className="h-5 w-5 text-gray-400" />
                       </div>
                     )}
-                    <span className="text-sm text-gray-700">
-                      {deal.co_agent.full_name}
-                    </span>
                   </div>
-                ) : (
-                  <span className="text-gray-400">-</span>
-                )}
-              </div>
+                  <div>
+                    <p className="font-medium text-gray-900 truncate max-w-[150px]">
+                      {deal.property?.title || deal.project?.title || 'Unnamed Property'}
+                    </p>
+                    <p className="text-xs text-gray-500 truncate max-w-[150px]">
+                      {deal.property?.location || deal.project?.location || 'No location'}
+                    </p>
+                  </div>
+                </div>
 
-              <div className="flex items-center">
-                <Clock className="h-4 w-4 text-gray-400 mr-1" />
-                <span className="text-sm text-gray-500">
-                  {formatDate(deal.updated_at)}
-                </span>
+                <div>
+                  <p className="font-medium text-gray-900 truncate max-w-[150px]">
+                    {deal.lead?.full_name || 'No contact'}
+                  </p>
+                  <p className="text-xs text-gray-500 truncate max-w-[150px]">
+                    {deal.lead?.phone_number || ''}
+                  </p>
+                </div>
+
+                <div>
+                  <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${getDealTypeColor(deal.deal_type)}`}>
+                    {deal.deal_type === 'Collaboration' || deal.deal_type === 'Marketplace Property' ? (
+                      <Users className="h-3 w-3 mr-1" />
+                    ) : (
+                      <Home className="h-3 w-3 mr-1" />
+                    )}
+                    {getDealTypeLabel(deal.deal_type)}
+                  </span>
+                </div>
+
+                <div>
+                  <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(deal.status)}`}>
+                    {deal.status}
+                  </span>
+                </div>
+
+                <div>
+                  {getStageForStatus(deal.status)}
+                </div>
+
+                <div className="truncate max-w-[150px]">
+                  {deal.co_agent ? (
+                    <div className="flex items-center">
+                      {deal.co_agent.avatar_url ? (
+                        <img
+                          src={deal.co_agent.avatar_url}
+                          alt={deal.co_agent.full_name}
+                          className="w-6 h-6 rounded-full mr-2 object-cover"
+                        />
+                      ) : (
+                        <div className="w-6 h-6 rounded-full mr-2 bg-gray-200 flex items-center justify-center">
+                          <User className="h-3 w-3 text-gray-500" />
+                        </div>
+                      )}
+                      <span className="text-sm text-gray-700">
+                        {deal.co_agent.full_name}
+                      </span>
+                    </div>
+                  ) : (
+                    <span className="text-gray-400">-</span>
+                  )}
+                </div>
+
+                <div className="flex items-center">
+                  <Clock className="h-4 w-4 text-gray-400 mr-1" />
+                  <span className="text-sm text-gray-500">
+                    {formatDate(deal.updated_at)}
+                  </span>
+                </div>
               </div>
             </div>
 
@@ -264,3 +266,4 @@ const DealsList: React.FC<DealsListProps> = ({ deals }) => {
 };
 
 export default DealsList;
+

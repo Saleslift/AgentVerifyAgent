@@ -92,16 +92,14 @@ export default function AgencyProperties() {
       if (propertiesForAgentCounts.length > 0) {
         const { data: sharesData, error: countsError } = await supabase
           .from('shared_properties')
-          .select('property_id, count(*)')
+          .select('property_id, agent_id')
           .in('property_id', propertiesForAgentCounts)
           .eq('shared_by_agency_id', profile?.id)
-          .group('property_id');
 
         if (countsError) throw countsError;
 
-        // Convert to dictionary for easier lookup
         agentCounts = (sharesData || []).reduce((acc, item) => {
-          acc[item.property_id] = item.count;
+          acc[item.property_id] = (acc[item.property_id] || 0) + 1;
           return acc;
         }, {} as { [key: string]: number });
       }
@@ -343,3 +341,4 @@ export default function AgencyProperties() {
     </div>
   );
 }
+

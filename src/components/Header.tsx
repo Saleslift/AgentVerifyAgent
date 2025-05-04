@@ -1,14 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { Menu, X } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import ConnectModal from './agent/ConnectModal';
 import ContactOptions from './ContactOptions';
 import LanguageSelectorMenu from './LanguageSelectorMenu';
 import type {Agent} from "../types";
 
 type HeaderProps = {
-  agent: Agent;
+  agent?: Agent;
 }
 
 export default function Header({agent}: HeaderProps) {
@@ -72,7 +72,7 @@ export default function Header({agent}: HeaderProps) {
             aria-label={isMenuOpen ? "Close menu" : "Open menu"}
             aria-expanded={isMenuOpen}
           >
-            {isAgentProfilePage ? (
+            {isAgentProfilePage && agent ? (
                 <>
                   <ContactOptions
                       whatsapp={agent.whatsapp}
@@ -90,7 +90,7 @@ export default function Header({agent}: HeaderProps) {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-3">
-            {isAgentProfilePage ? (
+            {isAgentProfilePage && agent ? (
                 <>
                   <LanguageSelectorMenu isAgentProfilePage={isAgentProfilePage}  />
                   <ContactOptions
@@ -169,31 +169,11 @@ export default function Header({agent}: HeaderProps) {
       </nav>
 
       {/* Connect Modal */}
-      {isAgentProfilePage && showConnectModal && (
+      {isAgentProfilePage && showConnectModal && agent && (
         <ConnectModal
           isOpen={showConnectModal}
           onClose={() => setShowConnectModal(false)}
-          agent={{
-            id: '',
-            name: 'Agent Name',
-            introduction: '',
-            photo: '',
-            agencyLogo: '',
-            agencyName: 'Agency Name',
-            verified: true,
-            bio: '',
-            languages: [],
-            specialties: [],
-            registrationNumber: '',
-            whatsapp: agent.phone,
-            location: '',
-            experience: '',
-            activeListings: 0,
-            reviews: [],
-            serviceAreas: [],
-            certifications: [],
-            slug: ''
-          }}
+          agent={agent}
         />
       )}
     </header>
