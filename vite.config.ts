@@ -5,7 +5,7 @@ import path from 'path';
 
 export default defineConfig(({ mode }) => {
   const isAnalyze = mode === 'analyze';
-  
+
   return {
     plugins: [
       react({
@@ -41,66 +41,69 @@ export default defineConfig(({ mode }) => {
         output: {
           manualChunks: (id) => {
             // Core React libraries
-            if (id.includes('node_modules/react/') || 
+            if (id.includes('node_modules/react/') ||
                 id.includes('node_modules/react-dom/')) {
               return 'react-vendor';
             }
-            
+
             // Supabase
             if (id.includes('node_modules/@supabase/')) {
               return 'supabase';
             }
-            
+
             // Maps
-            if (id.includes('node_modules/@googlemaps/') || 
+            if (id.includes('node_modules/@googlemaps/') ||
                 id.includes('node_modules/@react-google-maps/') ||
                 id.includes('node_modules/use-places-autocomplete')) {
               return 'maps';
             }
-            
+
             // Forms
-            if (id.includes('node_modules/react-hook-form') || 
+            if (id.includes('node_modules/react-hook-form') ||
                 id.includes('node_modules/zod')) {
               return 'forms';
             }
-            
+
             // UI Components
             if (id.includes('node_modules/@headlessui/')) {
               return 'ui-components';
             }
-            
+
             // Icons
             if (id.includes('node_modules/lucide-react')) {
               return 'icons';
             }
-            
+
             // Group by feature for app code
             if (id.includes('/src/components/agent/')) {
               return 'feature-agent';
             }
-            
+
             if (id.includes('/src/components/agency/')) {
               return 'feature-agency';
             }
-            
+
             if (id.includes('/src/components/developer/')) {
               return 'feature-developer';
             }
-            
+
             if (id.includes('/src/components/property/')) {
               return 'feature-property';
             }
-            
+
             if (id.includes('/src/hooks/')) {
               return 'app-hooks';
             }
-            
+
             if (id.includes('/src/utils/')) {
               return 'app-utils';
             }
-            
+
             if (id.includes('/src/contexts/')) {
               return 'app-contexts';
+            }
+            if (id.includes('commonjsHelpers')){
+              return 'commonjsHelpers'
             }
           }
         }
