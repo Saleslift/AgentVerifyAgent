@@ -1,5 +1,12 @@
 import { createClient } from '@supabase/supabase-js';
 
+
+type UploadFileToSupabaseParams = {
+    file: File;
+    filePath: string;
+    bucketName: string;
+}
+
 // Get environment variables
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -424,4 +431,58 @@ export const checkConnection = async () => {
       }
     };
   }
+};
+
+export const getAuthHeader = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+
+    return  {
+      apikey: import.meta.env.VITE_SUPABASE_ANON_KEY!,
+      Authorization: `Bearer ${session?.access_token}`
+    };
+}
+
+export const uploadFileToSupabase = async (params: UploadFileToSupabaseParams) => {
+  const {file, filePath, bucketName} = params;
+
+  const { error: uploadError } = await supabase.storage
+      .from(bucketName)
+      .upload(filePath, file, {
+        contentType: file.type,
+        upsert: false,
+      });
+
+  if (uploadError) {
+    throw uploadError;
+  }
+
+  // Get public URL
+  const { data: { publicUrl } } = supabase.storage
+      .from(bucketName)
+      .getPublicUrl(filePath);
+
+  return publicUrl;
+}
+
+export const uploadMultipleFilesToSupabase = async (params: { files: File[]; bucketName: string; folderPath: string }) => {
+  const { files, bucketName, folderPath } = params;
+
+  const uploadPromises = files.map((file) => {
+    const filePath = `${folderPath}/${file.name}`;
+    return supabase.storage
+        .from(bucketName)
+        .upload(filePath, file, {
+          contentType: file.type,
+          upsert: false,
+        })
+        .then(({ error }) => {
+          if (error) throw error;
+
+          // Get public URL for the uploaded file
+          const { data } = supabase.storage.from(bucketName).getPublicUrl(filePath);
+          return data?.publicUrl;
+        });
+  });
+
+  return Promise.all(uploadPromises);
 };

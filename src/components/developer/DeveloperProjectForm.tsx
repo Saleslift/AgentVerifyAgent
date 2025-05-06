@@ -27,7 +27,8 @@ interface ProjectFormData {
     priceMin: string;
     priceMax: string;
     unitsAvailable: string;
-    images?: File[] | string[];
+    images: string[] | null;
+    floorPlanImage: string | null;
   }[];
 }
 
@@ -52,7 +53,8 @@ const defaultFormValues: ProjectFormData = {
     priceMin: '',
     priceMax: '',
     unitsAvailable: '',
-    images: []
+    images: [],
+    floorPlanImage: '',
   }]
 };
 
@@ -115,7 +117,9 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
         priceMin: unit.price_range?.split('-')[0]?.replace(/[^0-9]/g, '') || '',
         priceMax: unit.price_range?.split('-')[1]?.replace(/[^0-9]/g, '') || '',
         unitsAvailable: unit.units_available?.toString() || '0',
-        images: []
+        images: unit.images,
+        floorPlanImage: unit.floor_plan_image
+        ,
       })) || []);
     } catch (error) {
       console.error('Error fetching project data:', error);
@@ -158,7 +162,7 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
         creator_id: user.id,
         creator_type: role, // Use the actual role from useRoleAuth
         agent_id: user.id, // For developers, agent_id is the same as creator_id
-      };
+      } as DB_Properties;
 
       // Handle project images if provided
       if (data.imageFiles && data.imageFiles.length > 0) {
@@ -316,7 +320,9 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
         price_range: `${parseInt(group.priceMin).toLocaleString()} - ${parseInt(group.priceMax).toLocaleString()}`,
         units_available: parseInt(group.unitsAvailable) || 0,
         status: 'available',
-        notes: null
+        notes: null,
+        floor_plan_image: group.floorPlanImage,
+        images: group.images,
       };
 
       if (isEditMode && group.id && group.id.length > 10) {

@@ -1,5 +1,7 @@
 import React from 'react';
 import { Plus, Trash2, ArrowLeft, Save } from 'lucide-react';
+import { uploadFileToSupabase } from "../../../utils/supabase.ts";
+import {useAuth} from "../../../contexts/AuthContext.tsx";
 
 interface UnitGroup {
   id: string;
@@ -11,8 +13,8 @@ interface UnitGroup {
   priceMin: string;
   priceMax: string;
   unitsAvailable: string;
-  images?: (File | string)[];
-  floorPlans?: File[];
+  images?: string[] | null;
+  floorPlanImage: string | null;
 }
 
 interface UnitGroupRepeaterProps {
@@ -42,8 +44,10 @@ const UnitGroupRepeater = ({
   onChange,
   onPrev,
   onSubmit,
-  loading
+  loading,
 }: UnitGroupRepeaterProps) => {
+  const { user } = useAuth();
+
   const handleAddUnitGroup = () => {
     const newGroup: UnitGroup = {
       id: crypto.randomUUID(),
@@ -56,7 +60,7 @@ const UnitGroupRepeater = ({
       priceMax: '',  // Added missing comma here
       unitsAvailable: '',
       images: [],
-      floorPlans: []
+      floorPlanImage: '',
     };
 
     onChange([...unitGroups, newGroup]);
@@ -78,7 +82,7 @@ const UnitGroupRepeater = ({
     );
   };
 
-  const handleImageUpload = (id: string, event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (id: string, event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
@@ -109,8 +113,14 @@ const UnitGroupRepeater = ({
         alert('Image size should not exceed 120MB');
         continue;
       }
+      // Upload brochure file
+      const fileExt = files[i].name.split('.').pop();
+      const fileName = `${crypto.randomUUID()}.${fileExt}`;
+      const filePath = `developer-files/unit-types/images/${user?.id}/${fileName}`;
 
-      newImages.push(files[i]);
+      const publicUrl  = await uploadFileToSupabase({file: files[i], filePath, bucketName: 'developer-files'});
+
+      newImages.push(publicUrl);
     }
 
     // Update the unit group with new images
@@ -126,47 +136,40 @@ const UnitGroupRepeater = ({
     }
   };
 
-  const handleFloorPlanUpload = (id: string, event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
-    if (!files || files.length === 0) return;
+  const handleFloorPlanUpload = async (id: string, event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file ) return;
 
     // Find the current group
     const currentGroup = unitGroups.find(group => group.id === id);
     if (!currentGroup) return;
 
-    // Get current floor plans or initialize empty array
-    const currentFloorPlans = currentGroup.floorPlans || [];
-
-    // Check if adding these files would exceed the 3 floor plan limit
-    if (currentFloorPlans.length + files.length > 3) {
-      alert('You can upload a maximum of 3 floor plan images per unit type');
-      return;
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload only image files');
     }
 
-    // Add new files to the floor plans array
-    const newFloorPlans = [...currentFloorPlans];
-    for (let i = 0; i < files.length; i++) {
-      // Validate file type
-      if (!files[i].type.startsWith('image/')) {
-        alert('Please upload only image files');
-        continue;
-      }
-
-      // Validate file size (120MB max)
-      if (files[i].size > 120 * 1024 * 1024) {
-        alert('Image size should not exceed 120MB');
-        continue;
-      }
-
-      newFloorPlans.push(files[i]);
+    // Validate file size (5MB max)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size should not exceed 5MB');
     }
 
-    // Update the unit group with new floor plans
-    onChange(
-      unitGroups.map(group =>
-        group.id === id ? { ...group, floorPlans: newFloorPlans } : group
-      )
-    );
+    // Upload brochure file
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${crypto.randomUUID()}.${fileExt}`;
+    const filePath = `developer-files/unit-types/${user?.id}/${fileName}`;
+
+    const publicUrl  = await uploadFileToSupabase({file, filePath, bucketName: 'developer-files'});
+
+    if (publicUrl) {
+      onChange(
+          unitGroups.map(group =>
+              group.id === id ? { ...group, floorPlanImage: publicUrl } : group
+          )
+      );
+    }
+    else {
+      alert('Image size should not exceed 5MB');
+    }
 
     // Clear the input
     if (event.target) {
@@ -174,19 +177,15 @@ const UnitGroupRepeater = ({
     }
   };
 
-  const handleRemoveFloorPlan = (groupId: string, imageIndex: number) => {
+  const handleRemoveFloorPlan = (groupId: string) => {
     // Find the current group
     const currentGroup = unitGroups.find(group => group.id === groupId);
-    if (!currentGroup || !currentGroup.floorPlans) return;
-
-    // Remove the floor plan at the specified index
-    const newFloorPlans = [...currentGroup.floorPlans];
-    newFloorPlans.splice(imageIndex, 1);
+    if (!currentGroup || !currentGroup.floorPlanImage) return;
 
     // Update the unit group with new floor plans
     onChange(
       unitGroups.map(group =>
-        group.id === groupId ? { ...group, floorPlans: newFloorPlans } : group
+        group.id === groupId ? { ...group, floorPlanImage: null } : group
       )
     );
   };
@@ -207,6 +206,7 @@ const UnitGroupRepeater = ({
       )
     );
   };
+
   const formatCurrency = (value: string) => {
     if (!value) return '';
 
@@ -407,42 +407,38 @@ const UnitGroupRepeater = ({
             {/* Floor Plan Images */}
             <div className="mt-6">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Floor Plan Images (up to 3)
+                Floor Plan Image
               </label>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
                 {/* Display existing floor plans */}
-                {group.floorPlans && group.floorPlans.map((file, index) => (
-                  <div key={index} className="relative aspect-[4/3]">
+                {group.floorPlanImage && (
+                  <div key={group.floorPlanImage} className="relative aspect-[4/3]">
                     <img
-                      src={URL.createObjectURL(file)}
-                      alt={`Floor Plan ${index + 1}`}
+                      src={group.floorPlanImage}
+                      alt={group.floorPlanImage}
                       className="w-full h-full object-cover rounded-lg"
                     />
                     <button
                       type="button"
-                      onClick={() => handleRemoveFloorPlan(group.id, index)}
+                      onClick={() => handleRemoveFloorPlan(group.id)}
                       className="absolute top-2 right-2 p-1 bg-red-600 text-white rounded-full hover:bg-red-700"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
-                ))}
+                )}
 
                 {/* Upload button - only show if less than 3 floor plans */}
-                {(!group.floorPlans || group.floorPlans.length < 3) && (
+                {!group.floorPlanImage && (
                   <label className="relative aspect-[4/3] border-2 border-dashed border-gray-300 rounded-lg hover:border-gray-400 cursor-pointer flex flex-col items-center justify-center">
                     <input
                       type="file"
-                      multiple
                       accept="image/*"
                       onChange={(e) => handleFloorPlanUpload(group.id, e)}
                       className="hidden"
                     />
                     <Plus className="h-8 w-8 text-gray-400 mb-2" />
                     <span className="text-sm text-gray-500">Add Floor Plans</span>
-                    <span className="text-xs text-gray-400 mt-1">
-                      {group.floorPlans ? `${group.floorPlans.length}/3` : '0/3'}
-                    </span>
                   </label>
                 )}
               </div>

@@ -2303,8 +2303,8 @@ export type Database = {
           message: string
           recipient_id: string
           title: string
+          token: string | null
           type: string
-          token?: string
         }
         Insert: {
           agency_id?: string | null
@@ -2315,8 +2315,8 @@ export type Database = {
           message: string
           recipient_id: string
           title: string
+          token?: string | null
           type: string
-          token?: string
         }
         Update: {
           agency_id?: string | null
@@ -2327,8 +2327,8 @@ export type Database = {
           message?: string
           recipient_id?: string
           title?: string
+          token?: string | null
           type?: string
-          token?: string
         }
         Relationships: []
       }
@@ -2457,7 +2457,7 @@ export type Database = {
           languages?: string[] | null
           linkedin?: string | null
           location?: string | null
-          promotion_video_url: string | null
+          promotion_video_url?: string | null
           registration_number?: string | null
           role?: string
           slug?: string | null
@@ -2492,8 +2492,8 @@ export type Database = {
           languages?: string[] | null
           linkedin?: string | null
           location?: string | null
+          promotion_video_url?: string | null
           registration_number?: string | null
-          promotion_video_url: string | null
           role?: string
           slug?: string | null
           specialties?: string[] | null
@@ -2977,8 +2977,10 @@ export type Database = {
         Row: {
           created_at: string | null
           developer_id: string
+          floor_plan_image: string | null
           floor_range: string | null
           id: string
+          images: string[] | null
           name: string
           notes: string | null
           price_range: string | null
@@ -2991,8 +2993,10 @@ export type Database = {
         Insert: {
           created_at?: string | null
           developer_id: string
+          floor_plan_image?: string | null
           floor_range?: string | null
           id?: string
+          images?: string[] | null
           name: string
           notes?: string | null
           price_range?: string | null
@@ -3005,8 +3009,10 @@ export type Database = {
         Update: {
           created_at?: string | null
           developer_id?: string
+          floor_plan_image?: string | null
           floor_range?: string | null
           id?: string
+          images?: string[] | null
           name?: string
           notes?: string | null
           price_range?: string | null
