@@ -353,7 +353,7 @@ export default function AgentPropertyForm({ agentId, property, onSuccess, onCanc
 
       <MediaGallery
           userId={agentId}
-          media={formData.images}
+          media={formData.images || []}
           onMediaChange={handleImagesChange}
           maxFileSizeMB={5}
           maxFiles={20}
@@ -363,7 +363,7 @@ export default function AgentPropertyForm({ agentId, property, onSuccess, onCanc
 
       <MediaGallery
           userId={agentId}
-          media={formData.videos}
+          media={formData.videos || []}
           onMediaChange={handleVideosChange}
           maxFileSizeMB={50}
           title={"Video Gallery"}
@@ -385,7 +385,7 @@ export default function AgentPropertyForm({ agentId, property, onSuccess, onCanc
       {/* Additional Features */}
       <AdditionalFeatures
         formData={formData}
-        setFormData={setFormData}
+        setFormData={onChangeForm}
         withListInMarketplace={true}
       />
     </form>

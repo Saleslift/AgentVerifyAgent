@@ -11,7 +11,6 @@ import { Property, PropertyFilters } from '../types';
 import { initPageVisibilityHandling, cleanupPageVisibilityHandling } from '../utils/pageVisibility';
 import ShareModal from '../components/property/ShareModal';
 import AgentHeroSection from '../components/agent/AgentHeroSection';
-import SearchFilter from '../components/SearchFilter';
 import AgentListingsTab from '../components/agent/AgentListingsTab';
 import { supabase } from '../utils/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -73,43 +72,12 @@ export default function AgentProfilePage() {
     return total / agent.reviews.length;
   }, [agent?.reviews]);
 
-  const handlePropertySelect = (property: Property) => {
-    setSelectedProperty(property);
-    setShowShareModal(true);
-  };
 
   const handleCopySuccess = () => {
     setShowCopiedMessage(true);
     setTimeout(() => setShowCopiedMessage(false), 2000);
   };
 
-  const handleSearch = (filters: { propertyType: string; priceRange: string }) => {
-    // Set active tab to listings
-    setActiveTab('listings');
-
-    // Parse price range
-    let minPrice: number | undefined;
-    let maxPrice: number | undefined;
-
-    if (filters.priceRange) {
-      const [min, max] = filters.priceRange.split('-');
-      minPrice = min ? parseInt(min) : undefined;
-      maxPrice = max ? parseInt(max) : undefined;
-
-      // Handle "5000000+" case
-      if (filters.priceRange.endsWith('+')) {
-        minPrice = parseInt(filters.priceRange.replace('+', ''));
-        maxPrice = undefined;
-      }
-    }
-
-    // Set search filters
-    setSearchFilters({
-      type: filters.propertyType || undefined,
-      minPrice,
-      maxPrice,
-    });
-  };
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -264,15 +232,6 @@ export default function AgentProfilePage() {
       {/* Hero Section */}
       <AgentHeroSection agent={agent} averageRating={averageRating} />
 
-      <SearchFilter
-        onSearch={handleSearch}
-        initialFilters={{
-          propertyType: searchFilters.type,
-          priceRange: searchFilters.minPrice && searchFilters.maxPrice ?
-            `${searchFilters.minPrice}-${searchFilters.maxPrice}` :
-            searchFilters.minPrice ? `${searchFilters.minPrice}+` : ''
-        }}
-      />
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8 md:py-12" id="listings-section">

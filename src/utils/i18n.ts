@@ -8,9 +8,12 @@ const resources = {
     fr: { translation: frTranslation },
 };
 
+// Retrieve the saved language from localStorage or default to 'en'
+const savedLanguage = localStorage.getItem('i18nextLng') || 'en';
+
 i18n.use(initReactI18next).init({
     resources,
-    lng: 'en', // Default language
+    lng: savedLanguage, // Use the saved language
     fallbackLng: 'en',
     interpolation: {
         escapeValue: false, // React already escapes values

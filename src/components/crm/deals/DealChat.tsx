@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Send, 
+import {
+  Send,
   User,
   ImageIcon,
   FileText,
@@ -30,13 +30,13 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
-  
+
   useEffect(() => {
     if (!dealId || !user) return;
-    
+
     fetchMessages();
     fetchPartnerAgent();
-    
+
     // Set up real-time subscription for new messages
     const subscription = supabase
       .channel(`deal-chat-${dealId}`)
@@ -51,7 +51,7 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
         (payload) => {
           console.log('New message:', payload);
           setMessages(prevMessages => [...prevMessages, payload.new]);
-          
+
           // Scroll to bottom when new message arrives
           setTimeout(() => {
             scrollToBottom();
@@ -59,20 +59,20 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
         }
       )
       .subscribe();
-    
+
     return () => {
       subscription.unsubscribe();
     };
   }, [dealId, user]);
-  
+
   // Fetch messages
   const fetchMessages = async () => {
     if (!dealId || !user) return;
-    
+
     try {
       setLoading(true);
       setError(null);
-      
+
       const { data, error: fetchError } = await supabase
         .from('crm_messages')
         .select(`
@@ -85,19 +85,19 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
         `)
         .eq('deal_id', dealId)
         .order('created_at');
-      
+
       if (fetchError) throw fetchError;
-      
+
       setMessages(data || []);
-      
+
       // Scroll to bottom after messages are loaded
       setTimeout(() => {
         scrollToBottom();
       }, 100);
-      
+
       // Mark messages as read
       markMessagesAsRead();
-      
+
     } catch (err) {
       console.error('Error fetching messages:', err);
       setError('Failed to load messages');
@@ -105,24 +105,24 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
       setLoading(false);
     }
   };
-  
+
   // Fetch partner agent information
   const fetchPartnerAgent = () => {
     if (!deal || !user) return;
-    
+
     const isListingAgent = deal.agent_id === user.id;
     const partnerId = isListingAgent ? deal.co_agent_id : deal.agent_id;
-    
+
     if (partnerId) {
       // Set partner agent from deal data
       setPartnerAgent(isListingAgent ? deal.co_agent : deal.agent);
     }
   };
-  
+
   // Mark messages as read
   const markMessagesAsRead = async () => {
     if (!dealId || !user) return;
-    
+
     try {
       await supabase
         .from('crm_messages')
@@ -134,27 +134,27 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
       console.error('Error marking messages as read:', err);
     }
   };
-  
+
   // Scroll to bottom of chat
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   };
-  
+
   // Handle sending a message
   const handleSendMessage = async () => {
     if (!dealId || !user || (!newMessage.trim() && !selectedFile)) return;
-    
+
     try {
       setSending(true);
       setError(null);
-      
+
       // Handle file upload first if a file is selected
       if (selectedFile) {
         await handleFileUpload();
       }
-      
+
       // Only send text message if there's actual text
       if (newMessage.trim()) {
         const { error: sendError } = await supabase
@@ -166,13 +166,14 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
             is_read: false,
             created_at: new Date().toISOString()
           });
-        
+
         if (sendError) throw sendError;
+        fetchMessages();
       }
-      
+
       // Clear the input
       setNewMessage('');
-      
+
       // Log activity
       if (newMessage.trim()) {
         await supabase
@@ -184,7 +185,7 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
             description: 'Sent a message'
           });
       }
-      
+
     } catch (err) {
       console.error('Error sending message:', err);
       setError('Failed to send message');
@@ -192,7 +193,7 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
       setSending(false);
     }
   };
-  
+
   // Handle file selection
   const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -201,21 +202,21 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
         setError('File size must be less than 10MB');
         return;
       }
-      
+
       setSelectedFile(file);
       setError(null);
     }
   };
-  
+
   // Handle file upload
   const handleFileUpload = async () => {
     if (!dealId || !user || !selectedFile) return;
-    
+
     try {
       // Generate a unique file name
       const fileExt = selectedFile.name.split('.').pop();
       const fileName = `${dealId}/${Date.now()}.${fileExt}`;
-      
+
       // Upload to storage
       const { data, error: uploadError } = await supabase.storage
         .from('crm-documents')
@@ -227,14 +228,14 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
             setUploadProgress(Math.round(percent));
           }
         });
-      
+
       if (uploadError) throw uploadError;
-      
+
       // Get public URL
       const { data: { publicUrl } } = supabase.storage
         .from('crm-documents')
         .getPublicUrl(fileName);
-      
+
       // Create a document record
       await supabase
         .from('crm_documents')
@@ -248,7 +249,7 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
           uploaded_by: user.id,
           category: 'chat'
         });
-      
+
       // Add a special message indicating a file was shared
       const { error: messageError } = await supabase
         .from('crm_messages')
@@ -259,13 +260,13 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
           is_read: false,
           created_at: new Date().toISOString()
         });
-      
+
       if (messageError) throw messageError;
-      
+
       // Reset file state
       setSelectedFile(null);
       setUploadProgress(0);
-      
+
       // Log activity
       await supabase
         .from('crm_activities')
@@ -275,17 +276,17 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
           activity_type: 'file_upload',
           description: `Shared a file in chat: ${selectedFile.name}`
         });
-      
+
     } catch (err) {
       console.error('Error uploading file:', err);
       throw err;
     }
   };
-  
+
   // Determine file type based on extension
   const getFileType = (fileName: string): string => {
     const extension = fileName.split('.').pop()?.toLowerCase();
-    
+
     if (['jpg', 'jpeg', 'png', 'gif'].includes(extension || '')) {
       return 'image';
     } else if (['pdf'].includes(extension || '')) {
@@ -295,30 +296,30 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
     } else if (['xls', 'xlsx'].includes(extension || '')) {
       return 'Excel';
     }
-    
+
     return 'Document';
   };
-  
+
   // Format timestamps
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
   };
-  
+
   // Check if date should be displayed (first message or different day)
   const shouldShowDate = (message: any, index: number) => {
     if (index === 0) return true;
-    
+
     const prevDate = new Date(messages[index - 1].created_at);
     const currDate = new Date(message.created_at);
-    
+
     return (
       prevDate.getDate() !== currDate.getDate() ||
       prevDate.getMonth() !== currDate.getMonth() ||
       prevDate.getFullYear() !== currDate.getFullYear()
     );
   };
-  
+
   // Format date for display
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -329,7 +330,7 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
       day: 'numeric'
     });
   };
-  
+
   // Handle keypress (send on Enter)
   const handleKeyPress = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -346,8 +347,8 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
           <>
             <div className="h-10 w-10 rounded-full flex-shrink-0 overflow-hidden bg-gray-100">
               {partnerAgent.avatar_url ? (
-                <img 
-                  src={partnerAgent.avatar_url} 
+                <img
+                  src={partnerAgent.avatar_url}
                   alt={partnerAgent.full_name}
                   className="h-full w-full object-cover"
                 />
@@ -382,9 +383,9 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
           </div>
         )}
       </div>
-      
+
       {/* Chat Messages */}
-      <div 
+      <div
         ref={chatContainerRef}
         className="flex-1 overflow-y-auto p-4 space-y-4"
       >
@@ -411,13 +412,13 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
                     </div>
                   </div>
                 )}
-                
+
                 <div className={`flex ${message.sender_id === user?.id ? 'justify-end' : 'justify-start'}`}>
                   <div className={`flex items-end ${message.sender_id === user?.id ? 'flex-row-reverse' : ''}`}>
                     {/* Avatar */}
                     <div className="flex-shrink-0 h-8 w-8 rounded-full overflow-hidden">
                       {message.sender?.avatar_url ? (
-                        <img 
+                        <img
                           src={message.sender.avatar_url}
                           alt={message.sender.full_name}
                           className="h-full w-full object-cover"
@@ -428,9 +429,9 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
                         </div>
                       )}
                     </div>
-                    
+
                     {/* Message content */}
-                    <div 
+                    <div
                       className={`mx-2 px-4 py-3 rounded-t-lg ${
                         message.sender_id === user?.id 
                           ? 'bg-blue-600 text-white rounded-bl-lg rounded-br-none' 
@@ -460,7 +461,7 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
           </>
         )}
       </div>
-      
+
       {/* File Preview */}
       {selectedFile && (
         <div className="bg-gray-50 border-t border-gray-200 p-2 flex items-center justify-between">
@@ -476,7 +477,7 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
           </button>
         </div>
       )}
-      
+
       {/* Chat Input */}
       <div className="border-t border-gray-200 p-4 bg-white">
         {error && (
@@ -484,7 +485,7 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
             {error}
           </div>
         )}
-        
+
         <div className="flex items-end space-x-4">
           <div className="relative flex-1">
             <textarea
@@ -533,17 +534,17 @@ const DealChat: React.FC<DealChatProps> = ({ dealId, deal }) => {
 
 // Message icon component
 const MessageIcon = ({ className }: { className: string }) => (
-  <svg 
-    className={className} 
-    fill="none" 
-    viewBox="0 0 24 24" 
-    stroke="currentColor" 
+  <svg
+    className={className}
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
     strokeWidth={1}
   >
-    <path 
-      strokeLinecap="round" 
-      strokeLinejoin="round" 
-      d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" 
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"
     />
   </svg>
 );

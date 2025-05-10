@@ -51,7 +51,7 @@ export default function LandingPage() {
     if (user) {
       // Set flag to allow navigation
       sessionStorage.setItem('intentional_navigation', 'true');
-      
+
       // Redirect based on role
       if (role === 'agency') {
         navigate('/agency-dashboard');
@@ -115,7 +115,7 @@ export default function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
+      <Header  />
 
       {/* Hero Section */}
       <section className="relative min-h-[120vh] flex items-center pt-20">

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Copy, MessageSquare, Mail, X } from 'lucide-react';
+import { useTranslation } from 'react-i18next'; // Import useTranslation
 import { Property } from '../../types';
 
 interface ShareModalProps {
@@ -15,12 +16,13 @@ export default function ShareModal({
   property,
   onCopySuccess
 }: ShareModalProps) {
+  const { t } = useTranslation(); // Initialize translation hook
+
   if (!isOpen) return null;
 
   const pageUrl = property.hasOwnProperty('projectId') ?
       `${window.location.origin}/property/${property.projectId}/unit-types/${property.id}`
       :`${window.location.origin}/property/${property.slug || property.id}`;
-
 
   const handleCopyLink = async () => {
     try {
@@ -33,14 +35,14 @@ export default function ShareModal({
   };
 
   const handleWhatsAppShare = () => {
-    const text = `Check out this property: ${property.title} - ${pageUrl}`;
+    const text = t('shareWhatsAppText', { title: property.title, url: pageUrl });
     window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     onClose();
   };
 
   const handleEmailShare = () => {
-    const subject = `Property Listing: ${property.title}`;
-    const body = `Check out this property:\n\n${property.title}\n${pageUrl}`;
+    const subject = t('shareEmailSubject', { title: property.title });
+    const body = t('shareEmailBody', { title: property.title, url: pageUrl });
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     onClose();
   };
@@ -49,7 +51,7 @@ export default function ShareModal({
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[1000]">
       <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4 animate-fade-in-up">
         <div className="flex justify-between items-center mb-4">
-          <h3 className="text-xl font-semibold">Share Property</h3>
+          <h3 className="text-xl font-semibold">{t('shareProperty')}</h3>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700"
@@ -65,7 +67,7 @@ export default function ShareModal({
           >
             <div className="flex items-center">
               <Copy className="h-5 w-5 mr-3 text-gray-500" />
-              <span>Copy Link</span>
+              <span>{t('copyLink')}</span>
             </div>
             <span className="text-sm text-gray-500">→</span>
           </button>
@@ -76,7 +78,7 @@ export default function ShareModal({
           >
             <div className="flex items-center">
               <MessageSquare className="h-5 w-5 mr-3 text-green-600" />
-              <span>Share on WhatsApp</span>
+              <span>{t('shareWhatsApp')}</span>
             </div>
             <span className="text-sm text-gray-500">→</span>
           </button>
@@ -87,7 +89,7 @@ export default function ShareModal({
           >
             <div className="flex items-center">
               <Mail className="h-5 w-5 mr-3 text-blue-600" />
-              <span>Share via Email</span>
+              <span>{t('shareEmail')}</span>
             </div>
             <span className="text-sm text-gray-500">→</span>
           </button>

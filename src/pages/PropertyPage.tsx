@@ -12,16 +12,19 @@ import {initPageVisibilityHandling, cleanupPageVisibilityHandling} from '../util
 import ShareModal from '../components/property/ShareModal';
 import FullscreenGallery from '../components/property/FullscreenGallery';
 import MainImageGallery from '../components/property/MainImageGallery';
-import PriceCard from '../components/property/PriceCard';
+import PropertyDetailsRightCard from '../components/property/PropertyDetailsRightCard.tsx';
 import PropertyMap from "../components/PropertyMap.tsx";
 import UnitTypeCard from '../components/property/UnitTypeCard';
 import {convertSnakeToCamel} from "../utils/helpers.ts";
+import { useTranslation } from 'react-i18next';
 
 type PropertyPageProps = {
     slug?: string;
     withNearByPlaces?: boolean;
 }
+
 export default function PropertyPage(props: PropertyPageProps) {
+    const { t } = useTranslation();
     const {slug: propsSlug, withNearByPlaces = true} = props;
     const {slug: routeSlug, unitTypeId} = useParams(); // Extract unitTypeId from URL
     const slug = propsSlug || routeSlug;
@@ -188,13 +191,13 @@ export default function PropertyPage(props: PropertyPageProps) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-gray-50">
                 <div className="text-center">
-                    <h2 className="text-xl font-semibold text-gray-900 mb-2">Error</h2>
-                    <p className="text-gray-600">{error || 'Property not found'}</p>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">{t('error')}</h2>
+                    <p className="text-gray-600">{error || t('propertyNotFound')}</p>
                     <button
                         onClick={() => navigate('/')}
                         className="mt-4 px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-900"
                     >
-                        Return Home
+                        {t('returnHome')}
                     </button>
                 </div>
             </div>
@@ -203,7 +206,7 @@ export default function PropertyPage(props: PropertyPageProps) {
 
     return (
         <div className="min-h-screen bg-gray-50">
-            <Header/>
+            <Header isAgentProfilePage={false} /> {/* Ensure LanguageSelectorMenu is rendered */}
 
             <main className="pt-20 bg-white">
                 <div className="container mx-auto px-4 py-6">
@@ -246,42 +249,40 @@ export default function PropertyPage(props: PropertyPageProps) {
                     {/* Mobile Property Details - Shown at the top on mobile */}
                     <div className="md:hidden mb-6">
                         <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
-                            <h3 className="text-lg font-semibold mb-4">Property Details</h3>
+                            <h3 className="text-lg font-semibold mb-4">{t('propertyDetails')}</h3>
                             <div className="space-y-3">
                                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Type</span>
+                                    <span className="text-gray-600">{t('type')}</span>
                                     <span className="font-medium">{property.type}</span>
                                 </div>
                                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Purpose</span>
-                                    <span className="font-medium">For {property.contractType}</span>
+                                    <span className="text-gray-600">{t('purpose')}</span>
+                                    <span className="font-medium">{t('for')} {property.contractType}</span>
                                 </div>
                                 {property.furnishingStatus && (
                                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                        <span className="text-gray-600">Furnishing</span>
+                                        <span className="text-gray-600">{t('furnishing')}</span>
                                         <span className="font-medium">{property.furnishingStatus}</span>
                                     </div>
                                 )}
                                 {property.completionStatus && (
                                     <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                        <span className="text-gray-600">Completion</span>
+                                        <span className="text-gray-600">{t('completion')}</span>
                                         <span className="font-medium">{property.completionStatus}</span>
                                     </div>
                                 )}
                                 <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                    <span className="text-gray-600">Parking</span>
+                                    <span className="text-gray-600">{t('parking')}</span>
                                     <span
-                                        className="font-medium">{property.parkingAvailable ? 'Available' : 'Not Available'}</span>
+                                        className="font-medium">{property.parkingAvailable ? t('available') : t('notAvailable')}</span>
                                 </div>
                             </div>
-                            {/* Property Details Component */}
-
                         </div>
 
                         {/* Property Highlight on mobile */}
                         {property?.highlight && (
                             <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-200 mb-6">
-                                <h3 className="text-lg font-semibold mb-3">Property Highlight</h3>
+                                <h3 className="text-lg font-semibold mb-3">{t('propertyHighlight')}</h3>
                                 <p className="text-gray-700">{property?.highlight}</p>
                             </div>
                         )}
@@ -304,12 +305,12 @@ export default function PropertyPage(props: PropertyPageProps) {
                             {property.floorPlanImage && (
                                 <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
                                     <div className="flex items-center justify-between mb-4">
-                                        <h2 className="text-xl font-semibold">Floor Plan</h2>
+                                        <h2 className="text-xl font-semibold">{t('floorPlan')}</h2>
                                         <FileText className="h-6 w-6 text-gray-400"/>
                                     </div>
                                     <img
                                         src={property.floorPlanImage}
-                                        alt="Floor Plan"
+                                        alt={t('floorPlan')}
                                         className="w-full rounded-lg"
                                     />
                                 </div>
@@ -317,7 +318,7 @@ export default function PropertyPage(props: PropertyPageProps) {
                             {/* Unit Types Section */}
                             {unitTypes.length > 0 && (
                                 <div className="mt-8 mb-8">
-                                    <h2 className="text-2xl font-bold text-gray-900 mb-4">Unit Types</h2>
+                                    <h2 className="text-2xl font-bold text-gray-900 mb-4">{t('unitTypes')}</h2>
                                     <div className="grid lg:grid-cols-2 gap-8">
                                         {unitTypes.map((unitType) => (
                                             <UnitTypeCard
@@ -340,7 +341,7 @@ export default function PropertyPage(props: PropertyPageProps) {
 
                         {/* Price Card for Desktop */}
                         <div className="lg:col-span-1 space-y-6">
-                            {property && <PriceCard property={property}/>}
+                            {property && <PropertyDetailsRightCard property={property}/>}
                         </div>
                     </div>
                 </div>
@@ -358,7 +359,7 @@ export default function PropertyPage(props: PropertyPageProps) {
             {showCopiedMessage && (
                 <div
                     className="fixed bottom-4 left-1/2 -translate-x-1/2 bg-black text-white px-4 py-2 rounded-lg text-sm animate-fade-in z-50">
-                    Link copied!
+                    {t('linkCopied')}
                 </div>
             )}
             <Footer/>

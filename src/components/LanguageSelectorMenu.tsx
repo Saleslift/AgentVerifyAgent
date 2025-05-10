@@ -14,6 +14,7 @@ export default function LanguageSelectorMenu({ isAgentProfilePage }: LanguageSel
 
   const handleLanguageChange = (lng: string) => {
     i18n.changeLanguage(lng);
+    localStorage.setItem('i18nextLng', lng); // Save the selected language
     setLanguage(lng);
     setShowDropdown(false);
   };

@@ -150,7 +150,7 @@ export default function PropertyMap(props: PropertyMapVisGLProps) {
                             </div>
                             <h3 className="font-medium text-gray-900 mb-1 line-clamp-1">{hoveredProperty.title}</h3>
                             <p className="text-primary-300 font-semibold">
-                                {hoveredProperty.price.toLocaleString('en-US', {
+                                {hoveredProperty?.price?.toLocaleString('en-US', {
                                     style: 'currency',
                                     currency: 'AED',
                                     maximumFractionDigits: 0

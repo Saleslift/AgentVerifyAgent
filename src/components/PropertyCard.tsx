@@ -7,7 +7,6 @@ import { useTranslation } from 'react-i18next'; // Added
 // Lazy load the ShareModal component
 const ShareModal = React.lazy(() => import('./property/ShareModal'));
 import OptimizedImage from './OptimizedImage';
-import { supabase } from '../utils/supabase';
 
 interface PropertyCardProps {
   property: Property;
@@ -117,7 +116,7 @@ const PropertyCard = memo(function PropertyCard({
 
           <div className="flex flex-wrap gap-2 mb-3 text-sm">
             <div className="flex items-center px-2 py-1 bg-gray-100 rounded-md">
-              <span>{property.type}</span>
+              <span>{t(property.type)}</span>
             </div>
             {property.bedrooms !== undefined && (
               <div className="flex items-center px-2 py-1 bg-gray-100 rounded-md">

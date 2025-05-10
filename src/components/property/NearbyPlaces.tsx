@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Coffee, ShoppingBag, Utensils, School, Bus, Building2, Star } from 'lucide-react';
+import {useTranslation} from "react-i18next";
+import i18n from "../../utils/i18n.ts";
 
 interface Place {
   id: string; // Unified ID to handle both `id` and `place_id`
@@ -28,21 +30,24 @@ interface NearbyPlacesProps {
 }
 
 
-const defaultPlaceTypes: PlaceType[] = [
-  { type: 'restaurant', label: 'Restaurants', radius: 1000, icon: Utensils },
-  { type: 'cafe', label: 'Cafes', radius: 1000, icon: Coffee },
-  { type: 'shopping_mall', label: 'Shopping', radius: 5000, icon: ShoppingBag },
-  { type: 'school', label: 'Schools', radius: 5000, icon: School },
-  { type: 'transit_station', label: 'Transit', radius: 3000, icon: Bus },
-  { type: 'supermarket', label: 'Supermarkets', radius: 3000, icon: Building2 }
-];
+export default function NearbyPlaces({ propertyLat, propertyLng, placeTypes }: NearbyPlacesProps) {
+  const { t, i18n: i18next } = useTranslation(); // Initialize translation hook
 
-export default function NearbyPlaces({ propertyLat, propertyLng, placeTypes = defaultPlaceTypes }: NearbyPlacesProps) {
-  const [selectedType, setSelectedType] = useState(placeTypes[0].type);
+  const defaultPlaceTypes: PlaceType[] = [
+    { type: 'restaurant', label: t('restaurant'), radius: 1000, icon: Utensils },
+    { type: 'cafe', label: t('cafes'), radius: 1000, icon: Coffee },
+    { type: 'shopping_mall', label: t('shopping_mall'), radius: 5000, icon: ShoppingBag },
+    { type: 'school', label: t('schools'), radius: 5000, icon: School },
+    { type: 'transit_station', label: t('transit_station'), radius: 3000, icon: Bus },
+    { type: 'supermarket', label: t('supermarket'), radius: 3000, icon: Building2 }
+  ];
+
+  const [selectedType, setSelectedType] = useState((placeTypes || defaultPlaceTypes)[0].type);
   const [places, setPlaces] = useState<Place[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null); // Added error state for better error handling
 
+  console.log(i18next.language);
   useEffect(() => {
     if (!propertyLat || !propertyLng || !window.google) return;
     fetchNearbyPlaces(selectedType);
@@ -52,12 +57,13 @@ export default function NearbyPlaces({ propertyLat, propertyLng, placeTypes = de
     setLoading(true);
     setError(null); // Reset error state before fetching
     const service = new google.maps.places.PlacesService(document.createElement('div'));
-    const selectedPlaceType = placeTypes.find(pt => pt.type === type);
+    const selectedPlaceType = (placeTypes || defaultPlaceTypes).find(pt => pt.type === type);
 
     const request = {
       location: new google.maps.LatLng(propertyLat, propertyLng),
       radius: selectedPlaceType?.radius || 1000, // Use radius from `placeTypes`
-      type: type as google.maps.places.PlaceType
+      type: type as google.maps.places.PlaceType,
+      language: i18next.language, // Set language for the request
     };
 
     service.nearbySearch(request, (results, status) => {
@@ -68,6 +74,7 @@ export default function NearbyPlaces({ propertyLat, propertyLng, placeTypes = de
         const processedPlaces = results
             .map(place => {
               if (!place.geometry?.location) return null;
+              console.log(place);
 
               const placeLocation = place.geometry.location;
               const distance = google.maps.geometry.spherical.computeDistanceBetween(
@@ -104,12 +111,12 @@ export default function NearbyPlaces({ propertyLat, propertyLng, placeTypes = de
   return (
       <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-4 sm:mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold">Nearby Places</h2>
+          <h2 className="text-xl font-semibold">{t('nearbyPlaces')}</h2>
           <MapPin className="h-6 w-6 text-gray-400" />
         </div>
 
         <div className="flex flex-wrap overflow-x-auto space-x-2 pb-2 mb-4">
-          {placeTypes.map(({ type, label, icon: Icon }) => (
+          {(placeTypes || defaultPlaceTypes).map(({ type, label, icon: Icon }) => (
               <button
                   key={type}
                   onClick={() => setSelectedType(type)}
@@ -120,7 +127,7 @@ export default function NearbyPlaces({ propertyLat, propertyLng, placeTypes = de
                   }`}
               >
                 <Icon className="h-4 w-4" />
-                <span>{label}</span>
+                <span>{t(label)}</span>
               </button>
           ))}
         </div>
@@ -157,12 +164,16 @@ export default function NearbyPlaces({ propertyLat, propertyLng, placeTypes = de
                           </span>
                                 </div>
                             ) : (
-                                <span className="text-xs text-gray-500">No ratings</span>
+                                <span className="text-xs text-gray-500">{t('noRatings')}</span>
                             )}
-                            <span className="text-sm text-gray-600">{place.distance}m away</span>
+                            <span className="text-sm text-gray-600">
+                              {t('metersAway', { distance: place.distance })}
+                            </span>
                           </div>
                           {place.duration && (
-                              <div className="text-xs text-gray-500 mt-1">~{place.duration} by car</div> // Display duration
+                              <div className="text-xs text-gray-500 mt-1">
+                                ~{t('byCar', { duration: place.duration })}
+                              </div>
                           )}
                           {place.openNow !== undefined && (
                               <div className="mt-2">
@@ -171,7 +182,7 @@ export default function NearbyPlaces({ propertyLat, propertyLng, placeTypes = de
                                 ? 'bg-green-100 text-green-800'
                                 : 'bg-red-100 text-red-800'
                         }`}>
-                          {place.openNow ? 'Open Now' : 'Closed'} // Display open/closed status
+                          {place.openNow ? t('openNow') : t('closed')}
                         </span>
                               </div>
                           )}
@@ -183,9 +194,10 @@ export default function NearbyPlaces({ propertyLat, propertyLng, placeTypes = de
             </div>
         ) : (
             <div className="text-center py-6 text-gray-500">
-              No {placeTypes.find(pt => pt.type === selectedType)?.label.toLowerCase()} found nearby
+              {t('noPlacesFound', { label: (placeTypes || defaultPlaceTypes).find(pt => pt.type === selectedType)?.label.toLowerCase() })}
             </div>
         )}
       </div>
   );
 }
+

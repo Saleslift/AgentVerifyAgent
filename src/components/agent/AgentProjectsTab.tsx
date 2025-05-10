@@ -179,8 +179,8 @@ export default function AgentProjectsTab() {
                 ) : (
                     <div className="h-[600px] rounded-lg overflow-hidden">
                         <PropertyMap
-                            properties={filteredProjects}
-                            customMapStyle={{height: '100%', width: '100%'}}
+                            properties={filteredProjects || []}
+                            // customMapStyle={{height: '100%', width: '100%'}}
                             onPropertySelect={(projectId) => {
                                 // Scroll to the project in the list view
                                 setViewMode('list');
