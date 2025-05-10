@@ -78,7 +78,7 @@ export default function AgentSidebar({ agentId, activeTab, onTabChange, agentSlu
       ]
     },
     { id: 'jobs', label: 'Jobs', icon: Briefcase, onClick: () => onTabChange('jobs') },
-    { id: 'statistics', label: 'Statistics', icon: BarChart2, onClick: () => onTabChange('statistics') }
+    // { id: 'statistics', label: 'Statistics', icon: BarChart2, onClick: () => onTabChange('statistics') }
   ], [agentId, agentSlug, onTabChange]);
 
   return (

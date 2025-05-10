@@ -21,7 +21,7 @@ export default function AgentDashboardPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { user } = useAuth();
-  const { profile, properties, loading, error } = useUserData();
+  const { profile, properties, refresh, loading, error } = useUserData();
 
   const [activeTab, setActiveTab] = useState<ActiveTabs>('properties');
 
@@ -55,6 +55,7 @@ export default function AgentDashboardPage() {
     // Map tab to path
     const tabToPath: Record<ActiveTabs, string> = {
       'properties': '/agent-dashboard/properties',
+      'my-properties': '/agent-dashboard/my-properties',
       'marketplace': '/agent-dashboard/marketplace',
       'statistics': '/agent-dashboard/statistics',
       'jobs': '/agent-dashboard/jobs',
@@ -64,7 +65,6 @@ export default function AgentDashboardPage() {
       'contacts': '/agent-dashboard/contacts',
       'crm-deals': '/agent-dashboard/crm-deals',
       'add-property': '/agent-dashboard/add-property',
-      'my-properties': '/agent-dashboard/my-properties',
     };
     navigate(tabToPath[tab]);
   };
@@ -154,10 +154,8 @@ export default function AgentDashboardPage() {
               <PropertyManagement
                   agentId={user.id}
                   properties={properties}
-                  onDelete={(id) => {
-                    // Handle delete
-                    console.log('Delete property:', id);
-                  }}
+                  onEdit={() => refresh()}
+                  onDelete={() => refresh()}
                   showAddButton={false}
                   showOriginTag={true} // Show origin tags in My Properties tab
               />
@@ -165,10 +163,8 @@ export default function AgentDashboardPage() {
             <PropertyManagement
               agentId={user.id}
               properties={properties}
-              onDelete={(id) => {
-                // Handle delete
-                console.log('Delete property:', id);
-              }}
+              onEdit={refresh}
+              onDelete={refresh}
               showAddButton={false}
               showOriginTag={true} // Show origin tags in My Properties tab
             />

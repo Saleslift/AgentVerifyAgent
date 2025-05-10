@@ -49,7 +49,7 @@ export default function Header({agent}: HeaderProps) {
   };
 
   return (
-    <header className="bg-white/80 backdrop-blur-sm z-[50] border-b border-gray-100 relative">
+    <header className="bg-white/80 backdrop-blur-sm z-[20] border-b border-gray-100 relative">
       {/* Increased z-index and added relative positioning */}
       <nav className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
