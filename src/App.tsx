@@ -25,6 +25,7 @@ const DeveloperPublicPage = lazy(() => import('./pages/DeveloperPublicPage'));
 const EditProfilePage = lazy(() => import('./pages/EditAgentProfilePage.tsx'));
 const AddPropertyPage = lazy(() => import('./pages/AddPropertyPage'));
 const PropertyPage = lazy(() => import('./pages/PropertyPage'));
+const UnitTypePage = lazy(() => import('./pages/UnitTypePage'));
 const AcceptInvitationPage = lazy(() => import('./pages/AcceptInvitationPage'));
 // CRM pages
 const DealDetail = lazy(() => import('./components/crm/deals/DealDetail'));
@@ -134,14 +135,25 @@ const App = memo(function App() {
                                 </Suspense>
                             }
                         />
-                        <Route
-                            path="/property/:slug"
-                            element={
-                                <Suspense fallback={<PageLoader />}>
-                                    <PropertyPage />
-                                </Suspense>
-                            }
-                        />
+                        <Route path="/property/:slug">
+                            <Route
+                                index
+                                element={
+                                    <Suspense fallback={<PageLoader />}>
+                                        <PropertyPage key="property" />
+                                    </Suspense>
+                                }
+                            />
+                            <Route
+                                path="unit-types/:unitTypeId"
+                                element={
+                                    <Suspense fallback={<PageLoader />}>
+                                        <PropertyPage key={window.location.pathname} />
+                                    </Suspense>
+                                }
+                            />
+                        </Route>
+
 
                         {/* Role-Specific Dashboard Routes */}
                         <Route
@@ -250,7 +262,7 @@ const App = memo(function App() {
                         } />
 
                         {/* Catch-All Route */}
-                        <Route path="*" element={<Navigate to="/" replace />} />
+                        {/*<Route path="*" element={<Navigate to="/" replace />} />*/}
                     </Routes>
                 </CurrencyProvider>
             </AuthProvider>
@@ -259,3 +271,4 @@ const App = memo(function App() {
 });
 
 export default App;
+

@@ -1,5 +1,5 @@
 import React, {useState, useEffect} from 'react';
-import {Map, Marker, InfoWindow, useMap} from '@vis.gl/react-google-maps';
+import { Map, Marker, InfoWindow, useMap } from '@vis.gl/react-google-maps';
 import type {Property} from '../types';
 import {calculateMarkerOffsets} from '../utils/mapHelpers';
 
@@ -42,12 +42,8 @@ export default function PropertyMap(props: PropertyMapVisGLProps) {
     // Apply marker offsets to prevent overlapping
     useEffect(() => {
         if (properties.length > 0) {
-            if (properties.length === 1) {
-                setDisplayProperties(properties);
-            } else {
-                const offsetProperties = calculateMarkerOffsets(properties);
-                setDisplayProperties(offsetProperties);
-            }
+            const offsetProperties = calculateMarkerOffsets(properties);
+            setDisplayProperties(offsetProperties);
         } else {
             setDisplayProperties([]);
         }
@@ -102,6 +98,7 @@ export default function PropertyMap(props: PropertyMapVisGLProps) {
         }
     }, [map, displayProperties]);
 
+
     return (
         <div className="relative rounded-xl overflow-hidden shadow-lg break-before-page">
             <Map
@@ -127,7 +124,7 @@ export default function PropertyMap(props: PropertyMapVisGLProps) {
                             icon={{
                                 path: google.maps.SymbolPath.CIRCLE,
                                 scale: 20,
-                                fillColor: property.contractType === 'Sale' ? '#000000' : '#4CAF50',
+                                fillColor: property?.contractType === 'Sale' || property?.is_prelaunch ? '#000000' : '#4CAF50',
                                 fillOpacity: 1,
                                 strokeWeight: 1,
                                 strokeColor: '#FFFFFF'
@@ -139,6 +136,7 @@ export default function PropertyMap(props: PropertyMapVisGLProps) {
                 {/* Property Info Window */}
                 {hoveredProperty && hoveredProperty.lat && hoveredProperty.lng && (
                     <InfoWindow
+                        pixelOffset={[0, -20]}
                         position={getLatLng(hoveredProperty)}
                         onCloseClick={() => setHoveredProperty(null)}
                     >

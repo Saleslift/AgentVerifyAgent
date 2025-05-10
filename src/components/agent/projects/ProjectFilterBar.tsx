@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-import { Filter, X, ChevronDown, Check } from 'lucide-react';
+import { Filter, X, ChevronDown } from 'lucide-react';
 
 // Define constants for filter options
-const unitTypes = ['Studio', '1 Bedroom', '2 Bedroom', '3 Bedroom', '4+ Bedroom', 'Penthouse', 'Townhouse', 'Villa'];
 const locations = ['Dubai Marina', 'Downtown Dubai', 'Palm Jumeirah', 'Business Bay', 'Dubai Hills', 'Jumeirah Village Circle'];
 const paymentPlans = ['40/60', '50/50', '60/40', '30/70', 'Post-Handover'];
 const launchTypes = ['All', 'Standard Projects', 'New Launches'];
 
 interface ProjectFilterBarProps {
   filters: {
-    unitType: string;
+    bedrooms: string; // Changed from unitType to bedrooms
     minSize: string;
     maxSize: string;
     minPrice: string;
@@ -39,7 +38,7 @@ export default function ProjectFilterBar({ filters, onFilterChange }: ProjectFil
 
   const handleReset = () => {
     onFilterChange({
-      unitType: '',
+      bedrooms: '', // Updated from unitType to bedrooms
       minSize: '',
       maxSize: '',
       minPrice: '',
@@ -90,11 +89,11 @@ export default function ProjectFilterBar({ filters, onFilterChange }: ProjectFil
         <div className="px-4 pb-4 flex flex-wrap gap-2">
           {Object.entries(filters).map(([key, value]) => {
             if (!value) return null;
-            
+
             let label = '';
             switch(key) {
-              case 'unitType':
-                label = `Type: ${value}`;
+              case 'bedrooms':
+                label = `Bedrooms: ${value}`;
                 break;
               case 'minSize':
                 label = `Min Size: ${value} sqft`;
@@ -123,7 +122,7 @@ export default function ProjectFilterBar({ filters, onFilterChange }: ProjectFil
               default:
                 label = `${key}: ${value}`;
             }
-            
+
             return (
               <div key={key} className="flex items-center bg-gray-100 rounded-full px-3 py-1 text-sm">
                 <span>{label}</span>
@@ -145,19 +144,16 @@ export default function ProjectFilterBar({ filters, onFilterChange }: ProjectFil
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Unit Type
+                Bedrooms
               </label>
-              <select
-                name="unitType"
-                value={filters.unitType}
+              <input
+                type="number"
+                name="bedrooms" // Updated from unitType to bedrooms
+                placeholder="Any"
+                value={filters.bedrooms} // Updated from filters.unitType to filters.bedrooms
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent"
-              >
-                <option value="">Any Type</option>
-                {unitTypes.map(type => (
-                  <option key={type} value={type}>{type}</option>
-                ))}
-              </select>
+              />
             </div>
 
             <div>
@@ -254,7 +250,7 @@ export default function ProjectFilterBar({ filters, onFilterChange }: ProjectFil
                 ))}
               </select>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Launch Type
@@ -278,11 +274,11 @@ export default function ProjectFilterBar({ filters, onFilterChange }: ProjectFil
             <div className="mt-4 flex flex-wrap gap-2">
               {Object.entries(filters).map(([key, value]) => {
                 if (!value) return null;
-                
+
                 let label = '';
                 switch(key) {
-                  case 'unitType':
-                    label = `Type: ${value}`;
+                  case 'bedrooms':
+                    label = `Bedrooms: ${value}`;
                     break;
                   case 'minSize':
                     label = `Min Size: ${value} sqft`;
@@ -311,7 +307,7 @@ export default function ProjectFilterBar({ filters, onFilterChange }: ProjectFil
                   default:
                     label = `${key}: ${value}`;
                 }
-                
+
                 return (
                   <div key={key} className="flex items-center bg-gray-100 rounded-full px-3 py-1 text-sm">
                     <span>{label}</span>
@@ -324,7 +320,7 @@ export default function ProjectFilterBar({ filters, onFilterChange }: ProjectFil
                   </div>
                 );
               })}
-              
+
               <button
                 onClick={handleReset}
                 className="text-sm text-blue-600 hover:text-blue-800 py-1 px-2"

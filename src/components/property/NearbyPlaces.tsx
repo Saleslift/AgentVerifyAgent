@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { MapPin, Coffee, ShoppingBag, Utensils, School, Bus, Building2, Star } from 'lucide-react';
-import {useMap, useMapsLibrary} from "@vis.gl/react-google-maps";
 
 interface Place {
   id: string; // Unified ID to handle both `id` and `place_id`
@@ -92,7 +91,6 @@ export default function NearbyPlaces({ propertyLat, propertyLng, placeTypes = de
             })
             .filter(place => place !== null) as Place[];
 
-        console.log('processedPlaces', processedPlaces)
         processedPlaces.sort((a, b) => (a.distance || 0) - (b.distance || 0)); // Sort by distance
         setPlaces(processedPlaces.slice(0, 6)); // Limit to 6 places
       } else {

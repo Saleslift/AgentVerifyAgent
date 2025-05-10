@@ -447,6 +447,35 @@ export type Database = {
           },
         ]
       }
+      agent_unit_types: {
+        Row: {
+          agent_id: string
+          created_at: string
+          id: number
+          unit_type_id: string
+        }
+        Insert: {
+          agent_id?: string
+          created_at?: string
+          id?: number
+          unit_type_id?: string
+        }
+        Update: {
+          agent_id?: string
+          created_at?: string
+          id?: number
+          unit_type_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "agent_unit_types_unit_type_id_fkey"
+            columns: ["unit_type_id"]
+            isOneToOne: true
+            referencedRelation: "unit_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       audit_logs: {
         Row: {
           action: string
@@ -2975,52 +3004,109 @@ export type Database = {
       }
       unit_types: {
         Row: {
+          amenities: string[] | null
+          bathrooms: number | null
+          bedrooms: number | null
+          completion_status:
+            | Database["public"]["Enums"]["completion_status"]
+            | null
+          contract_type: Database["public"]["Enums"]["contract_type"]
           created_at: string | null
+          description: string | null
           developer_id: string
           floor_plan_image: string | null
           floor_range: string | null
+          furnishing_status:
+            | Database["public"]["Enums"]["furnishing_status"]
+            | null
           id: string
           images: string[] | null
-          name: string
+          lat: number | null
+          lng: number | null
+          location: string
           notes: string | null
+          parking_available: boolean | null
+          price: number
           price_range: string | null
           project_id: string
           size_range: string | null
-          status: string
+          sqft: number | null
+          status: string | null
+          title: string
+          type: Database["public"]["Enums"]["property_type"]
           units_available: number | null
           updated_at: string | null
+          videos: string[] | null
         }
         Insert: {
+          amenities?: string[] | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          completion_status?:
+            | Database["public"]["Enums"]["completion_status"]
+            | null
+          contract_type?: Database["public"]["Enums"]["contract_type"]
           created_at?: string | null
+          description?: string | null
           developer_id: string
           floor_plan_image?: string | null
           floor_range?: string | null
+          furnishing_status?:
+            | Database["public"]["Enums"]["furnishing_status"]
+            | null
           id?: string
           images?: string[] | null
-          name: string
+          lat?: number | null
+          lng?: number | null
+          location?: string
           notes?: string | null
+          parking_available?: boolean | null
+          price?: number
           price_range?: string | null
           project_id: string
           size_range?: string | null
-          status?: string
+          sqft?: number | null
+          status?: string | null
+          title: string
+          type?: Database["public"]["Enums"]["property_type"]
           units_available?: number | null
           updated_at?: string | null
+          videos?: string[] | null
         }
         Update: {
+          amenities?: string[] | null
+          bathrooms?: number | null
+          bedrooms?: number | null
+          completion_status?:
+            | Database["public"]["Enums"]["completion_status"]
+            | null
+          contract_type?: Database["public"]["Enums"]["contract_type"]
           created_at?: string | null
+          description?: string | null
           developer_id?: string
           floor_plan_image?: string | null
           floor_range?: string | null
+          furnishing_status?:
+            | Database["public"]["Enums"]["furnishing_status"]
+            | null
           id?: string
           images?: string[] | null
-          name?: string
+          lat?: number | null
+          lng?: number | null
+          location?: string
           notes?: string | null
+          parking_available?: boolean | null
+          price?: number
           price_range?: string | null
           project_id?: string
           size_range?: string | null
-          status?: string
+          sqft?: number | null
+          status?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["property_type"]
           units_available?: number | null
           updated_at?: string | null
+          videos?: string[] | null
         }
         Relationships: [
           {

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 
 interface FullscreenGalleryProps {
-  images: string[];
+  images: Array<string | null>;
   initialIndex: number;
   onClose: () => void;
 }

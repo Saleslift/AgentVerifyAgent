@@ -7,33 +7,57 @@ import { useRoleAuth } from '../../hooks/useRoleAuth';
 import ProjectInfoForm from './project-form/ProjectInfoForm';
 import { UnitGroupRepeater } from './project-form/UnitGroupRepeater';
 import { toast } from 'react-hot-toast';
+import {CamelizeKeys, UnitType} from "../../types";
+import {convertCamelToSnake, convertSnakeToCamel} from "../../utils/helpers.ts";
 
 interface ProjectFormData {
   title: string;
   description: string | null;
   location: string;
+  lat?: null | number;
+    lng?: null | number;
   handoverDate: string;
   paymentPlan: string;
   brochureFile?: File;
   brochureUrl?: string;
   imageFiles: File[] | string[];
-  unitGroups: {
-    id: string;
-    type: string;
-    areaMin: string;
-    areaMax: string;
-    floorMin: string;
-    floorMax: string;
-    priceMin: string;
-    priceMax: string;
-    unitsAvailable: string;
-    images: string[] | null;
-    floorPlanImage: string | null;
-  }[];
+  unitGroups: CamelizeKeys<DB_Unit_Types>[]
+  unitGroupsToDelete: CamelizeKeys<DB_Unit_Types>[]
 }
 
 interface ProjectProps {
   projectId?: string;
+}
+
+const DEFAULT_UNIT_TYPE: UnitType = {
+  title: '',
+  developerId: '',
+  projectId: '',
+  images: [],
+  floorPlanImage: '',
+  description: '',
+  type: 'Apartment',
+  price: 0,
+  bedrooms: 0,
+  bathrooms: 0,
+  furnishingStatus: null,
+  completionStatus: 'Off-Plan',
+  sqft: 0,
+  amenities: [],
+  parkingAvailable: false,
+  videos: [],
+  createdAt: null,
+  floorRange: null,
+  notes: null,
+  priceRange: null,
+  sizeRange: null,
+  status: '',
+  unitsAvailable: 0,
+  updatedAt: null,
+  contractType: 'Sale',
+  id: '',
+  lat: null,
+  lng: null,
 }
 
 const defaultFormValues: ProjectFormData = {
@@ -43,19 +67,8 @@ const defaultFormValues: ProjectFormData = {
   handoverDate: '',
   paymentPlan: '40/60',
   imageFiles: [],
-  unitGroups: [{
-    id: crypto.randomUUID(),
-    type: '1 Bedroom',
-    areaMin: '',
-    areaMax: '',
-    floorMin: '',
-    floorMax: '',
-    priceMin: '',
-    priceMax: '',
-    unitsAvailable: '',
-    images: [],
-    floorPlanImage: '',
-  }]
+  unitGroups: [DEFAULT_UNIT_TYPE],
+  unitGroupsToDelete: [],
 };
 
 const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
@@ -80,6 +93,22 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
     }
   }, [projectId]);
 
+  const fetchUnitTypes = async (projectId: string) => {
+    try {
+      const { data: unitTypes, error } = await supabase
+        .from('unit_types')
+        .select('*')
+        .eq('project_id', projectId);
+
+      if (error) throw error;
+      setValue('unitGroups', unitTypes?.map(unitType => convertSnakeToCamel(unitType)));
+    } catch (error) {
+      console.error('Error fetching unit types:', error);
+      toast.error('Failed to load unit types');
+      return [];
+    }
+  }
+
   const fetchProjectData = async (id: string) => {
     try {
       setIsLoading(true);
@@ -92,13 +121,6 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
 
       if (projectError) throw projectError;
 
-      const { data: unitTypes, error: unitTypesError } = await supabase
-        .from('unit_types')
-        .select('*')
-        .eq('project_id', id);
-
-      if (unitTypesError) throw unitTypesError;
-
       setValue('title', project.title || '');
       setValue('description', project.description || '');
       setValue('location', project.location || '');
@@ -107,20 +129,8 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
       setValue('imageFiles', project.images || []); // Pre-fill images from database
       setValue('brochureUrl', project.brochure_url || ''); // Pre-fill brochure URL
       setValue('brochureFile', undefined); // Ensure no file is set
-      setValue('unitGroups', unitTypes?.map(unit => ({
-        id: unit.id,
-        type: unit.name,
-        areaMin: unit.size_range?.split('-')[0]?.trim() || '',
-        areaMax: unit.size_range?.split('-')[1]?.trim() || '',
-        floorMin: unit.floor_range?.split('-')[0]?.trim() || '',
-        floorMax: unit.floor_range?.split('-')[1]?.trim() || '',
-        priceMin: unit.price_range?.split('-')[0]?.replace(/[^0-9]/g, '') || '',
-        priceMax: unit.price_range?.split('-')[1]?.replace(/[^0-9]/g, '') || '',
-        unitsAvailable: unit.units_available?.toString() || '0',
-        images: unit.images,
-        floorPlanImage: unit.floor_plan_image
-        ,
-      })) || []);
+      await fetchUnitTypes(id); // Fetch unit types for the project
+
     } catch (error) {
       console.error('Error fetching project data:', error);
       toast.error('Failed to load project data');
@@ -152,6 +162,8 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
         title: data.title,
         description: data.description,
         location: data.location,
+        lat: data.lat,
+        lng: data.lng,
         handover_date: data.handoverDate,
         payment_plan: data.paymentPlan,
         type: 'Apartment',
@@ -182,7 +194,11 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
         if (updateError) throw updateError;
 
         // Process unit types
-        await processUnitTypes(data.unitGroups, currentProjectId, user.id);
+        await processUnitTypes(data.unitGroups, currentProjectId, user.id, data);
+        // Delete unit types if any are marked for deletion
+        if (projectData.unitGroupsToDelete.length > 0) {
+          await handleDeleteUnitTypes()
+        }
       } else {
         // Create new project
         const { data: newProject, error: createError } = await supabase
@@ -192,9 +208,9 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
           .single();
 
         if (createError) throw createError;
-
         // Process unit types
-        await processUnitTypes(data.unitGroups, newProject.id, user.id);
+        await processUnitTypes(data.unitGroups, newProject.id, user.id, data);
+
       }
 
       toast.success(isEditMode ? 'Project updated successfully' : 'Project created successfully');
@@ -307,25 +323,24 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
     return imageUrls;
   };
 
-  const processUnitTypes = async (unitGroups: any[], projectId: string, developerId: string) => {
+  const processUnitTypes = async (unitGroups: UnitType[], projectId: string, developerId: string, projectData:ProjectFormData) => {
     // For each unit group
     for (const group of unitGroups) {
       // Format data for unit_types table
+      const unitType = convertCamelToSnake(group);
       const unitTypeData = {
+        ...unitType,
         project_id: projectId,
         developer_id: developerId,
-        name: group.type,
-        size_range: `${group.areaMin} - ${group.areaMax}`,
-        floor_range: group.floorMin && group.floorMax ? `${group.floorMin} - ${group.floorMax}` : null,
-        price_range: `${parseInt(group.priceMin).toLocaleString()} - ${parseInt(group.priceMax).toLocaleString()}`,
-        units_available: parseInt(group.unitsAvailable) || 0,
+        units_available: group.unitsAvailable,
+        description: unitType.description || projectData.description,
+        location: projectData.location,
+        lat: projectData.lat,
+        lng: projectData.lng,
         status: 'available',
-        notes: null,
-        floor_plan_image: group.floorPlanImage,
-        images: group.images,
       };
 
-      if (isEditMode && group.id && group.id.length > 10) {
+      if (isEditMode && group.id && group.id.length > 0) {
         // Update existing unit type
         const { error: updateError } = await supabase
           .from('unit_types')
@@ -340,14 +355,33 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
         // Create new unit type
         const { error: insertError } = await supabase
           .from('unit_types')
-          .insert(unitTypeData);
-
+          .insert({...unitTypeData, id: undefined});
         if (insertError) {
           console.error('Error creating unit type:', insertError);
         }
       }
     }
   };
+
+    const handleDeleteUnitTypes = async () => {
+        try {
+          for (const unitGroupToDelete of projectData.unitGroupsToDelete) {
+            const { error } = await supabase
+                .from('unit_types')
+                .delete()
+                .eq('id', unitGroupToDelete.id)
+                .eq('developer_id', user?.id || ''); // Ensure developer owns the unit type
+
+            if (error) throw error;
+          }
+        } catch (error) {
+          console.error('Error deleting unit type:', error);
+        }
+    };
+
+    const onAddToDeletedUnitGroup = (unitType: UnitType) => {
+        setValue('unitGroupsToDelete', [...projectData.unitGroupsToDelete, unitType]);
+    }
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
@@ -364,7 +398,6 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
                 setValue(key as keyof ProjectFormData, value);
               });
             }}
-            onNext={() => {}}
           />
           <UnitGroupRepeater
             unitGroups={projectData.unitGroups}
@@ -372,6 +405,7 @@ const DeveloperProjectForm: React.FC<ProjectProps> = ({ projectId }) => {
             onPrev={() => navigate(-1)}
             onSubmit={handleSubmit(onSubmit)}
             loading={isSubmitting}
+            onAddToDeletedUnitGroup={onAddToDeletedUnitGroup}
           />
         </>
       )}

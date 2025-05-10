@@ -2,6 +2,11 @@
 
 export type Property = CamelizeKeys<DB_Properties>
 
+export type UnitType = CamelizeKeys<DB_Unit_Types>
+
+export type AgentUnitType = CamelizeKeys<DB_Agent_Unit_Types>
+
+
 // Unified Certification Interface
 export interface Certification {
   id: string;
@@ -134,17 +139,6 @@ export interface AgentInvitation {
 // Unified DealType
 export type DealType = 'own_property' | 'marketplace' | 'collaboration' | 'off_plan_project';
 
-// Unified UnitType Interface
-export interface UnitType {
-  id?: string;
-  name: string;
-  size_range?: string;
-  floor_range?: string;
-  price_range?: string;
-  status?: 'available' | 'sold out' | 'coming soon';
-  units_available?: number;
-}
-
 // Unified Project Interface
 export interface Project {
   id: string;
@@ -194,3 +188,21 @@ export type CamelizeKeys<T extends object> = {
   [key in keyof T as key extends string ? Camelize<key> : key]: T[key]
 }
 
+export type CamelToSnake<T extends string, P extends string = ""> = string extends T
+    ? string
+    : T extends `${infer C0}${infer R}`
+        ? CamelToSnake<
+            R,
+            `${P}${C0 extends Lowercase<C0> ? "" : "_"}${Lowercase<C0>}`
+        >
+        : P;
+
+export type CamelKeysToSnake<T> = {
+  [K in keyof T as CamelToSnake<Extract<K, string>>]: T[K];
+};
+
+export const getMissingFields = (unitType: UnitType): string[] => {
+  const propertyKeys = Object.keys(new Property()) as (keyof Property)[];
+  const unitTypeKeys = Object.keys(unitType) as (keyof UnitType)[];
+  return propertyKeys.filter((key) => !unitTypeKeys.includes(key));
+};

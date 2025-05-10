@@ -358,7 +358,6 @@ export default function PropertyManagement({
           <div className="bg-white rounded-xl p-6 w-full max-w-6xl max-h-[90vh] overflow-y-auto m-4">
             {propertyToEdit.source === 'direct' ? (
               <div className="p-4">
-                <h2 className="text-xl font-bold mb-4">Edit Property</h2>
                 <AgentPropertyForm
                   agentId={agentId}
                   property={propertyToEdit}

@@ -1,3 +1,5 @@
+import {CamelizeKeys, CamelKeysToSnake} from "../types";
+
 /**
  * Debounce function to limit how often a function can be called
  * @param func The function to debounce
@@ -9,17 +11,17 @@ export function debounce<T extends (...args: any[]) => any>(
   wait: number
 ): (...args: Parameters<T>) => void {
   let timeout: ReturnType<typeof setTimeout> | null = null;
-  
+
   return function(...args: Parameters<T>): void {
     const later = () => {
       timeout = null;
       func(...args);
     };
-    
+
     if (timeout !== null) {
       clearTimeout(timeout);
     }
-    
+
     timeout = setTimeout(later, wait);
   };
 }
@@ -56,7 +58,7 @@ function timeAgo(date: string | Date): string {
   const now = new Date();
   const past = new Date(date);
   const diffInSeconds = Math.floor((now.getTime() - past.getTime()) / 1000);
-  
+
   if (diffInSeconds < 60) return `${diffInSeconds} seconds ago`;
   if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
   if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
@@ -80,7 +82,7 @@ function fuzzySearch(query: string, items: string[]): string[] {
       const aIndex = a.toLowerCase().indexOf(lowerQuery);
       const bIndex = b.toLowerCase().indexOf(lowerQuery);
       if (aIndex !== bIndex) return aIndex - bIndex;
-      
+
       // Then by length (shorter items first)
       return a.length - b.length;
     });
@@ -93,12 +95,44 @@ function fuzzySearch(query: string, items: string[]): string[] {
  */
 function parsePriceRange(priceRange: string): { min?: number; max?: number } {
   if (!priceRange) return {};
-  
+
   if (priceRange.endsWith('+')) {
     const min = parseInt(priceRange.replace('+', ''));
     return { min };
   }
-  
+
   const [min, max] = priceRange.split('-').map(p => parseInt(p));
   return { min, max };
 }
+
+/**
+ * Convert an object with snake_case keys to camelCase keys
+ * @param obj The object to convert
+ * @returns A new object with camelCase keys
+ */
+export function convertSnakeToCamel<T extends object>(obj: T): CamelizeKeys<T> {
+  if (typeof obj !== 'object' || obj === null) return obj as CamelizeKeys<T>;
+
+  if (Array.isArray(obj)) {
+    return obj.map(item => convertSnakeToCamel(item)) as unknown as CamelizeKeys<T>;
+  }
+
+  return Object.keys(obj).reduce((acc, key) => {
+    const camelKey = key.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase());
+    acc[camelKey] = convertSnakeToCamel(obj[key]);
+    return acc;
+  }, {} as any);
+}
+
+export const convertCamelToSnake = <T extends Record<string, any>>(
+    input: T
+): CamelKeysToSnake<T> => {
+  return Object.keys(input).reduce((acc, cur) => {
+    const key = cur.replace(
+        /[A-Z]/g,
+        (k) => `_${k.toLowerCase()}`
+    ) as keyof CamelKeysToSnake<T>;
+    acc[key] = input[cur];
+    return acc;
+  }, {} as CamelKeysToSnake<T>);
+};

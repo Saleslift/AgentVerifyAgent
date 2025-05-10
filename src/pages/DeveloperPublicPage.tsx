@@ -30,8 +30,8 @@ import Footer from '../components/Footer';
 import PrelaunchProjectCard from '../components/developer/PrelaunchProjectCard';
 import ContactOptions from '../components/ContactOptions';
 import PropertyMap from "../components/PropertyMap.tsx";
-import PropertyModal from '../components/PropertyModal';
-import DeveloperProjectCard from '../components/DeveloperProjectCard';
+import DeveloperProjectCard from '../components/developer/DeveloperProjectCard';
+
 import {Property} from "../types";
 
 interface DeveloperProfile {
@@ -83,7 +83,6 @@ export default function DeveloperPublicPage() {
   const [error, setError] = useState('');
   const [projectType, setProjectType] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedProjectSlug, setSelectedProjectSlug] = useState<string | null>(null);
 
   useEffect(() => {
     if (slug) {
@@ -150,16 +149,6 @@ export default function DeveloperPublicPage() {
     window.open(`/property/${property.slug || property.id}`, '_blank');
   }
 
-  const handleOpenModal = (slug: string | null) => {
-    if (slug) {
-      setSelectedProjectSlug(slug);
-
-    }
-  };
-
-  const handleCloseModal = () => {
-    setSelectedProjectSlug(null);
-  };
 
   // Filter projects based on search term and project type
   const filteredProjects = () => {
@@ -636,7 +625,6 @@ export default function DeveloperPublicPage() {
                       project.is_prelaunch ? (
                         <PrelaunchProjectCard
                           key={project.id}
-                          onOpenModal={handleOpenModal}
                           project={{
                             ...project,
                             whatsapp: developer.whatsapp
@@ -646,7 +634,6 @@ export default function DeveloperPublicPage() {
                         <DeveloperProjectCard
                           key={project.id}
                           project={project}
-                          onOpenModal={handleOpenModal}
                         />
                       )
                     )}
@@ -683,16 +670,6 @@ export default function DeveloperPublicPage() {
           </div>
         </div>
       </div>
-
-      {/* Modal for PropertyPage */}
-      {selectedProjectSlug && (
-        <PropertyModal
-          isOpen={!!selectedProjectSlug}
-          onClose={handleCloseModal}
-          slug={selectedProjectSlug}
-        />
-      )}
-
       <Footer />
     </div>
   );

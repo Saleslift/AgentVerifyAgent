@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { Bed, Bath, Square, CarFront as Car, LayoutGrid, Building, Sparkles } from 'lucide-react';
 import { Property } from '../../types';
 import { supabase } from '../../utils/supabase';
-import { useCurrency } from '../../contexts/CurrencyContext';
 
 interface PropertyDetailsProps {
   property: Property;
@@ -14,7 +13,6 @@ interface AmenityItem {
 }
 
 const PropertyDetailsUnified: React.FC<PropertyDetailsProps> = ({ property }) => {
-  const { formatPrice } = useCurrency();
   const [allAmenities, setAllAmenities] = useState<AmenityItem[]>([]);
 
   // Group amenities by category

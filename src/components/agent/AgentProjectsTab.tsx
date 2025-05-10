@@ -9,7 +9,7 @@ import PropertyMap from "../PropertyMap.tsx";
 export default function AgentProjectsTab() {
     const {user} = useAuth();
     const [filters, setFilters] = useState({
-        unitType: '',
+        bedrooms: '', // Changed from unitType to bedrooms
         minSize: '',
         maxSize: '',
         minPrice: '',
@@ -27,7 +27,9 @@ export default function AgentProjectsTab() {
         loading,
         error,
         addProjectToAgentPage,
-        addUnitToProperties,
+        addUnitToDisplay,
+        displayedUnitTypes,
+        removeUnitFromDisplay,
         addingProjectId,
         addingUnitId,
         unitTypes
@@ -42,15 +44,15 @@ export default function AgentProjectsTab() {
         await addProjectToAgentPage(projectId);
     };
 
-    const handleAddUnitToProperties = async (unitId, projectId) => {
+    const handleAddUnitToProperties = async (unitId: string, projectId: string) => {
         if (!user) return;
-        await addUnitToProperties(unitId, projectId);
+        await addUnitToDisplay(unitId, projectId);
     };
 
     // Filter projects based on selected filters
-    const filteredProjects = projects.filter(project => {
-        // Filter by unit type
-        if (filters.unitType && !project.unit_types.some(unit => unit.name.includes(filters.unitType))) {
+    const filteredProjects = projects?.filter(project => {
+        // Filter by bedrooms
+        if (filters.bedrooms && !project.unit_types.some(unit => unit.bedrooms === parseInt(filters.bedrooms))) {
             return false;
         }
 
@@ -167,10 +169,12 @@ export default function AgentProjectsTab() {
                     <ProjectList
                         projects={filteredProjects}
                         onAddToMyPage={handleAddToMyPage}
-                        onAddUnitToProperties={handleAddUnitToProperties}
+                        onAddUnitToDisplay={handleAddUnitToProperties}
                         addingProjectId={addingProjectId}
                         addingUnitId={addingUnitId}
                         unitTypes={unitTypes}
+                        displayedUnitTypes={displayedUnitTypes}
+                        removeUnitFromDisplay={removeUnitFromDisplay}
                     />
                 ) : (
                     <div className="h-[600px] rounded-lg overflow-hidden">
@@ -203,3 +207,4 @@ export default function AgentProjectsTab() {
         </div>
     );
 }
+

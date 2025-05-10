@@ -1,12 +1,12 @@
 import React from 'react';
-import { MapPin, Home, Download } from 'lucide-react';
+import { MapPin, Home } from 'lucide-react';
 
 interface DeveloperProjectCardProps {
   project: DB_Properties,
   onOpenModal: (slug: string | null) => void;
 }
 
-export default function DeveloperProjectCard({ project, onOpenModal }: DeveloperProjectCardProps) {
+export default function DeveloperProjectCard({ project }: DeveloperProjectCardProps) {
   return (
     <div className="bg-white rounded-lg border border-gray-200 overflow-hidden shadow-sm">
       <div className="aspect-video bg-gray-200">
@@ -28,9 +28,7 @@ export default function DeveloperProjectCard({ project, onOpenModal }: Developer
           <MapPin className="h-4 w-4 mr-1 flex-shrink-0" />
           <span className="truncate">{project.location}</span>
         </div>
-        <div className="text-xl font-bold mb-2">
-          AED {project.price.toLocaleString()}
-        </div>
+
         <p className="text-gray-600 mb-3 line-clamp-2">{project.description}</p>
         <div className="flex space-x-2">
           <a
@@ -39,12 +37,6 @@ export default function DeveloperProjectCard({ project, onOpenModal }: Developer
           >
             View Details
           </a>
-          <button
-            onClick={() => onOpenModal(project.slug)}
-            className="flex items-center justify-center w-1/3 py-2 bg-gray-800 text-white rounded-lg hover:bg-black transition-colors"
-          >
-            <Download className="h-5 w-5 mr-2" />
-          </button>
         </div>
       </div>
     </div>

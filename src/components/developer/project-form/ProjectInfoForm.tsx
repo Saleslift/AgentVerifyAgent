@@ -11,6 +11,8 @@ interface ProjectFormData {
   brochureUrl?: string;
   brochureFile?: File;
   imageFiles: (File | string)[]; // Allow both File and string for pre-filled images
+  lat: number | null,
+  lng: number | null,
 }
 
 interface ProjectInfoFormProps {
@@ -19,7 +21,7 @@ interface ProjectInfoFormProps {
   onNext: () => void;
 }
 
-export default function ProjectInfoForm({ projectData, onChange, onNext }: ProjectInfoFormProps) {
+export default function ProjectInfoForm({ projectData, onChange }: ProjectInfoFormProps) {
   const [imageError, setImageError] = useState<string | null>(null);
   const [brochureError, setBrochureError] = useState<string | null>(null);
 
@@ -102,6 +104,8 @@ export default function ProjectInfoForm({ projectData, onChange, onNext }: Proje
   const handleLocationChange = (address: string, lat?: number, lng?: number) => {
     onChange({
       location: address,
+      lat,
+      lng
     });
   };
 
@@ -322,16 +326,6 @@ export default function ProjectInfoForm({ projectData, onChange, onNext }: Proje
         )}
       </div>
 
-      {/* Next Button */}
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={onNext}
-          className="px-6 py-3 bg-black text-white rounded-lg hover:bg-gray-800"
-        >
-          Next: Unit Types
-        </button>
-      </div>
     </div>
   );
 }

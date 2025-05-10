@@ -31,49 +31,10 @@ const PropertyCard = memo(function PropertyCard({
   const navigate = useNavigate();
   const { formatPrice } = useCurrency();
   const { t } = useTranslation(); // Added
-  const [showShareOptions, setShowShareOptions] = useState(false);
   const [showCopiedMessage, setShowCopiedMessage] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
-  const shareMenuRef = useRef<HTMLDivElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
-  const [allAmenities, setAllAmenities] = useState<string[]>([]);
 
-  // Fetch all amenities including custom ones
-  useEffect(() => {
-    const fetchAllAmenities = async () => {
-      try {
-        const { data, error } = await supabase.rpc(
-          'get_all_property_amenities',
-          { p_property_id: property.id }
-        );
-
-        if (error) throw error;
-
-        if (data) {
-          const amenityNames = data.map(item => item.name);
-          setAllAmenities(amenityNames);
-        }
-      } catch (err) {
-        console.error('Error fetching amenities:', err);
-        // Fallback to standard amenities if custom fetch fails
-        setAllAmenities(property.amenities || []);
-      }
-    };
-
-    fetchAllAmenities();
-  }, [property.id, property.amenities]);
-
-  // Handle click outside share menu
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (shareMenuRef.current && !shareMenuRef.current.contains(event.target as Node)) {
-        setShowShareOptions(false);
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
 
   const handleCardClick = useCallback((e: React.MouseEvent) => {
     // Prevent navigation if clicking action buttons
@@ -82,9 +43,16 @@ const PropertyCard = memo(function PropertyCard({
     ) {
       return;
     }
+    sessionStorage.setItem('intentional_navigation', 'true');
+
+    if (property.hasOwnProperty('projectId')) {
+      // If the property is from the agent_properties table, navigate to the property page
+      window.open(`/property/${property.projectId}/unit-types/${property.id}`, '_blank');
+      return;
+
+    }
 
     // Set flag to allow navigation
-    sessionStorage.setItem('intentional_navigation', 'true');
     navigate(`/property/${property.slug || property.id}`);
   }, [navigate, property.id, property.slug]);
 

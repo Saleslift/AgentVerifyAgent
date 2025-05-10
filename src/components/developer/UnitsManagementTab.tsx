@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Search, 
-  Filter, 
-  Download, 
-  Edit, 
-  Trash2, 
-  Plus, 
-  X, 
-  AlertCircle, 
-  CheckCircle2,
+import {
+  Search,
+  Filter,
+  Download,
+  Edit,
+  Trash2,
+  Plus,
+  X,
+  AlertCircle,
   ArrowUpDown,
   FileSpreadsheet,
   ChevronDown
@@ -25,7 +24,7 @@ interface Unit {
   project_id: string;
   project_title: string;
   type: string;
-  size: number;
+  sqft: number;
   price: number;
   availability: 'available' | 'reserved' | 'sold';
 }
@@ -33,9 +32,9 @@ interface Unit {
 interface UnitType {
   id: string;
   project_id: string;
-  name: string;
-  size_range: string;
-  price_range: string;
+  title: string;
+  sqft: number;
+  price: number;
   status: string;
   units_available: number;
 }
@@ -58,9 +57,9 @@ const UnitEditModal: React.FC<UnitEditModalProps> = ({ isOpen, onClose, unit, pr
   const [form, setForm] = useState<UnitType>({
     id: '',
     project_id: '',
-    name: '',
-    size_range: '',
-    price_range: '',
+    title: '',
+    sqft: 0,
+    price: 0,
     status: 'available',
     units_available: 1
   });
@@ -72,9 +71,9 @@ const UnitEditModal: React.FC<UnitEditModalProps> = ({ isOpen, onClose, unit, pr
       setForm({
         id: unit.id,
         project_id: unit.project_id,
-        name: unit.name,
-        size_range: unit.size_range,
-        price_range: unit.price_range,
+        title: unit.title,
+        sqft: unit.sqft,
+        price: unit.price,
         status: unit.status,
         units_available: unit.units_available
       });
@@ -82,9 +81,9 @@ const UnitEditModal: React.FC<UnitEditModalProps> = ({ isOpen, onClose, unit, pr
       setForm({
         id: '',
         project_id: projects.length > 0 ? projects[0].id : '',
-        name: '',
-        size_range: '',
-        price_range: '',
+        title: '',
+        sqft: 0,
+        price: 0,
         status: 'available',
         units_available: 1
       });
@@ -102,8 +101,8 @@ const UnitEditModal: React.FC<UnitEditModalProps> = ({ isOpen, onClose, unit, pr
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!form.project_id || !form.name) {
+
+    if (!form.project_id || !form.title) {
       setError('Project and Unit Type are required');
       return;
     }
@@ -176,8 +175,8 @@ const UnitEditModal: React.FC<UnitEditModalProps> = ({ isOpen, onClose, unit, pr
               </label>
               <input
                 type="text"
-                name="name"
-                value={form.name}
+                name="title"
+                value={form.title}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
                 placeholder="e.g., 1 Bedroom"
@@ -187,17 +186,17 @@ const UnitEditModal: React.FC<UnitEditModalProps> = ({ isOpen, onClose, unit, pr
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Size Range (sqft)
+                Size (sqft)
               </label>
               <input
-                type="text"
-                name="size_range"
-                value={form.size_range}
+                type="number"
+                name="Sqdft"
+                value={form.sqft}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                placeholder="e.g., 750-900"
+                placeholder="e.g., 750"
               />
-              <p className="mt-1 text-xs text-gray-500">Format as min-max (e.g., 750-900)</p>
+              <p className="mt-1 text-xs text-gray-500">Format as min-max (e.g., 750)</p>
             </div>
 
             <div>
@@ -205,14 +204,14 @@ const UnitEditModal: React.FC<UnitEditModalProps> = ({ isOpen, onClose, unit, pr
                 Price Range (AED)
               </label>
               <input
-                type="text"
-                name="price_range"
-                value={form.price_range}
+                type="number"
+                name="price"
+                value={form.price}
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-black focus:border-transparent"
-                placeholder="e.g., 1,500,000-2,000,000"
+                placeholder="e.g., 1,500,000"
               />
-              <p className="mt-1 text-xs text-gray-500">Format as min-max (e.g., 1,500,000-2,000,000)</p>
+              <p className="mt-1 text-xs text-gray-500">Format as number (e.g., 1,500,000)</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -335,9 +334,9 @@ export default function UnitsManagementTab() {
         .select(`
           id, 
           project_id,
-          name,
-          size_range,
-          price_range,
+          title,
+          sqft,
+          price,
           status,
           units_available
         `)
@@ -358,7 +357,7 @@ export default function UnitsManagementTab() {
       setFilteredUnits(unitsWithProjectTitles);
 
       // Extract unique unit types for filter
-      const types = [...new Set(unitsWithProjectTitles.map(unit => unit.name))];
+      const types = [...new Set(unitsWithProjectTitles.map(unit => unit.title))];
       setUniqueUnitTypes(types);
     } catch (err) {
       console.error('Error fetching units data:', err);
@@ -371,7 +370,7 @@ export default function UnitsManagementTab() {
   // Sorting logic
   useEffect(() => {
     let sortedUnits = [...units];
-    
+
     if (sortConfig) {
       sortedUnits.sort((a, b) => {
         if (a[sortConfig.key] < b[sortConfig.key]) {
@@ -383,24 +382,24 @@ export default function UnitsManagementTab() {
         return 0;
       });
     }
-    
+
     // Apply filters and search
     if (searchTerm || filter.project || filter.unitType || filter.availability) {
       sortedUnits = sortedUnits.filter(unit => {
-        const matchesSearch = 
+        const matchesSearch =
           unit.project_title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          unit.name?.toLowerCase().includes(searchTerm.toLowerCase());
-          
+          unit.title?.toLowerCase().includes(searchTerm.toLowerCase());
+
         const matchesProject = !filter.project || unit.project_id === filter.project;
-        const matchesUnitType = !filter.unitType || unit.name === filter.unitType;
-        const matchesAvailability = !filter.availability || 
+        const matchesUnitType = !filter.unitType || unit.title === filter.unitType;
+        const matchesAvailability = !filter.availability ||
           (filter.availability === 'available' && unit.status === 'available') ||
           (filter.availability === 'sold out' && unit.status === 'sold out');
-        
+
         return matchesSearch && matchesProject && matchesUnitType && matchesAvailability;
       });
     }
-    
+
     setFilteredUnits(sortedUnits);
   }, [units, sortConfig, searchTerm, filter]);
 
@@ -445,23 +444,23 @@ export default function UnitsManagementTab() {
         const { error } = await supabase
           .from('unit_types')
           .update({
-            name: unit.name,
-            size_range: unit.size_range,
-            price_range: unit.price_range,
+            title: unit.title,
+            sqft: unit.sqft,
+            price: unit.price,
             status: unit.status,
             units_available: unit.units_available
           })
           .eq('id', unit.id);
 
         if (error) throw error;
-        
+
         // Update local state
         setUnits(prevUnits =>
           prevUnits.map(u =>
             u.id === unit.id ? { ...u, ...unit } : u
           )
         );
-        
+
         toast.success('Unit updated successfully');
       } else {
         // Create new unit
@@ -470,29 +469,29 @@ export default function UnitsManagementTab() {
           .insert({
             project_id: unit.project_id,
             developer_id: user?.id,
-            name: unit.name,
-            size_range: unit.size_range,
-            price_range: unit.price_range,
+            title: unit.title,
+            sqft: unit.sqft,
+            price: unit.price,
             status: unit.status,
             units_available: unit.units_available
           })
           .select();
 
         if (error) throw error;
-        
+
         // Add project title to new unit
         const project = projects.find(p => p.id === unit.project_id);
         const newUnit = {
           ...data[0],
           project_title: project?.title || 'Unknown Project'
         };
-        
+
         // Update local state
         setUnits(prevUnits => [...prevUnits, newUnit]);
-        
+
         toast.success('Unit created successfully');
       }
-      
+
       // Refresh data
       fetchData();
     } catch (err) {
@@ -503,7 +502,7 @@ export default function UnitsManagementTab() {
 
   const handleDeleteUnit = async (unitId: string) => {
     if (!confirm('Are you sure you want to delete this unit type?')) return;
-    
+
     try {
       const { error } = await supabase
         .from('unit_types')
@@ -511,11 +510,11 @@ export default function UnitsManagementTab() {
         .eq('id', unitId);
 
       if (error) throw error;
-      
+
       // Update local state
       setUnits(prevUnits => prevUnits.filter(u => u.id !== unitId));
       setSelectedUnits(prevSelected => prevSelected.filter(id => id !== unitId));
-      
+
       toast.success('Unit deleted successfully');
     } catch (err) {
       console.error('Error deleting unit:', err);
@@ -539,11 +538,11 @@ export default function UnitsManagementTab() {
 
         if (error) throw error;
       }
-      
+
       // Refresh data
       fetchData();
       setSelectedUnits([]);
-      
+
       toast.success(`Updated ${selectedUnits.length} units`);
     } catch (err) {
       console.error('Error updating units:', err);
@@ -554,27 +553,27 @@ export default function UnitsManagementTab() {
   const exportToExcel = async () => {
     try {
       setIsExporting(true);
-      
+
       // Prepare data for export
       const exportData = filteredUnits.map(unit => ({
         'Project Name': unit.project_title,
-        'Unit Type': unit.name,
-        'Size Range': unit.size_range,
-        'Price Range': unit.price_range,
+        'Unit Type': unit.title,
+        'Sqft': unit.sqft,
+        'Price': unit.price,
         'Availability': unit.status,
         'Units Available': unit.units_available
       }));
-      
+
       // Create workbook
       const wb = XLSX.utils.book_new();
       const ws = XLSX.utils.json_to_sheet(exportData);
-      
+
       // Add worksheet to workbook
       XLSX.utils.book_append_sheet(wb, ws, 'Units');
-      
+
       // Generate Excel file
       XLSX.writeFile(wb, `unit_types_export_${format(new Date(), 'yyyy-MM-dd')}.xlsx`);
-      
+
       toast.success('Data exported successfully');
     } catch (err) {
       console.error('Error exporting data:', err);
@@ -624,13 +623,13 @@ export default function UnitsManagementTab() {
             <Download className={`h-4 w-4 mr-2 ${isExporting ? 'animate-pulse' : ''}`} />
             {isExporting ? 'Exporting...' : 'Export'}
           </button>
-          <button
-            onClick={openAddModal}
-            className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 flex items-center"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Add Unit Type
-          </button>
+          {/*<button*/}
+          {/*  onClick={openAddModal}*/}
+          {/*  className="px-4 py-2 bg-black text-white rounded-lg hover:bg-gray-800 flex items-center"*/}
+          {/*>*/}
+          {/*  <Plus className="h-4 w-4 mr-2" />*/}
+          {/*  Add Unit Type*/}
+          {/*</button>*/}
         </div>
       </div>
 
@@ -744,8 +743,8 @@ export default function UnitsManagementTab() {
                       />
                     </div>
                   </th>
-                  <th 
-                    scope="col" 
+                  <th
+                    scope="col"
                     className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                     onClick={() => handleSort('project_id')}
                   >
@@ -756,8 +755,8 @@ export default function UnitsManagementTab() {
                       )}
                     </div>
                   </th>
-                  <th 
-                    scope="col" 
+                  <th
+                    scope="col"
                     className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                     onClick={() => handleSort('name')}
                   >
@@ -768,32 +767,32 @@ export default function UnitsManagementTab() {
                       )}
                     </div>
                   </th>
-                  <th 
-                    scope="col" 
+                  <th
+                    scope="col"
                     className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort('size_range')}
+                    onClick={() => handleSort('sqft')}
                   >
                     <div className="flex items-center">
                       Size
-                      {sortConfig?.key === 'size_range' && (
+                      {sortConfig?.key === 'sqft' && (
                         <ArrowUpDown className="h-4 w-4 ml-1" />
                       )}
                     </div>
                   </th>
-                  <th 
-                    scope="col" 
+                  <th
+                    scope="col"
                     className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
-                    onClick={() => handleSort('price_range')}
+                    onClick={() => handleSort('price')}
                   >
                     <div className="flex items-center">
                       Price
-                      {sortConfig?.key === 'price_range' && (
+                      {sortConfig?.key === 'price' && (
                         <ArrowUpDown className="h-4 w-4 ml-1" />
                       )}
                     </div>
                   </th>
-                  <th 
-                    scope="col" 
+                  <th
+                    scope="col"
                     className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                     onClick={() => handleSort('status')}
                   >
@@ -804,8 +803,8 @@ export default function UnitsManagementTab() {
                       )}
                     </div>
                   </th>
-                  <th 
-                    scope="col" 
+                  <th
+                    scope="col"
                     className="px-3 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer"
                     onClick={() => handleSort('units_available')}
                   >
@@ -838,13 +837,13 @@ export default function UnitsManagementTab() {
                       </div>
                     </td>
                     <td className="px-3 py-3 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{unit.name}</div>
+                      <div className="text-sm text-gray-900">{unit.title}</div>
                     </td>
                     <td className="px-3 py-3 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{unit.size_range} sqft</div>
+                      <div className="text-sm text-gray-900">{unit.sqft} sqft</div>
                     </td>
                     <td className="px-3 py-3 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{unit.price_range}</div>
+                      <div className="text-sm text-gray-900">{unit.price}</div>
                     </td>
                     <td className="px-3 py-3 whitespace-nowrap">
                       <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${

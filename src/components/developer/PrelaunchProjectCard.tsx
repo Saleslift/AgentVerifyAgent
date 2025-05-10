@@ -1,21 +1,17 @@
 import React from 'react';
-import {Building2, MapPin, Calendar, ArrowRight, Download} from 'lucide-react';
+import { Building2, MapPin, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 
 interface PrelaunchProjectCardProps {
   project: DB_Properties & { whatsapp?: string };
   onClick?: () => void;
-  onOpenModal: (slug: string | null) => void;
 }
 
-export default function PrelaunchProjectCard({ project, onClick , onOpenModal}: PrelaunchProjectCardProps) {
+export default function PrelaunchProjectCard({ project, onClick }: PrelaunchProjectCardProps) {
   // Format launch date if it exists
   const formattedLaunchDate = project.launch_date
     ? format(new Date(project.launch_date), 'MMM dd, yyyy')
     : 'Coming Soon';
-
-  // Format price with AED currency
-  const formattedPrice = `AED ${project.price.toLocaleString()}`;
 
   // Open WhatsApp with template message
   const handleWhatsAppClick = (e: React.MouseEvent) => {
@@ -57,9 +53,7 @@ export default function PrelaunchProjectCard({ project, onClick , onOpenModal}: 
         </div>
 
         <div className="flex items-center justify-between mb-2">
-          <div className="text-gray-900 font-semibold">
-            From {formattedPrice}
-          </div>
+
           <div className="flex items-center text-gray-600 text-sm">
             <Calendar className="h-4 w-4 mr-1" />
             <span>{formattedLaunchDate}</span>
@@ -75,12 +69,6 @@ export default function PrelaunchProjectCard({ project, onClick , onOpenModal}: 
         >
           WhatsApp for Details
           {/*<ArrowRight className="ml-1 h-4 w-4" />*/}
-        </button>
-        <button
-            onClick={() => onOpenModal(project.slug)}
-            className="flex items-center justify-center w-1/3 py-2 bg-gray-800 text-white rounded-lg hover:bg-black transition-colors"
-        >
-          <Download className="h-5 w-5 mr-2" />
         </button>
         </div>
       </div>
