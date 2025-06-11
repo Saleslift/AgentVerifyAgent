@@ -56,7 +56,7 @@ export default function LanguageSelectorMenu({ isAgentProfilePage }: LanguageSel
         aria-expanded={showDropdown}
         aria-h
       >
-        <div className="relative flex justify-center items-center">
+        <div className="relative">
           <span className="absolute top-1 right-1 bg-white rounded-full text-xs px-0.5 py-0.5 z-10 translate-x-1/2 -translate-y-1/2">
             {language.toUpperCase()}
           </span>

@@ -143,7 +143,7 @@ export default function Header({agent}: HeaderProps) {
 
         {/* Mobile Navigation */}
         {isMenuOpen && (
-          <div className="md:hidden mt-4 py-4 border-t border-gray-100">
+          <div className="md:hidden mt-4 py-4  border-gray-100">
             {!isAgentProfilePage && user ? (
               <div className="flex flex-col space-y-4">
                 <button
