@@ -54,6 +54,7 @@ export default function Header({agent}: HeaderProps) {
       <nav className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo */}
+          <div>
           <a href="/" className="flex items-center space-x-3">
             <div className="relative w-10 h-10">
               <img
@@ -64,6 +65,7 @@ export default function Header({agent}: HeaderProps) {
             </div>
             <span className="text-xl font-bold text-black">AgentVerify</span>
           </a>
+          </div>
 
           {/* Mobile Menu Button */}
           <button
@@ -73,16 +75,16 @@ export default function Header({agent}: HeaderProps) {
             aria-expanded={isMenuOpen}
           >
             {isAgentProfilePage && agent ? (
-                <>
+                <div className={'flex items-center justify-center'}>
                   <ContactOptions
                       whatsapp={agent.whatsapp}
                       email={agent.email}
                       phone={agent.phone}
                   />
-                  <div className={'mt-4'}>
+                  <div className={'ml-1'}>
                   <LanguageSelectorMenu isAgentProfilePage={isAgentProfilePage}  />
                   </div>
-                </>
+                </div>
             ) : (
               <Menu className="h-6 w-6" />
             )}
@@ -92,12 +94,13 @@ export default function Header({agent}: HeaderProps) {
           <div className="hidden md:flex items-center space-x-3">
             {isAgentProfilePage && agent ? (
                 <>
-                  <LanguageSelectorMenu isAgentProfilePage={isAgentProfilePage}  />
                   <ContactOptions
                       whatsapp={agent.whatsapp}
                       email={agent.email}
                       phone={agent.phone}
                   />
+                  <LanguageSelectorMenu isAgentProfilePage={isAgentProfilePage}  />
+
                 </>
             ) : user ? (
               <div className="relative" ref={dropdownRef}>

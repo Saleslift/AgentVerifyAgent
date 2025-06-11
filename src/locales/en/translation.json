@@ -192,5 +192,13 @@
     "shareEmail": "Share via Email",
     "shareWhatsAppText": "Check out this property: {{title}} - {{url}}",
     "shareEmailSubject": "Property Listing: {{title}}",
-    "shareEmailBody": "Check out this property:\n\n{{title}}\n{{url}}"
+    "shareEmailBody": "Check out this property:\n\n{{title}}\n{{url}}",
+    "contactWhatsApp": "Contact via WhatsApp",
+    "contactCall": "Call agent",
+    "contactEmail": "Email agent",
+    "whatsapp": "WhatsApp",
+    "call": "Call",
+    "email": "Email",
+    "connectWithMe": "Connect with me",
+    "letsConnect": "Let's Connect"
 }

@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next'; // Import translation hook
 import { useAgentProfile } from '../hooks/useAgentProfile';
 import { useAgentProperties } from '../hooks/useAgentProperties';
 import Header from '../components/Header';
@@ -16,11 +17,11 @@ import { supabase } from '../utils/supabase';
 import { useAuth } from '../contexts/AuthContext';
 import ConnectModal from '../components/agent/ConnectModal';
 import AgentAgencyProfile from '../components/agent/AgentAgencyProfile';
-import { useTranslation } from 'react-i18next';
 
 export default function AgentProfilePage() {
-  const { slug } = useParams();
+  const { slug, lang } = useParams(); // Get language from URL
   const navigate = useNavigate();
+  const { i18n, t } = useTranslation(); // Initialize translation hook
   const { user } = useAuth();
   const { agent, loading, error } = useAgentProfile(slug);
   const { properties, loading: propertiesLoading, error: propertiesError } = useAgentProperties(agent?.id);
@@ -31,7 +32,6 @@ export default function AgentProfilePage() {
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [showConnectModal, setShowConnectModal] = useState(false);
   const listingsSectionRef = useRef<HTMLDivElement>(null);
-  const { t } = useTranslation();
 
   // Search filters state
   const [searchFilters, setSearchFilters] = useState<PropertyFilters>({
@@ -199,6 +199,22 @@ export default function AgentProfilePage() {
 
   // Check if current user is the agent
   const isCurrentAgent = user?.id === agent?.id;
+
+  // Set language based on URL or default to English
+  useEffect(() => {
+    if (lang === 'fr') {
+      i18n.changeLanguage('fr');
+    } else {
+      i18n.changeLanguage('en');
+    }
+  }, [lang, i18n]);
+
+  // Redirect to default language if none is provided
+  useEffect(() => {
+    if (!lang) {
+      navigate(`/agent/${slug}/en`, { replace: true });
+    }
+  }, [lang, slug, navigate]);
 
   if (loading || propertiesLoading) {
     return (
@@ -628,4 +644,3 @@ export default function AgentProfilePage() {
     </div>
   );
 }
-

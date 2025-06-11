@@ -3,7 +3,6 @@ import {
   Bell,
   Building2,
   UserCog,
-  BarChart2,
   Briefcase,
   ExternalLink,
   Plus,

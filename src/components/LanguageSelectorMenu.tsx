@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
+import {Globe} from "lucide-react";
+import { useNavigate, useParams } from 'react-router-dom';
+
 import i18n from '../utils/i18n';
 
 interface LanguageSelectorMenuProps {
@@ -7,26 +9,31 @@ interface LanguageSelectorMenuProps {
 }
 
 export default function LanguageSelectorMenu({ isAgentProfilePage }: LanguageSelectorMenuProps) {
-  const { t } = useTranslation();
-  const [language, setLanguage] = useState(i18n.language);
+  const { slug, lang } = useParams(); // Get current slug and language from URL
+  const navigate = useNavigate();
+  const [language, setLanguage] = useState(lang || 'en'); // Default to English
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
   const handleLanguageChange = (lng: string) => {
     i18n.changeLanguage(lng);
-    localStorage.setItem('i18nextLng', lng); // Save the selected language
     setLanguage(lng);
     setShowDropdown(false);
+
+    // Update the URL with the selected language
+    if (isAgentProfilePage && slug) {
+      navigate(`/agent/${slug}/${lng}`, { replace: true });
+    }
   };
 
   // Detect browser or region language on mount
   useEffect(() => {
-    const browserLanguage = navigator.language || navigator.userLanguage;
-    const detectedLanguage = browserLanguage && browserLanguage.startsWith('fr') ? 'fr' : 'en'; // Default to English if not French
-    if (detectedLanguage !== language) {
+    if (!lang) {
+      const browserLanguage = navigator.language || navigator.userLanguage;
+      const detectedLanguage = browserLanguage && browserLanguage.startsWith('fr') ? 'fr' : 'en';
       handleLanguageChange(detectedLanguage);
     }
-  }, []);
+  }, [lang]);
 
   // Handle click outside dropdown
   useEffect(() => {
@@ -42,15 +49,21 @@ export default function LanguageSelectorMenu({ isAgentProfilePage }: LanguageSel
   if (!isAgentProfilePage) return null;
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative flex justify-center items-center" ref={dropdownRef}>
       <button
         onClick={() => setShowDropdown(!showDropdown)}
         className="text-gray-700 hover:text-gray-900"
         aria-expanded={showDropdown}
-        aria-haspopup="true"
+        aria-h
       >
-        {t('languages')}
+        <div className="relative flex justify-center items-center">
+          <span className="absolute top-1 right-1 bg-white rounded-full text-xs px-0.5 py-0.5 z-10 translate-x-1/2 -translate-y-1/2">
+            {language.toUpperCase()}
+          </span>
+          <Globe size={35} />
+        </div>
       </button>
+
 
       {showDropdown && (
         <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-xl py-2 z-[1000] border border-gray-100">

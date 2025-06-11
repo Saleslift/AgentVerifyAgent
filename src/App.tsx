@@ -255,6 +255,14 @@ const App = memo(function App() {
                                 </Suspense>
                             }
                         />
+                        <Route
+                            path="/agent/:slug/:lang?"
+                            element={
+                                <Suspense fallback={<PageLoader />}>
+                                    <AgentProfilePage />
+                                </Suspense>
+                            }
+                        />
                         <Route path="/developers/:slug" element={
                             <Suspense fallback={<PageLoader />}>
                                 <DeveloperPublicPage />
@@ -271,4 +279,3 @@ const App = memo(function App() {
 });
 
 export default App;
-

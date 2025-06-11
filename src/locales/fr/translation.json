@@ -40,7 +40,7 @@
     "Concierge": "Concierge",
     "concierge": "Concierge",
     "confirmDeleteReview": "Êtes-vous sûr de vouloir supprimer cet avis ?",
-    "connectWithMe": "Connectez-vous avec moi",
+    "connectWithMe": "Connectons nous",
     "contract": "Contrat",
     "defaultExperience": "5+ ans",
     "defaultLanguage": "Anglais",
@@ -192,5 +192,11 @@
     "shareEmail": "Partager par e-mail",
     "shareWhatsAppText": "Découvrez cette propriété : {{title}} - {{url}}",
     "shareEmailSubject": "Annonce immobilière : {{title}}",
-    "shareEmailBody": "Découvrez cette propriété :\n\n{{title}}\n{{url}}"
+    "shareEmailBody": "Découvrez cette propriété :\n\n{{title}}\n{{url}}",
+    "contactWhatsApp": "Contacter via WhatsApp",
+    "contactCall": "Appeler l'agent",
+    "contactEmail": "Envoyer un e-mail à l'agent",
+    "whatsapp": "WhatsApp",
+    "call": "Appeler",
+    "letsConnect": "Connectons-nous"
 }
